@@ -11,11 +11,10 @@
   },
   "dependencies": {
     "@nuxtjs/i18n": "10.0.6",
-    "@sidebase/nuxt-auth": "1.0.2",
     "@tailwindcss/vite": "^4.1.12",
     "@vueuse/core": "^13.9.0",
+    "axios": "^1.11.0",
     "daisyui": "^5.1.6",
-    "next-auth": "~4.21.1",
     "nuxt": "^4.1.0",
     "pinia": "^3.0.3",
     "tailwindcss": "^4.1.12",
