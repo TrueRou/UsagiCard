@@ -7,8 +7,8 @@ interface UseApiOptions {
 }
 
 export const useLeporid = () => {
-    const { addNotification } = useNotifications()
-    const { startLoading, stopLoading, isLoading } = useLoading()
+    const { addNotification } = useNotificationsStore()
+    const { startLoading, stopLoading, isLoading } = useLoadingStore()
 
     const request = async <T = any>(
         url: string,

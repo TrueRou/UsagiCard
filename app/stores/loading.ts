@@ -24,13 +24,3 @@ export const useLoadingStore = defineStore('globalLoading', () => {
         resetLoading
     }
 })
-
-export const useLoading = () => {
-    const store = useLoadingStore()
-    return {
-        isLoading: store.isLoading,
-        startLoading: store.startLoading,
-        stopLoading: store.stopLoading,
-        resetLoading: store.resetLoading
-    }
-}

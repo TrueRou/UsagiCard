@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import type { Notification } from '~/stores/notifications'
 
-const { notifications, removeNotification } = useNotifications()
+const { notifications, removeNotification } = useNotificationsStore()
 
 const getAlertClass = (type: Notification['type']) => {
     const classes = {
@@ -51,20 +51,20 @@ const getAlertClass = (type: Notification['type']) => {
 <style scoped>
 .notification-enter-active,
 .notification-leave-active {
-  transition: all 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .notification-enter-from {
-  opacity: 0;
-  transform: translateX(100%);
+    opacity: 0;
+    transform: translateX(100%);
 }
 
 .notification-leave-to {
-  opacity: 0;
-  transform: translateX(100%);
+    opacity: 0;
+    transform: translateX(100%);
 }
 
 .notification-move {
-  transition: transform 0.3s ease;
+    transition: transform 0.3s ease;
 }
 </style>

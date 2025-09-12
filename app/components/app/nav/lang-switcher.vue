@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t, locale, locales, setLocale, localeProperties } = useI18n()
+const { locale, locales, setLocale, localeProperties } = useI18n()
 
 const langSw = ref<HTMLElement | null>(null)
 

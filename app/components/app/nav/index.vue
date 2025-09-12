@@ -14,8 +14,8 @@ const detached = computed(() => scrollY.value > 0);
             <a class="btn btn-ghost text-xl">Bunny</a>
         </div>
         <div class="navbar-center hidden lg:flex">
-            <a class="btn btn-ghost">{{ t('home') }}</a>
-            <a class="btn btn-ghost">{{ t('marketplace') }}</a>
+            <NuxtLink class="btn btn-ghost" to="/">{{ t('home') }}</NuxtLink>
+            <NuxtLink class="btn btn-ghost" to="/marketplace">{{ t('marketplace') }}</NuxtLink>
         </div>
         <menu class="navbar-end">
             <ul class="menu menu-horizontal items-center p-0">

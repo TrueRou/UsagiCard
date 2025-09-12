@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-const { isLoading } = useLoading()
+const { isLoading } = useLoadingStore()
 </script>
 
 <style scoped>
