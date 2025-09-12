@@ -1,55 +1,49 @@
 <template>
-    <div class="min-h-screen bg-base-200 p-4">
-        <div class="max-w-md mx-auto pt-16">
-            <h1 class="text-3xl font-bold text-center mb-8">{{ t('login') }}</h1>
+    <div class="max-w-md mx-auto pt-16">
+        <h1 class="text-3xl font-bold text-center mb-8">{{ t('login') }}</h1>
 
-            <form @submit.prevent="handleLogin" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium mb-2">{{ t('username') }}</label>
-                    <input v-model="form.username" type="text" :placeholder="t('username-placeholder')"
-                        class="input input-bordered w-full" :class="{ 'input-error': validationErrors.username }" />
-                    <p v-if="validationErrors.username" class="text-error text-sm mt-1">
-                        {{ validationErrors.username }}
-                    </p>
-                </div>
+        <form @submit.prevent="handleLogin" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium mb-2">{{ t('username') }}</label>
+                <input v-model="form.username" type="text" :placeholder="t('username-placeholder')"
+                    class="input input-bordered w-full" :class="{ 'input-error': hasFieldError('username') }" />
+                <p v-if="hasFieldError('username')" class="text-error text-sm mt-1">
+                    {{ getFieldError('username') }}
+                </p>
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium mb-2">{{ t('password') }}</label>
-                    <input v-model="form.password" type="password" :placeholder="t('password-placeholder')"
-                        class="input input-bordered w-full" :class="{ 'input-error': validationErrors.password }" />
-                    <p v-if="validationErrors.password" class="text-error text-sm mt-1">
-                        {{ validationErrors.password }}
-                    </p>
-                </div>
+            <div>
+                <label class="block text-sm font-medium mb-2">{{ t('password') }}</label>
+                <input v-model="form.password" type="password" :placeholder="t('password-placeholder')"
+                    class="input input-bordered w-full" :class="{ 'input-error': hasFieldError('password') }" />
+                <p v-if="hasFieldError('password')" class="text-error text-sm mt-1">
+                    {{ getFieldError('password') }}
+                </p>
+            </div>
 
-                <div v-if="errorMessage" class="alert alert-error">
-                    <span>{{ errorMessage }}</span>
-                </div>
+            <button type="submit" class="btn btn-primary w-full">
+                {{ t('login') }}
+            </button>
+        </form>
 
-                <button type="submit" class="btn btn-primary w-full" :class="{ 'loading': loading }"
-                    :disabled="loading">
-                    {{ loading ? t('logging-in') : t('login') }}
-                </button>
-            </form>
+        <hr class="my-8">
 
-            <hr class="my-8">
-
-            <p class="text-center text-sm">
-                {{ t('no-account') }}
-                <NuxtLink to="/auth/register" class="link link-primary">
-                    {{ t('register') }}
-                </NuxtLink>
-            </p>
-        </div>
+        <p class="text-center text-sm">
+            {{ t('no-account') }}
+            <NuxtLink to="/auth/register" class="link link-primary">
+                {{ t('register') }}
+            </NuxtLink>
+        </p>
     </div>
 </template>
 
 <script setup lang="ts">
 import { z } from 'zod'
-import type { LoginRequest, ApiResponse } from '~/def/api'
+import type { LoginRequest } from '~/def/auth'
 
 const { t } = useI18n()
 const { loggedIn, fetch: fetchUser } = useUserSession()
+const { request } = useLeporid()
 
 // Redirect if already logged in
 watchEffect(() => {
@@ -69,50 +63,20 @@ const form = reactive<LoginRequest>({
     password: ''
 })
 
-const validationErrors = reactive<Partial<Record<keyof LoginRequest, string>>>({})
-const loading = ref(false)
-const errorMessage = ref('')
-
-const validateForm = () => {
-    validationErrors.username = ''
-    validationErrors.password = ''
-
-    try {
-        loginSchema.parse(form)
-        return true
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            error.issues.forEach((issue) => {
-                const field = issue.path[0] as keyof LoginRequest
-                if (field in validationErrors) {
-                    validationErrors[field] = issue.message
-                }
-            })
-        }
-        return false
-    }
-}
+const { errors, validate, hasFieldError, getFieldError } = useFormValidation(loginSchema, form)
 
 const handleLogin = async () => {
-    if (!validateForm()) return
+    if (!validate()) return
 
-    loading.value = true
-    errorMessage.value = ''
+    await request<void>('/api/auth/login', {
+        method: 'POST',
+        body: form,
+        showSuccessToast: true,
+        successMessage: t('login-success')
+    })
 
-    try {
-        await $fetch<void>('/api/auth/login', {
-            method: 'POST',
-            body: form
-        })
-
-        await fetchUser()
-        await navigateTo('/')
-    } catch (error: unknown) {
-        const apiError = error as { data?: ApiResponse }
-        errorMessage.value = apiError.data?.message || t('login-failed')
-    } finally {
-        loading.value = false
-    }
+    await fetchUser()
+    await navigateTo('/')
 }
 
 useHead({
@@ -129,9 +93,7 @@ en-GB:
   password-placeholder: Enter your password
   username-required: Username is required
   password-required: Password is required
-  logging-in: Logging in...
-  login-failed: Login failed. Please check your credentials.
-  or: OR
+  login-success: Login successful!
   no-account: Don't have an account?
   register: Register
 
@@ -143,9 +105,7 @@ zh-CN:
   password-placeholder: 请输入密码
   username-required: 用户名不能为空
   password-required: 密码不能为空
-  logging-in: 登录中...
-  login-failed: 登录失败，请检查您的凭据。
-  or: 或者
+  login-success: 登录成功！
   no-account: 没有账户？
   register: 注册
 </i18n>

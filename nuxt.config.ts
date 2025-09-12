@@ -10,12 +10,21 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
-  modules: ['@nuxtjs/i18n', 'nuxt-auth-utils'],
+  modules: ['@nuxtjs/i18n', 'nuxt-auth-utils', '@pinia/nuxt', '@nuxt/icon'],
   i18n: {
-    defaultLocale: 'en-GB',
+    defaultLocale: 'zh-CN',
+    strategy: 'no_prefix',
     locales: [
-      { code: 'en-GB', name: 'English' },
-      { code: 'zh-CN', name: '简体中文' },
+      {
+        code: "en-GB",
+        flag: "GB",
+        name: 'English (International)',
+      },
+      {
+        code: "zh-CN",
+        flag: "CN",
+        name: '简体中文 (中国)',
+      },
     ]
   },
   runtimeConfig: {

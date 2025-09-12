@@ -1,5 +1,5 @@
 import { joinURL } from 'ufo'
-import type { TokenResponse } from '~/def/api'
+import type { TokenResponse } from '~/def/common'
 
 export default defineEventHandler(async (event) => {
     const session = await getUserSession(event)

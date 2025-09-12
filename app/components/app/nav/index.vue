@@ -1,14 +1,11 @@
 <script setup>
-const { loggedIn, user, session, fetch, clear } = useUserSession()
+import LangSwitcher from './lang-switcher.vue';
+import UserMenu from './user-menu.vue';
+
 const scrollY = useScrollYObserver();
 const { t } = useI18n()
 
 const detached = computed(() => scrollY.value > 0);
-
-const handleLogout = async () => {
-    await clear()
-    await navigateTo('/')
-}
 </script>
 
 <template>
@@ -20,31 +17,12 @@ const handleLogout = async () => {
             <a class="btn btn-ghost">{{ t('home') }}</a>
             <a class="btn btn-ghost">{{ t('marketplace') }}</a>
         </div>
-        <div class="navbar-end gap-2">
-            <div class="dropdown dropdown-end">
-                <div role="button" tabindex="0" class="btn btn-ghost btn-circle avatar">
-                    <div class="rounded-full w-9">
-                        <img v-if="loggedIn" src="https://a.ppy.sb/1094" />
-                        <img v-else="loggedIn" src="https://a.ppy.sb/-1" />
-                    </div>
-                </div>
-                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content rounded-box w-52">
-                    <template v-if="loggedIn">
-                        <li><a>{{ t('my-cart') }}</a></li>
-                        <li><a>{{ t('my-orders') }}</a></li>
-                        <li><a @click="handleLogout">{{ t('logout') }}</a></li>
-                    </template>
-                    <template v-else>
-                        <li>
-                            <NuxtLink to="/auth/login">{{ t('login') }}</NuxtLink>
-                        </li>
-                        <li>
-                            <NuxtLink to="/auth/register">{{ t('register') }}</NuxtLink>
-                        </li>
-                    </template>
-                </ul>
-            </div>
-        </div>
+        <menu class="navbar-end">
+            <ul class="menu menu-horizontal items-center p-0">
+                <LangSwitcher />
+                <UserMenu />
+            </ul>
+        </menu>
     </div>
 </template>
 
@@ -75,7 +53,7 @@ en-GB:
 
 zh-CN:
   home: 首页
-  marketplace: 设计工坊
+  marketplace: 创意工坊
   my-cart: 购物车
   my-orders: 我的订单
   logout: 登出
