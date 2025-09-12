@@ -8,11 +8,7 @@
             </NuxtLink>
         </div>
 
-        <div v-if="pending" class="flex justify-center py-16">
-            <div class="loading loading-spinner loading-lg"></div>
-        </div>
-
-        <div v-else-if="order" class="space-y-6">
+        <div v-if="order" class="space-y-6">
             <!-- 订单基本信息 -->
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
@@ -132,11 +128,9 @@ const route = useRoute()
 
 const orderId = parseInt(route.params.id as string)
 
-console.log(orderId)
-
 const isProcessing = ref(false)
 
-const { data: order, pending, refresh } = useLeporid<OrderResponse>(`/orders/{${orderId}}`)
+const { data: order, refresh } = await useLeporid<OrderResponse>(`/api/orders/${orderId}`)
 
 // 格式化日期时间
 const formatDateTime = (timestamp: number) => {
@@ -159,7 +153,7 @@ const handlePayOrder = async () => {
 
     isProcessing.value = true
     try {
-        useLeporid('/orders/pay', {
+        await useLeporid('/orders/pay', {
             method: 'POST',
             query: { orderSn: order.value.sn },
             showSuccessToast: true,

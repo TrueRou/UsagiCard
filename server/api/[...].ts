@@ -1,5 +1,5 @@
 import { joinURL } from 'ufo'
-import type { TokenResponse } from '~/def/common'
+import type { UserTokenCreateResponse } from '~/def'
 
 export default defineEventHandler(async (event) => {
     const session = await getUserSession(event)
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
         if (session.secure.expiresAt < Date.now()) {
             try {
                 // token expired, try to refresh
-                const resp = await $fetch<TokenResponse>('/api/auth/token', {
+                const resp = await $fetch<UserTokenCreateResponse>('/api/auth/token', {
                     method: 'POST', query: {
                         "grant_type": "refresh_token",
                         "refresh_token": session.secure.refreshToken,

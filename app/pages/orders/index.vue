@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <div v-if="orders?.records.length === 0" class="text-center py-16">
+        <div v-if="orders?.records && orders?.records.length === 0" class="text-center py-16">
             <p class="text-base-content/60 text-lg">{{ t('no-orders') }}</p>
         </div>
 
@@ -70,7 +70,7 @@ const searchForm = reactive<OrderSearchRequest>({
 })
 
 // 获取订单数据
-const { data: orders, refresh: refreshOrders } = useLeporid<OrderPageResponse>("/api/orders")
+const { data: orders, refresh: refreshOrders } = await useLeporid<OrderPageResponse>("/api/orders")
 
 // 搜索处理
 const handleSearch = () => {
@@ -86,7 +86,7 @@ const goToPage = (page: number) => {
 
 // 生成页码数组
 const getPageNumbers = () => {
-    const totalPages = orders.value.totalPage || 0
+    const totalPages = orders.value?.totalPage || 0
     const current = searchForm.page_number
     const pages: (number | string)[] = []
 

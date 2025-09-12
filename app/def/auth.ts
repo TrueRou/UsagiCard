@@ -16,3 +16,5 @@ declare module '#auth-utils' {
         expiresAt: number
     }
 }
+
+export { };

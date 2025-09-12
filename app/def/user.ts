@@ -31,6 +31,20 @@ export interface UserTokenCreateRequest {
 }
 
 /**
+ * 令牌响应
+ */
+export interface UserTokenCreateResponse {
+    /** 访问令牌 */
+    access_token: string
+    /** 刷新令牌 */
+    refresh_token: string
+    /** 令牌类型 */
+    token_type: string
+    /** 过期时间（秒） */
+    expires_in: number
+}
+
+/**
  * 用户响应
  */
 export interface UserResponse {
@@ -44,16 +58,3 @@ export interface UserResponse {
     privileges: UserPrivilege[]
 }
 
-/**
- * 令牌响应
- */
-export interface TokenResponse {
-    /** 访问令牌 */
-    access_token: string
-    /** 刷新令牌 */
-    refresh_token: string
-    /** 令牌类型 */
-    token_type: string
-    /** 过期时间（秒） */
-    expires_in: number
-}
