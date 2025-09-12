@@ -1,18 +1,22 @@
+import type { TokenResponse, UserResponse } from '~/def/api'
+
 export default defineEventHandler(async (event) => {
     const { username, password } = await readBody(event);
 
-    const tokenResponse: any = await $fetch('/api/auth/token', {
-        method: 'POST', query: {
+    const tokenResponse = await $fetch<TokenResponse>('/api/auth/token', {
+        method: 'POST',
+        query: {
             "grant_type": "password",
             "username": username,
             "password": password,
-        }, event
+        }
     });
 
-    const userResponse: any = await $fetch('/api/users/me', {
-        method: 'GET', headers: {
+    const userResponse = await $fetch<{ data: UserResponse }>('/api/users/me', {
+        method: 'GET',
+        headers: {
             "Authorization": `Bearer ${tokenResponse.access_token}`
-        }, event
+        }
     });
 
     await setUserSession(event, {

@@ -12,9 +12,9 @@ export default defineNuxtConfig({
   },
   modules: ['@nuxtjs/i18n', 'nuxt-auth-utils'],
   i18n: {
-    defaultLocale: 'en',
+    defaultLocale: 'en-GB',
     locales: [
-      { code: 'en', name: 'English' },
+      { code: 'en-GB', name: 'English' },
       { code: 'zh-CN', name: '简体中文' },
     ]
   },

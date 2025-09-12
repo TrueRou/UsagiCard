@@ -1,4 +1,4 @@
-const scrollY = ref(0)
+const scrollY = ref<number>(0)
 let done = false
 
 if (import.meta.client && !done) {
@@ -6,6 +6,6 @@ if (import.meta.client && !done) {
   done = true
 }
 
-export const useScrollYObserver = () => {
+export const useScrollYObserver = (): Ref<number> => {
   return scrollY
 }

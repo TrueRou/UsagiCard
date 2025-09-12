@@ -1,46 +1,48 @@
 <script setup>
+const { loggedIn, user, session, fetch, clear } = useUserSession()
 const scrollY = useScrollYObserver();
 const { t } = useI18n()
 
 const detached = computed(() => scrollY.value > 0);
+
+const handleLogout = async () => {
+    await clear()
+    await navigateTo('/')
+}
 </script>
 
 <template>
-    <div class="sticky top-0 z-10 navbar-container" :class="[detached && 'detached']">
-        <div class="navbar">
-            <div class="navbar-center">
-                <template>
-                    <RouterLink class="h-10 text-lg btn btn-ghost rounded-3xl min-h-fit">
-                        <i class="fa-solid fa-globe" />
-                        <b>Discover</b>
-                    </RouterLink>
-                </template>
-            </div>
-            <div class="items-center navbar-end">
-                <RouterLink class="text-lg btn btn-ghost btn-circle min-h-fit" to="/">
-                    <i class="fa-solid fa-search" />
-                </RouterLink>
-                <div class="dropdown dropdown-end">
-                    <div role="button" tabindex="0" class="btn btn-ghost btn-circle avatar">
-                        <!-- <div class="rounded-full w-9">
-                            <img v-if="session.isLoggedIn" src="https://a.ppy.sb/1094" />
-                            <img v-else="session.isLoggedIn" src="https://a.ppy.sb/-1" />
-                        </div> -->
+    <div class="navbar bg-base-100 shadow-sm sticky top-0 z-10" :class="[detached && 'detached']">
+        <div class="navbar-start">
+            <a class="btn btn-ghost text-xl">Bunny</a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <a class="btn btn-ghost">{{ t('home') }}</a>
+            <a class="btn btn-ghost">{{ t('marketplace') }}</a>
+        </div>
+        <div class="navbar-end gap-2">
+            <div class="dropdown dropdown-end">
+                <div role="button" tabindex="0" class="btn btn-ghost btn-circle avatar">
+                    <div class="rounded-full w-9">
+                        <img v-if="loggedIn" src="https://a.ppy.sb/1094" />
+                        <img v-else="loggedIn" src="https://a.ppy.sb/-1" />
                     </div>
-                    <ul tabindex="0"
-                        class="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content bg-neutral rounded-box w-52">
-                        <template v-if="session.isLoggedIn">
-                            <li><a>Profile</a></li>
-                            <li><a>Settings</a></li>
-                            <li><a>Logout</a></li>
-                        </template>
-                        <template v-else>
-                            <li><a>Login</a></li>
-                            <li><a>Register</a></li>
-                        </template>
-                    </ul>
                 </div>
-                <div class="x-spacer"></div>
+                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content rounded-box w-52">
+                    <template v-if="loggedIn">
+                        <li><a>{{ t('my-cart') }}</a></li>
+                        <li><a>{{ t('my-orders') }}</a></li>
+                        <li><a @click="handleLogout">{{ t('logout') }}</a></li>
+                    </template>
+                    <template v-else>
+                        <li>
+                            <NuxtLink to="/auth/login">{{ t('login') }}</NuxtLink>
+                        </li>
+                        <li>
+                            <NuxtLink to="/auth/register">{{ t('register') }}</NuxtLink>
+                        </li>
+                    </template>
+                </ul>
             </div>
         </div>
     </div>
@@ -59,21 +61,24 @@ const detached = computed(() => scrollY.value > 0);
         @apply bg-primary from-primary via-primary to-primary;
     }
 }
-
-.navbar-container {
-    @apply pb-2;
-
-    transition-duration: .15s;
-    transition-property: padding translate;
-    transition-timing-function: cubic-bezier(.4, 0, .2, 1);
-
-    &.detached {
-        @apply px-1 translate-y-1;
-        @apply md:px-[0.375rem] md:translate-y-[0.375rem];
-
-        .navbar {
-            @apply rounded-3xl md:rounded-xl;
-        }
-    }
-}
 </style>
+
+<i18n lang="yaml">
+en-GB:
+  home: Home
+  marketplace: Marketplace
+  my-cart: My Cart
+  my-orders: My Orders
+  logout: Logout
+  login: Login
+  register: Register
+
+zh-CN:
+  home: 首页
+  marketplace: 设计工坊
+  my-cart: 购物车
+  my-orders: 我的订单
+  logout: 登出
+  login: 登录
+  register: 注册
+</i18n>

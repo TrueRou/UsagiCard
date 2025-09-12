@@ -1,4 +1,5 @@
 import { joinURL } from 'ufo'
+import type { TokenResponse } from '~/def/api'
 
 export default defineEventHandler(async (event) => {
     const session = await getUserSession(event)
@@ -13,10 +14,32 @@ export default defineEventHandler(async (event) => {
     // override auth header if we have a session
     if (session.secure) {
         if (session.secure.expiresAt < Date.now()) {
-            // refresh token
-            // await clearUserSession(event)
+            try {
+                // token expired, try to refresh
+                const resp = await $fetch<TokenResponse>('/api/auth/token', {
+                    method: 'POST', query: {
+                        "grant_type": "refresh_token",
+                        "refresh_token": session.secure.refreshToken,
+                    }
+                })
+                headers['Authorization'] = `Bearer ${resp.access_token}`
+                await setUserSession(event, {
+                    user: session.user,
+                    secure: {
+                        accessToken: resp.access_token,
+                        refreshToken: resp.refresh_token,
+                        expiresAt: Date.now() + (resp.expires_in * 1000),
+                    }
+                })
+            } catch (error) {
+                // refresh failed, clear session and return 401
+                await clearUserSession(event)
+                throw createError({ statusCode: 401, statusMessage: 'Session expired' })
+            }
+        } else {
+            // valid session, just set the header
+            headers['Authorization'] = `Bearer ${session.secure.accessToken}`
         }
-        headers['Authorization'] = `Bearer ${session.secure.accessToken}`
     }
 
     const path = event.path.replace(/^\/api\//, '')
