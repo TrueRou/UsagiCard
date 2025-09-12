@@ -1,5 +1,5 @@
 export default defineNuxtPlugin((nuxtApp) => {
-    const ofetch = $fetch.create({
+    const leporid = $fetch.create({
         onRequest(context) {
             if (import.meta.server) {
                 const reqHeaders = useRequestHeaders(['cookie'])
@@ -32,14 +32,14 @@ export default defineNuxtPlugin((nuxtApp) => {
                     type: 'error',
                     message: errMessage
                 })
+                Promise.reject(errMessage) // reject the promise
             }
         }
     })
 
-    // 通过 useNuxtApp().$api 暴露
     return {
         provide: {
-            ofetch
+            leporid: leporid
         }
     }
 })

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <app-nav />
+    <AppNav />
     <NuxtPage />
     <ClientOnly>
-      <UiLoading />
+      <NuxtLoadingIndicator />
       <UiNotification />
     </ClientOnly>
   </div>

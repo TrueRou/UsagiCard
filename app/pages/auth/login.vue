@@ -69,7 +69,7 @@ const { errors, validate, hasFieldError, getFieldError } = useFormValidation(log
 const handleLogin = async () => {
     if (!validate()) return
 
-    useNuxtApp().$ofetch('/api/auth/login', {
+    await useNuxtApp().$leporid('/api/auth/login', {
         method: 'POST',
         body: form,
         showSuccessToast: true,

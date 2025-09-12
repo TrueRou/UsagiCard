@@ -103,7 +103,7 @@ const handleRegister = async () => {
         phone: form.phone
     }
 
-    useNuxtApp().$ofetch('/api/auth/register', {
+    await useNuxtApp().$leporid('/api/auth/register', {
         method: 'POST',
         body: requestData,
         showSuccessToast: true,

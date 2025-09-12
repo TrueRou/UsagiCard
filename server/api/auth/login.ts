@@ -1,10 +1,10 @@
-import type { UserResponse, TokenResponse } from '~/def'
+import type { UserResponse, UserTokenCreateResponse } from '~/def'
 
 export default defineEventHandler(async (event) => {
     const { username, password } = await readBody(event);
 
     try {
-        const tokenResponse = await $fetch<TokenResponse>('/api/auth/token', {
+        const tokenResponse = await $fetch<UserTokenCreateResponse>('/api/auth/token', {
             method: 'POST',
             query: {
                 "grant_type": "password",
