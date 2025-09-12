@@ -43,7 +43,6 @@ import type { UserTokenCreateRequest } from '~/def'
 
 const { t } = useI18n()
 const { loggedIn, fetch: fetchUser } = useUserSession()
-const { request } = useLeporid()
 
 // Redirect if already logged in
 watchEffect(() => {
@@ -70,7 +69,7 @@ const { errors, validate, hasFieldError, getFieldError } = useFormValidation(log
 const handleLogin = async () => {
     if (!validate()) return
 
-    await request<void>('/api/auth/login', {
+    await useLeporid('/api/auth/login', {
         method: 'POST',
         body: form,
         showSuccessToast: true,

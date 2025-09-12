@@ -61,7 +61,6 @@ import type { UserRegisterRequest } from '~/def'
 
 const { t } = useI18n()
 const { loggedIn } = useUserSession()
-const { request } = useLeporid()
 
 // Redirect if already logged in
 watchEffect(() => {
@@ -104,7 +103,7 @@ const handleRegister = async () => {
         phone: form.phone
     }
 
-    await request<void>('/api/auth/register', {
+    await useLeporid('/api/auth/register', {
         method: 'POST',
         body: requestData,
         showSuccessToast: true,

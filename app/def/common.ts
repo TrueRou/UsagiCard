@@ -14,20 +14,19 @@ export interface CommonResponse<T = any> {
  * 支付方式枚举
  */
 export enum PaymentMethod {
-    WECHAT_PAY = 'WECHAT_PAY',
-    ALIPAY = 'ALIPAY',
-    CREDIT_CARD = 'CREDIT_CARD'
+    AFDIAN = 'AFDIAN'
 }
 
 /**
  * 订单状态枚举
  */
 export enum OrderStatus {
-    PENDING = 'PENDING',
+    CANCELED = 'CANCELED',
+    UNPAID = 'UNPAID',
     PAID = 'PAID',
     SHIPPED = 'SHIPPED',
-    DELIVERED = 'DELIVERED',
-    CANCELLED = 'CANCELLED'
+    SUCCESS = 'SUCCESS',
+    CLOSED = 'CLOSED'
 }
 
 /**

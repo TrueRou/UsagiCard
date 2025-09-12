@@ -1,9 +1,12 @@
 <template>
-  <Transition name="loading">
-    <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-base-300/50 backdrop-blur-sm">
-      <div class="loading loading-spinner loading-lg text-primary"></div>
-    </div>
-  </Transition>
+  <ClientOnly>
+    <Transition name="loading">
+      <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-base-300/50 backdrop-blur-sm">
+        <div class="loading loading-spinner loading-lg text-primary"></div>
+      </div>
+    </Transition>
+  </ClientOnly>
+
 </template>
 
 <script setup lang="ts">

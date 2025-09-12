@@ -1,58 +1,49 @@
-import type { ApiResponse } from '~/def/common'
-
 interface UseApiOptions {
     showErrorToast?: boolean
     showSuccessToast?: boolean
     successMessage?: string
 }
 
-export const useLeporid = () => {
-    const { addNotification } = useNotificationsStore()
-    const { startLoading, stopLoading, isLoading } = useLoadingStore()
+export const useLeporid = <T = any>(
+    url: string,
+    options: Parameters<typeof useFetch>[1] & UseApiOptions = {}
+) => {
+    const {
+        showErrorToast = true,
+        showSuccessToast = false,
+        successMessage,
+        ...fetchOptions
+    } = options
 
-    const request = async <T = any>(
-        url: string,
-        options: Parameters<typeof $fetch>[1] & UseApiOptions = {}
-    ): Promise<T | null> => {
-        const {
-            showErrorToast = true,
-            showSuccessToast = false,
-            successMessage,
-            ...fetchOptions
-        } = options
-
-        startLoading()
-
-        try {
-            const response: any = await $fetch<T>(url, fetchOptions)
-
-            if (showSuccessToast && successMessage) {
+    const { data, error, pending, refresh } = useFetch<{ data: T }>(url, {
+        ...(fetchOptions as any),
+        onResponse({ response }) {
+            if (showSuccessToast && successMessage && import.meta.client) {
+                const { addNotification } = useNotificationsStore()
                 addNotification({
                     type: 'success',
                     message: successMessage
                 })
             }
-
-            return response.data as T
-        } catch (error: any) {
-            if (showErrorToast) {
-                const apiError = error.data as { data?: ApiResponse }
+        },
+        onResponseError({ response }) {
+            if (showErrorToast && import.meta.client) {
+                const apiError = response._data as { data?: any }
                 const message = apiError.data?.message || '请求失败，请重试'
 
+                const { addNotification } = useNotificationsStore()
                 addNotification({
                     type: 'error',
                     message
                 })
             }
-
-            throw error
-        } finally {
-            stopLoading()
         }
-    }
+    })
 
     return {
-        request,
-        isLoading: isLoading
+        data: computed(() => data.value?.data as T),
+        error,
+        pending,
+        refresh
     }
 }
