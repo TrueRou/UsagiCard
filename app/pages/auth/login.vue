@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { z } from 'zod'
-import type { LoginRequest } from '~/def/auth'
+import type { UserTokenCreateRequest } from '~/def'
 
 const { t } = useI18n()
 const { loggedIn, fetch: fetchUser } = useUserSession()
@@ -56,11 +56,13 @@ watchEffect(() => {
 const loginSchema = z.object({
     username: z.string().min(1, t('username-required')),
     password: z.string().min(1, t('password-required')),
+    refresh_token: z.string().optional(),
 })
 
-const form = reactive<LoginRequest>({
+const form = reactive<UserTokenCreateRequest>({
     username: '',
-    password: ''
+    password: '',
+    refresh_token: undefined,
 })
 
 const { errors, validate, hasFieldError, getFieldError } = useFormValidation(loginSchema, form)

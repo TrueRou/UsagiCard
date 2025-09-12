@@ -12,14 +12,14 @@
                 </p>
             </div>
 
-            <div>
+            <!-- <div>
                 <label class="block text-sm font-medium mb-2">{{ t('phone') }}</label>
                 <input v-model="form.phone" type="tel" :placeholder="t('phone-placeholder')"
                     class="input input-bordered w-full" :class="{ 'input-error': hasFieldError('phone') }" />
                 <p v-if="hasFieldError('phone')" class="text-error text-sm mt-1">
                     {{ getFieldError('phone') }}
                 </p>
-            </div>
+            </div> -->
 
             <div>
                 <label class="block text-sm font-medium mb-2">{{ t('password') }}</label>
@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { z } from 'zod'
-import type { RegisterRequest } from '~/def/auth'
+import type { UserRegisterRequest } from '~/def'
 
 const { t } = useI18n()
 const { loggedIn } = useUserSession()
@@ -71,14 +71,14 @@ watchEffect(() => {
 })
 
 // Extended register form with confirmPassword
-interface RegisterForm extends RegisterRequest {
+interface RegisterForm extends UserRegisterRequest {
     confirmPassword: string
 }
 
 // Zod schema for validation
 const registerSchema = z.object({
     username: z.string().min(3, t('username-min-length')),
-    phone: z.string().regex(/^\d+$/, t('phone-invalid')),
+    phone: z.string().optional(),
     password: z.string().min(6, t('password-min-length')),
     confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
@@ -88,7 +88,7 @@ const registerSchema = z.object({
 
 const form = reactive<RegisterForm>({
     username: '',
-    phone: '',
+    phone: undefined,
     password: '',
     confirmPassword: ''
 })
@@ -98,13 +98,13 @@ const { errors, validate, hasFieldError, getFieldError } = useFormValidation(reg
 const handleRegister = async () => {
     if (!validate()) return
 
-    const requestData: RegisterRequest = {
+    const requestData: UserRegisterRequest = {
         username: form.username,
         password: form.password,
         phone: form.phone
     }
 
-    const result = await request<void>('/api/auth/register', {
+    await request<void>('/api/auth/register', {
         method: 'POST',
         body: requestData,
         showSuccessToast: true,
