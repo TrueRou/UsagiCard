@@ -46,13 +46,3 @@ export const useNotificationsStore = defineStore('notifications', () => {
         clearAll
     }
 })
-
-export const useNotifications = () => {
-    const store = useNotificationsStore()
-    return {
-        notifications: store.notifications,
-        addNotification: store.addNotification,
-        removeNotification: store.removeNotification,
-        clearAll: store.clearAll
-    }
-}
