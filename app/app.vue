@@ -2,7 +2,9 @@
   <div>
     <app-nav />
     <NuxtPage />
-    <UiLoading />
-    <UiNotification />
+    <ClientOnly>
+      <UiLoading />
+      <UiNotification />
+    </ClientOnly>
   </div>
 </template>
