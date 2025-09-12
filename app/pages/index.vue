@@ -1,6 +1,5 @@
 <template>
   <div>
-    <app-nav />
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-4xl font-bold text-center mb-8">{{ t('welcome') }}</h1>
       <p class="text-center text-lg">{{ t('welcome-message') }}</p>
