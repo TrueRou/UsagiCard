@@ -153,7 +153,7 @@ const handlePayOrder = async () => {
 
     isProcessing.value = true
     try {
-        await useLeporid('/orders/pay', {
+        await useNuxtApp().$leporid('/api/orders/pay', {
             method: 'POST',
             query: { orderSn: order.value.sn },
             showSuccessToast: true,
@@ -173,7 +173,7 @@ const handleCancelOrder = async () => {
 
     isProcessing.value = true
     try {
-        useLeporid(`/orders/${order.value.id}/cancel`, {
+        await useNuxtApp().$leporid(`/api/orders/${order.value.id}/cancel`, {
             method: 'POST',
             showSuccessToast: true,
             successMessage: t('order-canceled')
@@ -186,6 +186,10 @@ const handleCancelOrder = async () => {
 
 useHead({
     title: computed(() => order.value ? t('order-detail') + ' #' + order.value.sn : t('order-detail'))
+})
+
+definePageMeta({
+    middleware: ['auth']
 })
 </script>
 

@@ -14,22 +14,22 @@ const { t } = useI18n()
 
 // 状态映射
 const statusMap = {
-    0: 'canceled',
-    1: 'unpaid',
-    2: 'paid',
-    3: 'shipped',
-    4: 'success',
-    5: 'closed'
+    [-1]: 'canceled',
+    0: 'unpaid',
+    1: 'paid',
+    2: 'shipped',
+    3: 'success',
+    4: 'closed'
 }
 
 // 状态样式映射
 const statusClassMap = {
-    0: 'badge-neutral',  // canceled
-    1: 'badge-warning',  // unpaid
-    2: 'badge-info',     // paid
-    3: 'badge-primary',  // shipped
-    4: 'badge-success',  // success
-    5: 'badge-neutral'   // closed
+    [-1]: 'badge-neutral',  // canceled
+    0: 'badge-warning',     // unpaid
+    1: 'badge-info',        // paid
+    2: 'badge-primary',     // shipped
+    3: 'badge-success',     // success
+    4: 'badge-neutral'      // closed
 }
 
 const statusText = computed(() => {

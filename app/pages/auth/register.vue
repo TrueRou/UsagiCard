@@ -6,9 +6,9 @@
             <div>
                 <label class="block text-sm font-medium mb-2">{{ t('username') }}</label>
                 <input v-model="form.username" type="text" :placeholder="t('username-placeholder')"
-                    class="input input-bordered w-full" :class="{ 'input-error': hasFieldError('username') }" />
-                <p v-if="hasFieldError('username')" class="text-error text-sm mt-1">
-                    {{ getFieldError('username') }}
+                    class="input input-bordered w-full" :class="{ 'input-error': ve('username') }" />
+                <p v-if="ve('username')" class="text-error text-sm mt-1">
+                    {{ ve('username') }}
                 </p>
             </div>
 
@@ -24,18 +24,18 @@
             <div>
                 <label class="block text-sm font-medium mb-2">{{ t('password') }}</label>
                 <input v-model="form.password" type="password" :placeholder="t('password-placeholder')"
-                    class="input input-bordered w-full" :class="{ 'input-error': hasFieldError('password') }" />
-                <p v-if="hasFieldError('password')" class="text-error text-sm mt-1">
-                    {{ getFieldError('password') }}
+                    class="input input-bordered w-full" :class="{ 'input-error': ve('password') }" />
+                <p v-if="ve('password')" class="text-error text-sm mt-1">
+                    {{ ve('password') }}
                 </p>
             </div>
 
             <div>
                 <label class="block text-sm font-medium mb-2">{{ t('confirm-password') }}</label>
                 <input v-model="form.confirmPassword" type="password" :placeholder="t('confirm-password-placeholder')"
-                    class="input input-bordered w-full" :class="{ 'input-error': hasFieldError('confirmPassword') }" />
-                <p v-if="hasFieldError('confirmPassword')" class="text-error text-sm mt-1">
-                    {{ getFieldError('confirmPassword') }}
+                    class="input input-bordered w-full" :class="{ 'input-error': ve('confirmPassword') }" />
+                <p v-if="ve('confirmPassword')" class="text-error text-sm mt-1">
+                    {{ ve('confirmPassword') }}
                 </p>
             </div>
 
@@ -92,7 +92,7 @@ const form = reactive<RegisterForm>({
     confirmPassword: ''
 })
 
-const { errors, validate, hasFieldError, getFieldError } = useFormValidation(registerSchema, form)
+const { validate, ve } = useFormValidation(registerSchema, form)
 
 const handleRegister = async () => {
     if (!validate()) return

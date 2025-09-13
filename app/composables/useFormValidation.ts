@@ -58,11 +58,7 @@ export const useFormValidation = <T extends Record<string, any>>(
     }
 
     const getFieldError = (field: string) => {
-        return errors.value[field] || ''
-    }
-
-    const hasFieldError = (field: string) => {
-        return !!errors.value[field]
+        return errors.value[field] || null
     }
 
     return {
@@ -72,7 +68,6 @@ export const useFormValidation = <T extends Record<string, any>>(
         validateField,
         clearErrors,
         clearFieldError,
-        getFieldError,
-        hasFieldError
+        ve: getFieldError
     }
 }

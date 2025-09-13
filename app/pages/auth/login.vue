@@ -6,18 +6,18 @@
             <div>
                 <label class="block text-sm font-medium mb-2">{{ t('username') }}</label>
                 <input v-model="form.username" type="text" :placeholder="t('username-placeholder')"
-                    class="input input-bordered w-full" :class="{ 'input-error': hasFieldError('username') }" />
-                <p v-if="hasFieldError('username')" class="text-error text-sm mt-1">
-                    {{ getFieldError('username') }}
+                    class="input input-bordered w-full" :class="{ 'input-error': ve('username') }" />
+                <p v-if="ve('username')" class="text-error text-sm mt-1">
+                    {{ ve('username') }}
                 </p>
             </div>
 
             <div>
                 <label class="block text-sm font-medium mb-2">{{ t('password') }}</label>
                 <input v-model="form.password" type="password" :placeholder="t('password-placeholder')"
-                    class="input input-bordered w-full" :class="{ 'input-error': hasFieldError('password') }" />
-                <p v-if="hasFieldError('password')" class="text-error text-sm mt-1">
-                    {{ getFieldError('password') }}
+                    class="input input-bordered w-full" :class="{ 'input-error': ve('password') }" />
+                <p v-if="ve('password')" class="text-error text-sm mt-1">
+                    {{ ve('password') }}
                 </p>
             </div>
 
@@ -64,7 +64,7 @@ const form = reactive<UserTokenCreateRequest>({
     refresh_token: undefined,
 })
 
-const { errors, validate, hasFieldError, getFieldError } = useFormValidation(loginSchema, form)
+const { validate, ve } = useFormValidation(loginSchema, form)
 
 const handleLogin = async () => {
     if (!validate()) return

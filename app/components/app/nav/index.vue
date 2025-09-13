@@ -45,18 +45,8 @@ const detached = computed(() => scrollY.value > 0);
 en-GB:
   home: Home
   marketplace: Marketplace
-  my-cart: My Cart
-  my-orders: My Orders
-  logout: Logout
-  login: Login
-  register: Register
 
 zh-CN:
   home: 首页
   marketplace: 创意工坊
-  my-cart: 购物车
-  my-orders: 我的订单
-  logout: 登出
-  login: 登录
-  register: 注册
 </i18n>

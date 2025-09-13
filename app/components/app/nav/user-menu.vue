@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const { loggedIn, user, session, fetch, clear } = useUserSession()
+const { loggedIn, clear } = useUserSession()
+
+const userSw = ref<HTMLElement | null>(null)
 
 const { t } = useI18n()
 
@@ -10,7 +12,7 @@ const handleLogout = async () => {
 </script>
 <template>
     <li tabindex="0" class="self-center">
-        <details>
+        <details ref="userSw">
             <summary>
                 <div role="button" tabindex="0" class="avatar h-8 w-8">
                     <div class="rounded-full">
@@ -19,10 +21,13 @@ const handleLogout = async () => {
                     </div>
                 </div>
             </summary>
-            <ul tabindex="0" class="shadow menu menu-tint right-0 dropdown-content rounded-box w-32">
+            <ul tabindex="0" class="shadow menu menu-tint right-0 dropdown-content rounded-box w-32"
+                @click="userSw?.toggleAttribute('open', false)">
                 <template v-if="loggedIn">
                     <li><a>{{ t('my-cart') }}</a></li>
-                    <li><a>{{ t('my-orders') }}</a></li>
+                    <li>
+                        <NuxtLink to="/orders">{{ t('my-orders') }}</NuxtLink>
+                    </li>
                     <li><a @click="handleLogout">{{ t('logout') }}</a></li>
                 </template>
                 <template v-else>

@@ -13,6 +13,6 @@ export const useLeporid = <T = any>(
 ) => {
     return useFetch<T>(url, {
         ...(options as any),
-        $fetch: useNuxtApp().$ofetch,
+        $fetch: useNuxtApp().$leporid,
     })
 }

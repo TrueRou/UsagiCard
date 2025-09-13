@@ -121,6 +121,10 @@ const getPageNumbers = () => {
 useHead({
     title: t('my-orders')
 })
+
+definePageMeta({
+    middleware: ['auth']
+})
 </script>
 
 <i18n lang="yaml">
