@@ -19,11 +19,13 @@ export default defineNuxtConfig({
         code: "en-GB",
         flag: "GB",
         name: 'English (International)',
+        file: 'en-GB.json'
       },
       {
         code: "zh-CN",
         flag: "CN",
         name: '简体中文 (中国)',
+        file: 'zh-CN.json'
       },
     ]
   },

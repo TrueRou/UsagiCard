@@ -17,6 +17,11 @@ export default defineNuxtPlugin((nuxtApp) => {
             if (rawData.code == 0 && rawData.data !== undefined) {
                 context.response._data = rawData.data // unwrap data
             }
+
+            if (import.meta.client) {
+                const loadingIndicator = useLoadingIndicator()
+                loadingIndicator.finish()
+            }
         },
         onResponseError(context) {
             const leporidResp = context.response._data.data
