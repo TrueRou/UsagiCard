@@ -1,4 +1,4 @@
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin((_nuxtApp) => {
     const leporid = $fetch.create({
         onRequest(context) {
             if (import.meta.server) {
@@ -14,36 +14,37 @@ export default defineNuxtPlugin((nuxtApp) => {
         onResponse(context) {
             const rawData = context.response._data
 
-            if (rawData.code == 200 && rawData.data !== undefined) {
+            if (rawData.code === 200 && rawData.data !== undefined) {
                 context.response._data = rawData.data // unwrap data
             }
 
             if (import.meta.client) {
                 const loadingIndicator = useLoadingIndicator()
                 loadingIndicator.finish()
-            }
-        },
-        onResponseError(context) {
-            if (import.meta.client) {
-                const nuxtApp = useNuxtApp()
-                const leporidResp = context.response._data.data
 
-                if (leporidResp.code && leporidResp.code !== 200) {
-                    const errMessage = nuxtApp.$i18n.t(`exceptions.${leporidResp.node}`) || nuxtApp.$i18n.t('exceptions.unknown-error')
-                    const { addNotification } = useNotificationsStore()
+                const { addNotification } = useNotificationsStore()
+                if (rawData.code === 200 && (context.options as any).showSuccessToast) {
+                    addNotification({
+                        type: 'success',
+                        message: (context.options as any).successMessage || '操作成功',
+                    })
+                }
+
+                if (rawData.code !== 200) {
+                    const message = rawData.message || context.response.statusText
                     addNotification({
                         type: 'error',
-                        message: errMessage
+                        message,
                     })
-                    Promise.reject(leporidResp) // reject the promise
+                    throw new Error(message)
                 }
             }
-        }
+        },
     })
 
     return {
         provide: {
-            leporid: leporid
-        }
+            leporid,
+        },
     }
 })
