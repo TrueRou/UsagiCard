@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import type { OrderPageResponse, OrderSearchRequest } from '~/def'
+import type { OrderPageResponse, OrderSearchRequest } from '~~/shared/types/order'
 
 const { t } = useI18n()
 

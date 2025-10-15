@@ -1,4 +1,11 @@
-import { ProductStatus } from './common'
+/**
+ * 商品状态枚举
+ */
+export enum ProductStatus {
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    OUT_OF_STOCK = 'OUT_OF_STOCK'
+}
 
 /**
  * 商品元数据

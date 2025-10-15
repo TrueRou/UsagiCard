@@ -121,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import type { OrderResponse } from '~/def'
+import type { OrderResponse } from '~~/shared/types/order'
 
 const { t } = useI18n()
 const route = useRoute()

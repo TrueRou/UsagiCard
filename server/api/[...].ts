@@ -1,5 +1,5 @@
 import { joinURL } from 'ufo'
-import type { UserTokenCreateResponse } from '~/def'
+import type { UserTokenCreateResponse } from '~~/shared/types/user'
 
 export default defineEventHandler(async (event) => {
     const session = await getUserSession(event)
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
             } catch (error) {
                 // refresh failed, clear session and return 401
                 await clearUserSession(event)
-                throw createError({ statusCode: 401, statusMessage: 'Session expired' })
+                throw createError(error as Error)
             }
         } else {
             // valid session, just set the header
@@ -56,6 +56,6 @@ export default defineEventHandler(async (event) => {
             headers: headers,
         })
     } catch (error) {
-        throw createError(error as Error)
+        return createError(error as Error);
     }
 })

@@ -1,4 +1,4 @@
-import type { UserResponse, UserTokenCreateResponse } from '~/def'
+import type { UserResponse, UserTokenCreateResponse } from '~~/shared/types/user'
 
 export default defineEventHandler(async (event) => {
     const { username, password } = await readBody(event);
@@ -35,19 +35,12 @@ export default defineEventHandler(async (event) => {
         })
 
         return {
-            code: 0,
-            message: 'success',
+            code: 200,
+            node: 'success',
+            message: null,
             data: null
         }
     } catch (error) {
-        return sendError(event, createError({
-            statusCode: 401,
-            statusMessage: 'Invalid username or password',
-            data: {
-                code: 1003,
-                message: 'Invalid username or password',
-                data: null
-            }
-        }));
+        throw createError(error as Error)
     }
 })

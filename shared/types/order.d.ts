@@ -1,4 +1,21 @@
-import { PaymentMethod, OrderStatus } from './common'
+/**
+ * 支付方式枚举
+ */
+export enum PaymentMethod {
+    AFDIAN = 'AFDIAN'
+}
+
+/**
+ * 订单状态枚举
+ */
+export enum OrderStatus {
+    CANCELED = 'CANCELED',
+    UNPAID = 'UNPAID',
+    PAID = 'PAID',
+    SHIPPED = 'SHIPPED',
+    SUCCESS = 'SUCCESS',
+    CLOSED = 'CLOSED'
+}
 
 /**
  * 订单项目请求

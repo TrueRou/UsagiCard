@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { z } from 'zod'
-import type { UserTokenCreateRequest } from '~/def'
+import type { UserTokenCreateRequest } from '~~/shared/types/user'
 
 const { t } = useI18n()
 const { loggedIn, fetch: fetchUser } = useUserSession()

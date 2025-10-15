@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { z } from 'zod'
-import type { UserRegisterRequest } from '~/def'
+import type { UserRegisterRequest } from '~~/shared/types/user'
 
 const { t } = useI18n()
 const { loggedIn } = useUserSession()
