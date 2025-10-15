@@ -14,7 +14,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         onResponse(context) {
             const rawData = context.response._data
 
-            if (rawData.code == 0 && rawData.data !== undefined) {
+            if (rawData.code == 200 && rawData.data !== undefined) {
                 context.response._data = rawData.data // unwrap data
             }
 
@@ -24,20 +24,19 @@ export default defineNuxtPlugin((nuxtApp) => {
             }
         },
         onResponseError(context) {
-            const leporidResp = context.response._data.data
-            let errMessage = "Unexcpected response format from API"
-
-            if (leporidResp.code && leporidResp.code !== 0) {
-                errMessage = leporidResp.message // format error message
-            }
-
             if (import.meta.client) {
-                const { addNotification } = useNotificationsStore()
-                addNotification({
-                    type: 'error',
-                    message: errMessage
-                })
-                Promise.reject(errMessage) // reject the promise
+                const nuxtApp = useNuxtApp()
+                const leporidResp = context.response._data.data
+
+                if (leporidResp.code && leporidResp.code !== 200) {
+                    const errMessage = nuxtApp.$i18n.t(`exceptions.${leporidResp.node}`) || nuxtApp.$i18n.t('exceptions.unknown-error')
+                    const { addNotification } = useNotificationsStore()
+                    addNotification({
+                        type: 'error',
+                        message: errMessage
+                    })
+                    Promise.reject(leporidResp) // reject the promise
+                }
             }
         }
     })

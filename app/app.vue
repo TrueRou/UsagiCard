@@ -4,7 +4,7 @@
     <NuxtPage />
     <ClientOnly>
       <NuxtLoadingIndicator />
-      <UiNotification />
+      <AppNotification />
     </ClientOnly>
   </div>
 </template>
