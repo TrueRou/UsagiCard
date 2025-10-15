@@ -1,3 +1,5 @@
 <template>
-    Welcome to the Marketplace page!
+    <span>
+        Welcome to the Marketplace page!
+    </span>
 </template>

@@ -16,6 +16,7 @@ function getFlagURL(flag: string) {
     return `${url}.svg`
 }
 </script>
+
 <template>
     <li tabindex="0">
         <details ref="langSw">
@@ -23,12 +24,16 @@ function getFlagURL(flag: string) {
                 <icon name="tabler:world" class="w-5 h-5" />{{ localeProperties.name }}
             </summary>
             <ul class="right-0 w-64 mt-0">
-                <li v-for="l in locales" :key="l.code" :class="{
-                    disabled: l.code === locale,
-                }">
-                    <a class="whitespace-nowrap" :class="{
-                        active: l.code === locale,
-                    }" @click="setLocale(l.code), langSw?.toggleAttribute('open', false)">
+                <li
+                    v-for="l in locales" :key="l.code" :class="{
+                        disabled: l.code === locale,
+                    }"
+                >
+                    <a
+                        class="whitespace-nowrap" :class="{
+                            active: l.code === locale,
+                        }" @click="setLocale(l.code), langSw?.toggleAttribute('open', false)"
+                    >
                         <img :alt="l.name" class="h-6" :src="getFlagURL((l as any).flag)"> {{ l.name }}
                     </a>
                 </li>

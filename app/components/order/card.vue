@@ -1,3 +1,68 @@
+<script setup lang="ts">
+interface Props {
+    order: OrderResponse
+}
+
+interface Emits {
+    (e: 'refresh'): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+const { t } = useI18n()
+
+const isProcessing = ref(false)
+
+// 格式化日期时间
+function formatDateTime(timestamp: number) {
+    return new Date(timestamp * 1000).toLocaleDateString()
+}
+
+// 判断是否可以取消订单
+const canCancelOrder = computed(() => {
+    return [0, 1].includes(props.order.status) // UNPAID 状态可以取消
+})
+
+// 判断是否可以支付订单
+const canPayOrder = computed(() => {
+    return props.order.status === 1 // UNPAID 状态可以支付
+})
+
+// 支付订单
+async function handlePayOrder() {
+    isProcessing.value = true
+    try {
+        await useLeporid('/orders/pay', {
+            method: 'POST',
+            query: { orderSn: props.order.sn },
+            showSuccessToast: true,
+            successMessage: t('payment-initiated'),
+        })
+        emit('refresh')
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
+
+// 取消订单
+async function handleCancelOrder() {
+    isProcessing.value = true
+    try {
+        await useLeporid(`/orders/${props.order.id}/cancel`, {
+            method: 'POST',
+            showSuccessToast: true,
+            successMessage: t('order-canceled'),
+        })
+        emit('refresh')
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
+</script>
+
 <template>
     <div class="card bg-base-100 shadow-sm border">
         <div class="card-body">
@@ -17,7 +82,7 @@
 
                     <!-- 订单商品摘要 -->
                     <div class="space-y-1">
-                        <div v-for="(item, index) in order.items.slice(0, 2)" :key="item.id" class="text-sm">
+                        <div v-for="item in order.items.slice(0, 2)" :key="item.id" class="text-sm">
                             {{ item.product.name }} × {{ item.quantity }}
                         </div>
                         <div v-if="order.items.length > 2" class="text-sm text-base-content/60">
@@ -42,15 +107,19 @@
                             {{ t('view-detail') }}
                         </NuxtLink>
 
-                        <button v-if="canPayOrder" @click="handlePayOrder" class="btn btn-sm btn-primary"
-                            :disabled="isProcessing">
-                            <span v-if="isProcessing" class="loading loading-spinner loading-xs"></span>
+                        <button
+                            v-if="canPayOrder" class="btn btn-sm btn-primary" :disabled="isProcessing"
+                            @click="handlePayOrder"
+                        >
+                            <span v-if="isProcessing" class="loading loading-spinner loading-xs" />
                             {{ t('pay-now') }}
                         </button>
 
-                        <button v-if="canCancelOrder" @click="handleCancelOrder"
-                            class="btn btn-sm btn-error btn-outline" :disabled="isProcessing">
-                            <span v-if="isProcessing" class="loading loading-spinner loading-xs"></span>
+                        <button
+                            v-if="canCancelOrder" class="btn btn-sm btn-error btn-outline"
+                            :disabled="isProcessing" @click="handleCancelOrder"
+                        >
+                            <span v-if="isProcessing" class="loading loading-spinner loading-xs" />
                             {{ t('cancel') }}
                         </button>
                     </div>
@@ -59,73 +128,6 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-import type { OrderResponse } from '~/def'
-
-interface Props {
-    order: OrderResponse
-}
-
-interface Emits {
-    (e: 'refresh'): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
-
-const { t } = useI18n()
-
-const isProcessing = ref(false)
-
-// 格式化日期时间
-const formatDateTime = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString()
-}
-
-// 判断是否可以取消订单
-const canCancelOrder = computed(() => {
-    return [0, 1].includes(props.order.status) // UNPAID 状态可以取消
-})
-
-// 判断是否可以支付订单
-const canPayOrder = computed(() => {
-    return props.order.status === 1 // UNPAID 状态可以支付
-})
-
-// 支付订单
-const handlePayOrder = async () => {
-    isProcessing.value = true
-    try {
-        await useLeporid('/orders/pay', {
-            method: 'POST',
-            query: { orderSn: props.order.sn },
-            showSuccessToast: true,
-            successMessage: t('payment-initiated')
-        })
-        emit('refresh')
-    } finally {
-        isProcessing.value = false
-    }
-}
-
-// 取消订单
-const handleCancelOrder = async () => {
-    if (!confirm(t('confirm-cancel-order'))) return
-
-    isProcessing.value = true
-    try {
-        await useLeporid(`/orders/${props.order.id}/cancel`, {
-            method: 'POST',
-            showSuccessToast: true,
-            successMessage: t('order-canceled')
-        })
-        emit('refresh')
-    } finally {
-        isProcessing.value = false
-    }
-}
-</script>
 
 <i18n lang="yaml">
 en-GB:

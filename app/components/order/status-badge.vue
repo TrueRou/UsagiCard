@@ -1,9 +1,3 @@
-<template>
-    <div class="badge" :class="badgeClass">
-        {{ statusText }}
-    </div>
-</template>
-
 <script setup lang="ts">
 interface Props {
     status: number
@@ -19,17 +13,17 @@ const statusMap = {
     1: 'paid',
     2: 'shipped',
     3: 'success',
-    4: 'closed'
+    4: 'closed',
 }
 
 // 状态样式映射
 const statusClassMap = {
-    [-1]: 'badge-neutral',  // canceled
-    0: 'badge-warning',     // unpaid
-    1: 'badge-info',        // paid
-    2: 'badge-primary',     // shipped
-    3: 'badge-success',     // success
-    4: 'badge-neutral'      // closed
+    [-1]: 'badge-neutral', // canceled
+    0: 'badge-warning', // unpaid
+    1: 'badge-info', // paid
+    2: 'badge-primary', // shipped
+    3: 'badge-success', // success
+    4: 'badge-neutral', // closed
 }
 
 const statusText = computed(() => {
@@ -41,6 +35,12 @@ const badgeClass = computed(() => {
     return statusClassMap[props.status as keyof typeof statusClassMap] || 'badge-neutral'
 })
 </script>
+
+<template>
+    <div class="badge" :class="badgeClass">
+        {{ statusText }}
+    </div>
+</template>
 
 <i18n lang="yaml">
 en-GB:

@@ -1,91 +1,31 @@
-<template>
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <h1 class="text-3xl font-bold mb-4 md:mb-0">{{ t('my-orders') }}</h1>
-
-            <!-- 搜索和筛选 -->
-            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                <input v-model="searchForm.keyword" type="text" :placeholder="t('search-placeholder')"
-                    class="input input-bordered w-full sm:w-64" @keyup.enter="handleSearch" />
-                <select v-model="searchForm.status" class="select select-bordered w-full sm:w-40"
-                    @change="handleSearch">
-                    <option value="">{{ t('all-status') }}</option>
-                    <option value="UNPAID">{{ t('status.unpaid') }}</option>
-                    <option value="PAID">{{ t('status.paid') }}</option>
-                    <option value="SHIPPED">{{ t('status.shipped') }}</option>
-                    <option value="SUCCESS">{{ t('status.success') }}</option>
-                    <option value="CANCELED">{{ t('status.canceled') }}</option>
-                    <option value="CLOSED">{{ t('status.closed') }}</option>
-                </select>
-                <button @click="handleSearch" class="btn btn-primary">
-                    {{ t('search') }}
-                </button>
-            </div>
-        </div>
-
-        <div v-if="orders?.records && orders?.records.length === 0" class="text-center py-16">
-            <p class="text-base-content/60 text-lg">{{ t('no-orders') }}</p>
-        </div>
-
-        <div v-else class="space-y-4">
-            <OrderCard v-for="order in orders?.records" :key="order.id" :order="order" @refresh="refreshOrders" />
-        </div>
-
-        <!-- 分页 -->
-        <div v-if="orders && orders.totalPage > 1" class="flex justify-center mt-8">
-            <div class="join">
-                <button class="join-item btn btn-sm" :disabled="searchForm.page_number <= 1"
-                    @click="goToPage(searchForm.page_number - 1)">
-                    {{ t('prev') }}
-                </button>
-
-                <template v-for="page in getPageNumbers()" :key="page">
-                    <button v-if="page !== '...'" class="join-item btn btn-sm"
-                        :class="{ 'btn-active': page === searchForm.page_number }" @click="goToPage(page as number)">
-                        {{ page }}
-                    </button>
-                    <span v-else class="join-item btn btn-sm btn-disabled">...</span>
-                </template>
-
-                <button class="join-item btn btn-sm" :disabled="searchForm.page_number >= (orders?.totalPage || 0)"
-                    @click="goToPage(searchForm.page_number + 1)">
-                    {{ t('next') }}
-                </button>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup lang="ts">
-import type { OrderPageResponse, OrderSearchRequest } from '~~/shared/types/order'
-
 const { t } = useI18n()
 
 // 搜索表单
 const searchForm = reactive<OrderSearchRequest>({
-    keyword: "123",
+    keyword: '123',
     status: undefined,
     page_number: 1,
-    page_size: 10
+    page_size: 10,
 })
 
 // 获取订单数据
-const { data: orders, refresh: refreshOrders } = await useLeporid<OrderPageResponse>("/api/orders")
+const { data: orders, refresh: refreshOrders } = await useLeporid<OrderPageResponse>('/api/orders')
 
 // 搜索处理
-const handleSearch = () => {
+function handleSearch() {
     searchForm.page_number = 1
     refreshOrders()
 }
 
 // 翻页处理
-const goToPage = (page: number) => {
+function goToPage(page: number) {
     searchForm.page_number = page
     refreshOrders()
 }
 
 // 生成页码数组
-const getPageNumbers = () => {
+function getPageNumbers() {
     const totalPages = orders.value?.totalPage || 0
     const current = searchForm.page_number
     const pages: (number | string)[] = []
@@ -94,7 +34,8 @@ const getPageNumbers = () => {
         for (let i = 1; i <= totalPages; i++) {
             pages.push(i)
         }
-    } else {
+    }
+    else {
         pages.push(1)
 
         if (current > 3) {
@@ -119,13 +60,99 @@ const getPageNumbers = () => {
 }
 
 useHead({
-    title: t('my-orders')
+    title: t('my-orders'),
 })
 
 definePageMeta({
-    middleware: ['auth']
+    middleware: ['require-login'],
 })
 </script>
+
+<template>
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <h1 class="text-3xl font-bold mb-4 md:mb-0">
+                {{ t('my-orders') }}
+            </h1>
+
+            <!-- 搜索和筛选 -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <input
+                    v-model="searchForm.keyword" type="text" :placeholder="t('search-placeholder')"
+                    class="input input-bordered w-full sm:w-64" @keyup.enter="handleSearch"
+                >
+                <select
+                    v-model="searchForm.status" class="select select-bordered w-full sm:w-40"
+                    @change="handleSearch"
+                >
+                    <option value="">
+                        {{ t('all-status') }}
+                    </option>
+                    <option value="UNPAID">
+                        {{ t('status.unpaid') }}
+                    </option>
+                    <option value="PAID">
+                        {{ t('status.paid') }}
+                    </option>
+                    <option value="SHIPPED">
+                        {{ t('status.shipped') }}
+                    </option>
+                    <option value="SUCCESS">
+                        {{ t('status.success') }}
+                    </option>
+                    <option value="CANCELED">
+                        {{ t('status.canceled') }}
+                    </option>
+                    <option value="CLOSED">
+                        {{ t('status.closed') }}
+                    </option>
+                </select>
+                <button class="btn btn-primary" @click="handleSearch">
+                    {{ t('search') }}
+                </button>
+            </div>
+        </div>
+
+        <div v-if="orders?.records && orders?.records.length === 0" class="text-center py-16">
+            <p class="text-base-content/60 text-lg">
+                {{ t('no-orders') }}
+            </p>
+        </div>
+
+        <div v-else class="space-y-4">
+            <OrderCard v-for="order in orders?.records" :key="order.id" :order="order" @refresh="refreshOrders" />
+        </div>
+
+        <!-- 分页 -->
+        <div v-if="orders && orders.totalPage > 1" class="flex justify-center mt-8">
+            <div class="join">
+                <button
+                    class="join-item btn btn-sm" :disabled="searchForm.page_number <= 1"
+                    @click="goToPage(searchForm.page_number - 1)"
+                >
+                    {{ t('prev') }}
+                </button>
+
+                <template v-for="page in getPageNumbers()" :key="page">
+                    <button
+                        v-if="page !== '...'" class="join-item btn btn-sm"
+                        :class="{ 'btn-active': page === searchForm.page_number }" @click="goToPage(page as number)"
+                    >
+                        {{ page }}
+                    </button>
+                    <span v-else class="join-item btn btn-sm btn-disabled">...</span>
+                </template>
+
+                <button
+                    class="join-item btn btn-sm" :disabled="searchForm.page_number >= (orders?.totalPage || 0)"
+                    @click="goToPage(searchForm.page_number + 1)"
+                >
+                    {{ t('next') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
 
 <i18n lang="yaml">
 en-GB:

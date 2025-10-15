@@ -4,10 +4,7 @@ export interface ValidationErrors {
     [key: string]: string
 }
 
-export const useFormValidation = <T extends Record<string, any>>(
-    schema: z.ZodSchema<T>,
-    form: Ref<T> | T
-) => {
+export function useFormValidation<T extends Record<string, any>>(schema: z.ZodSchema<T>, form: Ref<T> | T) {
     const errors = ref<ValidationErrors>({})
     const isValid = ref(true)
 
@@ -19,7 +16,8 @@ export const useFormValidation = <T extends Record<string, any>>(
             const formData = unref(form)
             schema.parse(formData)
             return true
-        } catch (error) {
+        }
+        catch (error) {
             if (error instanceof z.ZodError) {
                 error.issues.forEach((issue) => {
                     const field = issue.path[0] as string
@@ -37,7 +35,8 @@ export const useFormValidation = <T extends Record<string, any>>(
             schema.parse(formData)
             delete errors.value[field]
             return true
-        } catch (error) {
+        }
+        catch (error) {
             if (error instanceof z.ZodError) {
                 const fieldError = error.issues.find(issue => issue.path[0] === field)
                 if (fieldError) {
@@ -68,6 +67,6 @@ export const useFormValidation = <T extends Record<string, any>>(
         validateField,
         clearErrors,
         clearFieldError,
-        ve: getFieldError
+        ve: getFieldError,
     }
 }

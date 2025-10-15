@@ -1,19 +1,23 @@
-<template>
-  <div>
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="text-4xl font-bold text-center mb-8">{{ t('welcome') }}</h1>
-      <p class="text-center text-lg">{{ t('welcome-message') }}</p>
-    </div>
-  </div>
-</template>
-
 <script lang="ts" setup>
 const { t } = useI18n()
 
 useHead({
-  title: t('welcome')
+    title: t('welcome'),
 })
 </script>
+
+<template>
+    <div>
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-center mb-8">
+                {{ t('welcome') }}
+            </h1>
+            <p class="text-center text-lg">
+                {{ t('welcome-message') }}
+            </p>
+        </div>
+    </div>
+</template>
 
 <i18n lang="yaml">
 en-GB:

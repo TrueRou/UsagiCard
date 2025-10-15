@@ -1,3 +1,76 @@
+<script setup lang="ts">
+const { t } = useI18n()
+const route = useRoute()
+
+const orderId = Number.parseInt(route.params.id as string)
+
+const isProcessing = ref(false)
+
+const { data: order, refresh } = await useLeporid<OrderResponse>(`/api/orders/${orderId}`)
+
+// 格式化日期时间
+function formatDateTime(timestamp: number) {
+    return new Date(timestamp * 1000).toLocaleString()
+}
+
+// 判断是否可以取消订单
+const canCancelOrder = computed(() => {
+    return order.value && [0, 1].includes(order.value.status) // UNPAID 状态可以取消
+})
+
+// 判断是否可以支付订单
+const canPayOrder = computed(() => {
+    return order.value && order.value.status === 1 // UNPAID 状态可以支付
+})
+
+// 支付订单
+async function handlePayOrder() {
+    if (!order.value)
+        return
+
+    isProcessing.value = true
+    try {
+        await useNuxtApp().$leporid('/api/orders/pay', {
+            method: 'POST',
+            query: { orderSn: order.value.sn },
+            showSuccessToast: true,
+            successMessage: t('payment-initiated'),
+        })
+        await refresh()
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
+
+// 取消订单
+async function handleCancelOrder() {
+    if (!order.value)
+        return
+
+    isProcessing.value = true
+    try {
+        await useNuxtApp().$leporid(`/api/orders/${order.value.id}/cancel`, {
+            method: 'POST',
+            showSuccessToast: true,
+            successMessage: t('order-canceled'),
+        })
+        await refresh()
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
+
+useHead({
+    title: computed(() => order.value ? `${t('order-detail')} #${order.value.sn}` : t('order-detail')),
+})
+
+definePageMeta({
+    middleware: ['require-login'],
+})
+</script>
+
 <template>
     <div class="container mx-auto px-4 py-8">
         <!-- 返回按钮 -->
@@ -45,26 +118,36 @@
             <!-- 订单项目 -->
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title mb-4">{{ t('order-items') }}</h2>
+                    <h2 class="card-title mb-4">
+                        {{ t('order-items') }}
+                    </h2>
                     <div class="space-y-4">
-                        <div v-for="item in order.items" :key="item.id"
-                            class="flex items-center gap-4 p-4 border rounded-lg">
+                        <div
+                            v-for="item in order.items" :key="item.id"
+                            class="flex items-center gap-4 p-4 border rounded-lg"
+                        >
                             <div class="flex-1">
-                                <h3 class="font-semibold">{{ item.product.name }}</h3>
-                                <p class="text-sm text-base-content/70">{{ item.product.description }}</p>
+                                <h3 class="font-semibold">
+                                    {{ item.product.name }}
+                                </h3>
+                                <p class="text-sm text-base-content/70">
+                                    {{ item.product.description }}
+                                </p>
                                 <div class="flex gap-4 mt-2 text-sm">
                                     <span>{{ t('unit-price') }}: ¥{{ item.unit_price.toFixed(2) }}</span>
                                     <span>{{ t('quantity') }}: {{ item.quantity }}</span>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <div class="font-semibold">¥{{ item.total_price.toFixed(2) }}</div>
+                                <div class="font-semibold">
+                                    ¥{{ item.total_price.toFixed(2) }}
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- 价格汇总 -->
-                    <div class="divider"></div>
+                    <div class="divider" />
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
                             <span>{{ t('product-money') }}</span>
@@ -74,7 +157,7 @@
                             <span>{{ t('shipping-money') }}</span>
                             <span>¥{{ order.shipping_money.toFixed(2) }}</span>
                         </div>
-                        <div class="divider my-2"></div>
+                        <div class="divider my-2" />
                         <div class="flex justify-between text-lg font-bold">
                             <span>{{ t('total-payment') }}</span>
                             <span class="text-primary">¥{{ order.payment_money.toFixed(2) }}</span>
@@ -86,7 +169,9 @@
             <!-- 收货信息 -->
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title mb-4">{{ t('shipping-info') }}</h2>
+                    <h2 class="card-title mb-4">
+                        {{ t('shipping-info') }}
+                    </h2>
                     <div class="space-y-2">
                         <div><strong>{{ t('recipient') }}:</strong> {{ order.shipping_name }}</div>
                         <div><strong>{{ t('phone') }}:</strong> {{ order.shipping_phone }}</div>
@@ -101,16 +186,22 @@
             <!-- 操作按钮 -->
             <div v-if="canCancelOrder || canPayOrder" class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title mb-4">{{ t('actions') }}</h2>
+                    <h2 class="card-title mb-4">
+                        {{ t('actions') }}
+                    </h2>
                     <div class="flex gap-3">
-                        <button v-if="canPayOrder" @click="handlePayOrder" class="btn btn-primary"
-                            :disabled="isProcessing">
-                            <span v-if="isProcessing" class="loading loading-spinner loading-sm"></span>
+                        <button
+                            v-if="canPayOrder" class="btn btn-primary" :disabled="isProcessing"
+                            @click="handlePayOrder"
+                        >
+                            <span v-if="isProcessing" class="loading loading-spinner loading-sm" />
                             {{ t('pay-now') }}
                         </button>
-                        <button v-if="canCancelOrder" @click="handleCancelOrder" class="btn btn-error btn-outline"
-                            :disabled="isProcessing">
-                            <span v-if="isProcessing" class="loading loading-spinner loading-sm"></span>
+                        <button
+                            v-if="canCancelOrder" class="btn btn-error btn-outline" :disabled="isProcessing"
+                            @click="handleCancelOrder"
+                        >
+                            <span v-if="isProcessing" class="loading loading-spinner loading-sm" />
                             {{ t('cancel-order') }}
                         </button>
                     </div>
@@ -119,79 +210,6 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-import type { OrderResponse } from '~~/shared/types/order'
-
-const { t } = useI18n()
-const route = useRoute()
-
-const orderId = parseInt(route.params.id as string)
-
-const isProcessing = ref(false)
-
-const { data: order, refresh } = await useLeporid<OrderResponse>(`/api/orders/${orderId}`)
-
-// 格式化日期时间
-const formatDateTime = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleString()
-}
-
-// 判断是否可以取消订单
-const canCancelOrder = computed(() => {
-    return order.value && [0, 1].includes(order.value.status) // UNPAID 状态可以取消
-})
-
-// 判断是否可以支付订单
-const canPayOrder = computed(() => {
-    return order.value && order.value.status === 1 // UNPAID 状态可以支付
-})
-
-// 支付订单
-const handlePayOrder = async () => {
-    if (!order.value) return
-
-    isProcessing.value = true
-    try {
-        await useNuxtApp().$leporid('/api/orders/pay', {
-            method: 'POST',
-            query: { orderSn: order.value.sn },
-            showSuccessToast: true,
-            successMessage: t('payment-initiated')
-        })
-        await refresh()
-    } finally {
-        isProcessing.value = false
-    }
-}
-
-// 取消订单
-const handleCancelOrder = async () => {
-    if (!order.value) return
-
-    if (!confirm(t('confirm-cancel-order'))) return
-
-    isProcessing.value = true
-    try {
-        await useNuxtApp().$leporid(`/api/orders/${order.value.id}/cancel`, {
-            method: 'POST',
-            showSuccessToast: true,
-            successMessage: t('order-canceled')
-        })
-        await refresh()
-    } finally {
-        isProcessing.value = false
-    }
-}
-
-useHead({
-    title: computed(() => order.value ? t('order-detail') + ' #' + order.value.sn : t('order-detail'))
-})
-
-definePageMeta({
-    middleware: ['auth']
-})
-</script>
 
 <i18n lang="yaml">
 en-GB:

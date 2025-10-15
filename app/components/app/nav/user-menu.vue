@@ -5,41 +5,49 @@ const userSw = ref<HTMLElement | null>(null)
 
 const { t } = useI18n()
 
-const handleLogout = async () => {
+async function handleLogout() {
     await clear()
     await navigateTo('/')
 }
 </script>
+
 <template>
     <li tabindex="0" class="self-center">
         <details ref="userSw">
             <summary>
                 <div role="button" tabindex="0" class="avatar h-8 w-8">
                     <div class="rounded-full">
-                        <img v-if="loggedIn" src="https://a.ppy.sb/1094" />
-                        <img v-else="loggedIn" src="https://a.ppy.sb/-1" />
+                        <img v-if="loggedIn" src="https://a.ppy.sb/1094">
+                        <img v-else src="https://a.ppy.sb/-1">
                     </div>
                 </div>
             </summary>
-            <ul tabindex="0" class="shadow menu menu-tint right-0 dropdown-content rounded-box w-32"
-                @click="userSw?.toggleAttribute('open', false)">
+            <ul
+                tabindex="0" class="shadow menu menu-tint right-0 dropdown-content rounded-box w-32"
+                @click="userSw?.toggleAttribute('open', false)"
+            >
                 <template v-if="loggedIn">
                     <li><a>{{ t('my-cart') }}</a></li>
                     <li>
-                        <NuxtLink to="/orders">{{ t('my-orders') }}</NuxtLink>
+                        <NuxtLink to="/orders">
+                            {{ t('my-orders') }}
+                        </NuxtLink>
                     </li>
                     <li><a @click="handleLogout">{{ t('logout') }}</a></li>
                 </template>
                 <template v-else>
                     <li>
-                        <NuxtLink to="/auth/login">{{ t('login') }}</NuxtLink>
+                        <NuxtLink to="/auth/login">
+                            {{ t('login') }}
+                        </NuxtLink>
                     </li>
                     <li>
-                        <NuxtLink to="/auth/register">{{ t('register') }}</NuxtLink>
+                        <NuxtLink to="/auth/register">
+                            {{ t('register') }}
+                        </NuxtLink>
                     </li>
                 </template>
             </ul>
-
         </details>
     </li>
 </template>

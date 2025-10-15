@@ -1,9 +1,9 @@
 declare module '#auth-utils' {
     interface User {
-        id: number
+        id: string
         username: string
-        phone?: string
-        privileges: string[]
+        email: string
+        permissions: string[]
     }
 
     interface UserSession {
@@ -17,4 +17,4 @@ declare module '#auth-utils' {
     }
 }
 
-export { };
+export { }

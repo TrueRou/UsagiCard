@@ -2,7 +2,7 @@
  * 支付方式枚举
  */
 export enum PaymentMethod {
-    AFDIAN = 'AFDIAN'
+    AFDIAN = 'AFDIAN',
 }
 
 /**
@@ -14,7 +14,7 @@ export enum OrderStatus {
     PAID = 'PAID',
     SHIPPED = 'SHIPPED',
     SUCCESS = 'SUCCESS',
-    CLOSED = 'CLOSED'
+    CLOSED = 'CLOSED',
 }
 
 /**

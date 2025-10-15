@@ -1,22 +1,3 @@
 {
-    "middleware.login-required": "Login is required to access this page.",
-    "exceptions.unknown-error": "An unknown error has occurred.",
-    "exception.not-found": "The requested resource was not found.",
-    "exception.already-exists": "The resource already exists.",
-    "exception.invalid-credentials": "The provided credentials are invalid.",
-    "exception.validation-error": "There was a validation error with the request.",
-    "exception.expired-credentials": "The provided credentials have expired.",
-    "exception.forbidden": "You do not have permission to access this resource.",
-    "exception.bad-request": "The request was malformed or invalid.",
-    "exception.internal-server-error": "An internal server error occurred.",
-    "exception.password-required": "Password is required.",
-    "exception.refresh-token-required": "A refresh token is required.",
-    "exception.invalid-audience": "The audience is invalid.",
-    "exception.unsupported-grant-type": "The grant type is unsupported.",
-    "exception.unsupported-material-type": "The material type is unsupported.",
-    "exception.invalid-order-status": "The order status is invalid.",
-    "exception.invalid-product-metadata": "The product metadata is invalid.",
-    "exception.invalid-product-status": "The product status is invalid.",
-    "exception.invalid-artifact-status": "The artifact status is invalid.",
-    "exception.maimai-py-error": "An error occurred with the maimai.py service."
+    "middleware.login-required": "Login is required to access this page."
 }
