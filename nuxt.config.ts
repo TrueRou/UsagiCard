@@ -11,30 +11,11 @@ export default defineNuxtConfig({
         ],
     },
     modules: [
-        '@nuxtjs/i18n',
         '@pinia/nuxt',
         '@nuxt/icon',
         'nuxt-auth-utils',
         '@nuxt/eslint',
     ],
-    i18n: {
-        defaultLocale: 'zh-CN',
-        strategy: 'no_prefix',
-        locales: [
-            {
-                code: 'en-GB',
-                flag: 'GB',
-                name: 'English (International)',
-                file: 'en-GB.json',
-            },
-            {
-                code: 'zh-CN',
-                flag: 'CN',
-                name: '简体中文 (中国)',
-                file: 'zh-CN.json',
-            },
-        ],
-    },
     eslint: {
         config: {
             standalone: false, // <---
