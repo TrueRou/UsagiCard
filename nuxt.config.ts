@@ -41,7 +41,18 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
-        otogeApi: 'http://localhost:8090',
-        leporidApi: 'http://localhost:8080',
+        leporid: {
+            baseURL: 'https://api.dev.turou.fun/leporid',
+        },
+        otoge: {
+            baseURL: 'https://api.dev.turou.fun/otoge',
+        },
+        public: {
+            imageURL: 'https://assets.dev.turou.fun/leporid/images',
+            imagePreviewURL: 'https://assets.dev.turou.fun/leporid/thumbnails',
+        },
+    },
+    nitro: {
+        preset: 'bun',
     },
 })
