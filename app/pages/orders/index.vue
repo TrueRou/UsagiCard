@@ -1,6 +1,4 @@
 <script setup lang="ts">
-const { t } = useI18n()
-
 // 搜索表单
 const searchForm = reactive<OrderSearchRequest>({
     keyword: '123',
@@ -60,7 +58,7 @@ function getPageNumbers() {
 }
 
 useHead({
-    title: t('my-orders'),
+    title: '我的订单',
 })
 
 definePageMeta({
@@ -72,13 +70,13 @@ definePageMeta({
     <div class="container mx-auto px-4 py-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <h1 class="text-3xl font-bold mb-4 md:mb-0">
-                {{ t('my-orders') }}
+                我的订单
             </h1>
 
             <!-- 搜索和筛选 -->
             <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                 <input
-                    v-model="searchForm.keyword" type="text" :placeholder="t('search-placeholder')"
+                    v-model="searchForm.keyword" type="text" placeholder="搜索订单..."
                     class="input input-bordered w-full sm:w-64" @keyup.enter="handleSearch"
                 >
                 <select
@@ -86,36 +84,36 @@ definePageMeta({
                     @change="handleSearch"
                 >
                     <option value="">
-                        {{ t('all-status') }}
+                        全部状态
                     </option>
                     <option value="UNPAID">
-                        {{ t('status.unpaid') }}
+                        待付款
                     </option>
                     <option value="PAID">
-                        {{ t('status.paid') }}
+                        已付款
                     </option>
                     <option value="SHIPPED">
-                        {{ t('status.shipped') }}
+                        已发货
                     </option>
                     <option value="SUCCESS">
-                        {{ t('status.success') }}
+                        已完成
                     </option>
                     <option value="CANCELED">
-                        {{ t('status.canceled') }}
+                        已取消
                     </option>
                     <option value="CLOSED">
-                        {{ t('status.closed') }}
+                        已关闭
                     </option>
                 </select>
                 <button class="btn btn-primary" @click="handleSearch">
-                    {{ t('search') }}
+                    搜索
                 </button>
             </div>
         </div>
 
         <div v-if="orders?.records && orders?.records.length === 0" class="text-center py-16">
             <p class="text-base-content/60 text-lg">
-                {{ t('no-orders') }}
+                暂无订单
             </p>
         </div>
 
@@ -130,7 +128,7 @@ definePageMeta({
                     class="join-item btn btn-sm" :disabled="searchForm.page_number <= 1"
                     @click="goToPage(searchForm.page_number - 1)"
                 >
-                    {{ t('prev') }}
+                    上一页
                 </button>
 
                 <template v-for="page in getPageNumbers()" :key="page">
@@ -147,43 +145,9 @@ definePageMeta({
                     class="join-item btn btn-sm" :disabled="searchForm.page_number >= (orders?.totalPage || 0)"
                     @click="goToPage(searchForm.page_number + 1)"
                 >
-                    {{ t('next') }}
+                    下一页
                 </button>
             </div>
         </div>
     </div>
 </template>
-
-<i18n lang="yaml">
-en-GB:
-  my-orders: My Orders
-  search-placeholder: Search orders...
-  all-status: All Status
-  search: Search
-  no-orders: No orders found
-  prev: Previous
-  next: Next
-  status:
-    unpaid: Unpaid
-    paid: Paid
-    shipped: Shipped
-    success: Completed
-    canceled: Canceled
-    closed: Closed
-
-zh-CN:
-  my-orders: 我的订单
-  search-placeholder: 搜索订单...
-  all-status: 全部状态
-  search: 搜索
-  no-orders: 暂无订单
-  prev: 上一页
-  next: 下一页
-  status:
-    unpaid: 待付款
-    paid: 已付款
-    shipped: 已发货
-    success: 已完成
-    canceled: 已取消
-    closed: 已关闭
-</i18n>

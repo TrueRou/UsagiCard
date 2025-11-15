@@ -1,5 +1,4 @@
 <script setup lang="ts">
-const { t } = useI18n()
 const route = useRoute()
 
 const orderId = Number.parseInt(route.params.id as string)
@@ -7,6 +6,14 @@ const orderId = Number.parseInt(route.params.id as string)
 const isProcessing = ref(false)
 
 const { data: order, refresh } = await useLeporid<OrderResponse>(`/api/orders/${orderId}`)
+
+const paymentLabels: Record<string, string> = {
+    afdian: '爱发电',
+}
+
+function getPaymentLabel(method: string) {
+    return paymentLabels[method.toLowerCase()] ?? method
+}
 
 // 格式化日期时间
 function formatDateTime(timestamp: number) {
@@ -34,7 +41,7 @@ async function handlePayOrder() {
             method: 'POST',
             query: { orderSn: order.value.sn },
             showSuccessToast: true,
-            successMessage: t('payment-initiated'),
+            successMessage: '支付已发起',
         })
         await refresh()
     }
@@ -53,7 +60,7 @@ async function handleCancelOrder() {
         await useNuxtApp().$leporid(`/api/orders/${order.value.id}/cancel`, {
             method: 'POST',
             showSuccessToast: true,
-            successMessage: t('order-canceled'),
+            successMessage: '订单已取消',
         })
         await refresh()
     }
@@ -63,7 +70,7 @@ async function handleCancelOrder() {
 }
 
 useHead({
-    title: computed(() => order.value ? `${t('order-detail')} #${order.value.sn}` : t('order-detail')),
+    title: computed(() => (order.value ? `订单详情 #${order.value.sn}` : '订单详情')),
 })
 
 definePageMeta({
@@ -77,7 +84,7 @@ definePageMeta({
         <div class="mb-6">
             <NuxtLink to="/orders" class="btn btn-ghost btn-sm">
                 <Icon name="mdi:arrow-left" class="w-4 h-4 mr-2" />
-                {{ t('back-to-orders') }}
+                返回订单列表
             </NuxtLink>
         </div>
 
@@ -88,15 +95,15 @@ definePageMeta({
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
                         <div>
                             <h1 class="text-2xl font-bold mb-2">
-                                {{ t('order-detail') }} #{{ order.sn }}
+                                订单详情 #{{ order.sn }}
                             </h1>
                             <div class="flex flex-wrap gap-4 text-sm text-base-content/70">
-                                <span>{{ t('created-at') }}: {{ formatDateTime(order.created_at) }}</span>
+                                <span>创建时间: {{ formatDateTime(order.created_at) }}</span>
                                 <span v-if="order.paid_at">
-                                    {{ t('paid-at') }}: {{ formatDateTime(order.paid_at) }}
+                                    支付时间: {{ formatDateTime(order.paid_at) }}
                                 </span>
                                 <span v-if="order.shipped_at">
-                                    {{ t('shipped-at') }}: {{ formatDateTime(order.shipped_at) }}
+                                    发货时间: {{ formatDateTime(order.shipped_at) }}
                                 </span>
                             </div>
                         </div>
@@ -107,7 +114,7 @@ definePageMeta({
                                     ¥{{ order.payment_money.toFixed(2) }}
                                 </div>
                                 <div class="text-sm text-base-content/70">
-                                    {{ t('payment-method') }}: {{ t(`payment.${order.payment_method.toLowerCase()}`) }}
+                                    支付方式: {{ getPaymentLabel(order.payment_method) }}
                                 </div>
                             </div>
                         </div>
@@ -119,7 +126,7 @@ definePageMeta({
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title mb-4">
-                        {{ t('order-items') }}
+                        订单商品
                     </h2>
                     <div class="space-y-4">
                         <div
@@ -134,8 +141,8 @@ definePageMeta({
                                     {{ item.product.description }}
                                 </p>
                                 <div class="flex gap-4 mt-2 text-sm">
-                                    <span>{{ t('unit-price') }}: ¥{{ item.unit_price.toFixed(2) }}</span>
-                                    <span>{{ t('quantity') }}: {{ item.quantity }}</span>
+                                    <span>单价: ¥{{ item.unit_price.toFixed(2) }}</span>
+                                    <span>数量: {{ item.quantity }}</span>
                                 </div>
                             </div>
                             <div class="text-right">
@@ -150,16 +157,16 @@ definePageMeta({
                     <div class="divider" />
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <span>{{ t('product-money') }}</span>
+                            <span>商品总额</span>
                             <span>¥{{ order.product_money.toFixed(2) }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span>{{ t('shipping-money') }}</span>
+                            <span>运费</span>
                             <span>¥{{ order.shipping_money.toFixed(2) }}</span>
                         </div>
                         <div class="divider my-2" />
                         <div class="flex justify-between text-lg font-bold">
-                            <span>{{ t('total-payment') }}</span>
+                            <span>总计</span>
                             <span class="text-primary">¥{{ order.payment_money.toFixed(2) }}</span>
                         </div>
                     </div>
@@ -170,14 +177,14 @@ definePageMeta({
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title mb-4">
-                        {{ t('shipping-info') }}
+                        收货信息
                     </h2>
                     <div class="space-y-2">
-                        <div><strong>{{ t('recipient') }}:</strong> {{ order.shipping_name }}</div>
-                        <div><strong>{{ t('phone') }}:</strong> {{ order.shipping_phone }}</div>
-                        <div><strong>{{ t('address') }}:</strong> {{ order.shipping_address }}</div>
+                        <div><strong>收货人:</strong> {{ order.shipping_name }}</div>
+                        <div><strong>联系电话:</strong> {{ order.shipping_phone }}</div>
+                        <div><strong>收货地址:</strong> {{ order.shipping_address }}</div>
                         <div v-if="order.shipping_sn">
-                            <strong>{{ t('tracking-number') }}:</strong> {{ order.shipping_sn }}
+                            <strong>快递单号:</strong> {{ order.shipping_sn }}
                         </div>
                     </div>
                 </div>
@@ -187,7 +194,7 @@ definePageMeta({
             <div v-if="canCancelOrder || canPayOrder" class="card bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title mb-4">
-                        {{ t('actions') }}
+                        操作
                     </h2>
                     <div class="flex gap-3">
                         <button
@@ -195,14 +202,14 @@ definePageMeta({
                             @click="handlePayOrder"
                         >
                             <span v-if="isProcessing" class="loading loading-spinner loading-sm" />
-                            {{ t('pay-now') }}
+                            立即支付
                         </button>
                         <button
                             v-if="canCancelOrder" class="btn btn-error btn-outline" :disabled="isProcessing"
                             @click="handleCancelOrder"
                         >
                             <span v-if="isProcessing" class="loading loading-spinner loading-sm" />
-                            {{ t('cancel-order') }}
+                            取消订单
                         </button>
                     </div>
                 </div>
@@ -210,61 +217,3 @@ definePageMeta({
         </div>
     </div>
 </template>
-
-<i18n lang="yaml">
-en-GB:
-  back-to-orders: Back to Orders
-  order-detail: Order Detail
-  order-not-found: Order not found
-  created-at: Created
-  paid-at: Paid
-  shipped-at: Shipped
-  payment-method: Payment Method
-  order-items: Order Items
-  unit-price: Unit Price
-  quantity: Quantity
-  product-money: Product Total
-  shipping-money: Shipping Fee
-  total-payment: Total Payment
-  shipping-info: Shipping Information
-  recipient: Recipient
-  phone: Phone
-  address: Address
-  tracking-number: Tracking Number
-  actions: Actions
-  pay-now: Pay Now
-  cancel-order: Cancel Order
-  payment-initiated: Payment initiated
-  order-canceled: Order canceled
-  confirm-cancel-order: Are you sure you want to cancel this order?
-  payment:
-    afdian: Afdian
-
-zh-CN:
-  back-to-orders: 返回订单列表
-  order-detail: 订单详情
-  order-not-found: 订单未找到
-  created-at: 创建时间
-  paid-at: 支付时间
-  shipped-at: 发货时间
-  payment-method: 支付方式
-  order-items: 订单商品
-  unit-price: 单价
-  quantity: 数量
-  product-money: 商品总额
-  shipping-money: 运费
-  total-payment: 总计
-  shipping-info: 收货信息
-  recipient: 收货人
-  phone: 联系电话
-  address: 收货地址
-  tracking-number: 快递单号
-  actions: 操作
-  pay-now: 立即支付
-  cancel-order: 取消订单
-  payment-initiated: 支付已发起
-  order-canceled: 订单已取消
-  confirm-cancel-order: 确定要取消这个订单吗？
-  payment:
-    afdian: 爱发电
-</i18n>

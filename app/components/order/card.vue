@@ -10,9 +10,15 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const { t } = useI18n()
-
 const isProcessing = ref(false)
+
+const paymentLabels: Record<string, string> = {
+    afdian: '爱发电',
+}
+
+function getPaymentLabel(method: string) {
+    return paymentLabels[method.toLowerCase()] ?? method
+}
 
 // 格式化日期时间
 function formatDateTime(timestamp: number) {
@@ -37,7 +43,7 @@ async function handlePayOrder() {
             method: 'POST',
             query: { orderSn: props.order.sn },
             showSuccessToast: true,
-            successMessage: t('payment-initiated'),
+            successMessage: '支付已发起',
         })
         emit('refresh')
     }
@@ -53,7 +59,7 @@ async function handleCancelOrder() {
         await useLeporid(`/orders/${props.order.id}/cancel`, {
             method: 'POST',
             showSuccessToast: true,
-            successMessage: t('order-canceled'),
+            successMessage: '订单已取消',
         })
         emit('refresh')
     }
@@ -71,13 +77,13 @@ async function handleCancelOrder() {
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
                         <h3 class="font-semibold text-lg">
-                            {{ t('order') }} #{{ order.sn }}
+                            订单 #{{ order.sn }}
                         </h3>
                         <OrderStatusBadge :status="order.status" />
                     </div>
 
                     <div class="text-sm text-base-content/70 mb-3">
-                        {{ t('created-at') }}: {{ formatDateTime(order.created_at) }}
+                        创建时间: {{ formatDateTime(order.created_at) }}
                     </div>
 
                     <!-- 订单商品摘要 -->
@@ -86,7 +92,7 @@ async function handleCancelOrder() {
                             {{ item.product.name }} × {{ item.quantity }}
                         </div>
                         <div v-if="order.items.length > 2" class="text-sm text-base-content/60">
-                            {{ t('and-more-items', { count: order.items.length - 2 }) }}
+                            还有{{ order.items.length - 2 }}件商品
                         </div>
                     </div>
                 </div>
@@ -98,13 +104,13 @@ async function handleCancelOrder() {
                             ¥{{ order.payment_money.toFixed(2) }}
                         </div>
                         <div class="text-sm text-base-content/70">
-                            {{ t('payment-method') }}: {{ t(`payment.${order.payment_method.toLowerCase()}`) }}
+                            支付方式: {{ getPaymentLabel(order.payment_method) }}
                         </div>
                     </div>
 
                     <div class="flex gap-2">
                         <NuxtLink :to="`/orders/${order.id}`" class="btn btn-sm btn-outline">
-                            {{ t('view-detail') }}
+                            查看详情
                         </NuxtLink>
 
                         <button
@@ -112,7 +118,7 @@ async function handleCancelOrder() {
                             @click="handlePayOrder"
                         >
                             <span v-if="isProcessing" class="loading loading-spinner loading-xs" />
-                            {{ t('pay-now') }}
+                            立即支付
                         </button>
 
                         <button
@@ -120,7 +126,7 @@ async function handleCancelOrder() {
                             :disabled="isProcessing" @click="handleCancelOrder"
                         >
                             <span v-if="isProcessing" class="loading loading-spinner loading-xs" />
-                            {{ t('cancel') }}
+                            取消
                         </button>
                     </div>
                 </div>
@@ -128,33 +134,3 @@ async function handleCancelOrder() {
         </div>
     </div>
 </template>
-
-<i18n lang="yaml">
-en-GB:
-  order: Order
-  created-at: Created
-  and-more-items: and {count} more item(s)
-  payment-method: Payment Method
-  view-detail: View Detail
-  pay-now: Pay Now
-  cancel: Cancel
-  payment-initiated: Payment initiated
-  order-canceled: Order canceled
-  confirm-cancel-order: Are you sure you want to cancel this order?
-  payment:
-    afdian: Afdian
-
-zh-CN:
-  order: 订单
-  created-at: 创建时间
-  and-more-items: 还有{count}件商品
-  payment-method: 支付方式
-  view-detail: 查看详情
-  pay-now: 立即支付
-  cancel: 取消
-  payment-initiated: 支付已发起
-  order-canceled: 订单已取消
-  confirm-cancel-order: 确定要取消这个订单吗？
-  payment:
-    afdian: 爱发电
-</i18n>

@@ -4,35 +4,22 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const { t } = useI18n()
 
-// 状态映射
-const statusMap = {
-    [-1]: 'canceled',
-    0: 'unpaid',
-    1: 'paid',
-    2: 'shipped',
-    3: 'success',
-    4: 'closed',
-}
-
-// 状态样式映射
-const statusClassMap = {
-    [-1]: 'badge-neutral', // canceled
-    0: 'badge-warning', // unpaid
-    1: 'badge-info', // paid
-    2: 'badge-primary', // shipped
-    3: 'badge-success', // success
-    4: 'badge-neutral', // closed
+const statusConfig: Record<number, { text: string, className: string }> = {
+    [-1]: { text: '已取消', className: 'badge-neutral' },
+    0: { text: '待付款', className: 'badge-warning' },
+    1: { text: '已付款', className: 'badge-info' },
+    2: { text: '已发货', className: 'badge-primary' },
+    3: { text: '已完成', className: 'badge-success' },
+    4: { text: '已关闭', className: 'badge-neutral' },
 }
 
 const statusText = computed(() => {
-    const status = statusMap[props.status as keyof typeof statusMap] || 'unknown'
-    return t(`status.${status}`)
+    return statusConfig[props.status]?.text ?? '未知状态'
 })
 
 const badgeClass = computed(() => {
-    return statusClassMap[props.status as keyof typeof statusClassMap] || 'badge-neutral'
+    return statusConfig[props.status]?.className ?? 'badge-neutral'
 })
 </script>
 
@@ -41,25 +28,3 @@ const badgeClass = computed(() => {
         {{ statusText }}
     </div>
 </template>
-
-<i18n lang="yaml">
-en-GB:
-  status:
-    canceled: Canceled
-    unpaid: Unpaid
-    paid: Paid
-    shipped: Shipped
-    success: Completed
-    closed: Closed
-    unknown: Unknown
-
-zh-CN:
-  status:
-    canceled: 已取消
-    unpaid: 待付款
-    paid: 已付款
-    shipped: 已发货
-    success: 已完成
-    closed: 已关闭
-    unknown: 未知状态
-</i18n>

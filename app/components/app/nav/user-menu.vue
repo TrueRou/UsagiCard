@@ -3,8 +3,6 @@ const { loggedIn, clear } = useUserSession()
 
 const userSw = ref<HTMLElement | null>(null)
 
-const { t } = useI18n()
-
 async function handleLogout() {
     await clear()
     await navigateTo('/')
@@ -27,23 +25,23 @@ async function handleLogout() {
                 @click="userSw?.toggleAttribute('open', false)"
             >
                 <template v-if="loggedIn">
-                    <li><a>{{ t('my-cart') }}</a></li>
+                    <li><a>购物车</a></li>
                     <li>
                         <NuxtLink to="/orders">
-                            {{ t('my-orders') }}
+                            我的订单
                         </NuxtLink>
                     </li>
-                    <li><a @click="handleLogout">{{ t('logout') }}</a></li>
+                    <li><a @click="handleLogout">登出</a></li>
                 </template>
                 <template v-else>
                     <li>
                         <NuxtLink to="/auth/login">
-                            {{ t('login') }}
+                            登录
                         </NuxtLink>
                     </li>
                     <li>
                         <NuxtLink to="/auth/register">
-                            {{ t('register') }}
+                            注册
                         </NuxtLink>
                     </li>
                 </template>
@@ -51,19 +49,3 @@ async function handleLogout() {
         </details>
     </li>
 </template>
-
-<i18n lang="yaml">
-en-GB:
-  my-cart: My Cart
-  my-orders: My Orders
-  logout: Logout
-  login: Login
-  register: Register
-
-zh-CN:
-  my-cart: 购物车
-  my-orders: 我的订单
-  logout: 登出
-  login: 登录
-  register: 注册
-</i18n>
