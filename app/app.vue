@@ -1,10 +1,10 @@
 <template>
     <div>
-        <AppNav />
+        <Navbar />
         <NuxtPage />
         <ClientOnly>
             <NuxtLoadingIndicator />
-            <AppNotification />
+            <BannerNotification />
         </ClientOnly>
     </div>
 </template>
