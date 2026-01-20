@@ -1,33 +1,25 @@
 <script setup lang="ts">
 const route = useRoute()
 
-const orderId = Number.parseInt(route.params.id as string)
+const orderId = route.params.id as string // UUID string
 
 const isProcessing = ref(false)
 
-const { data: order, refresh } = await useLeporid<OrderResponse>(`/api/orders/${orderId}`)
+const { data: order, refresh } = await useLeporid<OrderPublic>(`/api/orders/${orderId}`)
 
-const paymentLabels: Record<string, string> = {
-    afdian: '爱发电',
-}
-
-function getPaymentLabel(method: string) {
-    return paymentLabels[method.toLowerCase()] ?? method
-}
-
-// 格式化日期时间
-function formatDateTime(timestamp: number) {
-    return new Date(timestamp * 1000).toLocaleString()
+// 格式化日期时间 (ISO string to local datetime)
+function formatDateTime(isoString: string) {
+    return new Date(isoString).toLocaleString()
 }
 
 // 判断是否可以取消订单
 const canCancelOrder = computed(() => {
-    return order.value && [0, 1].includes(order.value.status) // UNPAID 状态可以取消
+    return order.value && [OrderStatus.UNPAID, OrderStatus.PAID].includes(order.value.status)
 })
 
 // 判断是否可以支付订单
 const canPayOrder = computed(() => {
-    return order.value && order.value.status === 1 // UNPAID 状态可以支付
+    return order.value && order.value.status === OrderStatus.UNPAID
 })
 
 // 支付订单
@@ -37,9 +29,8 @@ async function handlePayOrder() {
 
     isProcessing.value = true
     try {
-        await useNuxtApp().$leporid('/api/orders/pay', {
+        await useNuxtApp().$leporid(`/api/orders/${order.value.id}/pay`, {
             method: 'POST',
-            query: { orderSn: order.value.sn },
             showSuccessToast: true,
             successMessage: '支付已发起',
         })
@@ -70,7 +61,7 @@ async function handleCancelOrder() {
 }
 
 useHead({
-    title: computed(() => (order.value ? `订单详情 #${order.value.sn}` : '订单详情')),
+    title: computed(() => (order.value ? `订单详情 #${order.value.id.slice(-8)}` : '订单详情')),
 })
 
 definePageMeta({
@@ -95,7 +86,7 @@ definePageMeta({
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
                         <div>
                             <h1 class="text-2xl font-bold mb-2">
-                                订单详情 #{{ order.sn }}
+                                订单详情 #{{ order.id.slice(-8) }}
                             </h1>
                             <div class="flex flex-wrap gap-4 text-sm text-base-content/70">
                                 <span>创建时间: {{ formatDateTime(order.created_at) }}</span>
@@ -111,10 +102,7 @@ definePageMeta({
                             <OrderStatusBadge :status="order.status" />
                             <div class="text-right">
                                 <div class="text-2xl font-bold text-primary">
-                                    ¥{{ order.payment_money.toFixed(2) }}
-                                </div>
-                                <div class="text-sm text-base-content/70">
-                                    支付方式: {{ getPaymentLabel(order.payment_method) }}
+                                    ¥{{ Number.parseFloat(order.payment_money).toFixed(2) }}
                                 </div>
                             </div>
                         </div>
@@ -135,19 +123,19 @@ definePageMeta({
                         >
                             <div class="flex-1">
                                 <h3 class="font-semibold">
-                                    {{ item.product.name }}
+                                    {{ item.product?.name || '商品' }}
                                 </h3>
                                 <p class="text-sm text-base-content/70">
-                                    {{ item.product.description }}
+                                    {{ item.product?.description || '' }}
                                 </p>
                                 <div class="flex gap-4 mt-2 text-sm">
-                                    <span>单价: ¥{{ item.unit_price.toFixed(2) }}</span>
+                                    <span>单价: ¥{{ Number.parseFloat(item.unit_price).toFixed(2) }}</span>
                                     <span>数量: {{ item.quantity }}</span>
                                 </div>
                             </div>
                             <div class="text-right">
                                 <div class="font-semibold">
-                                    ¥{{ item.total_price.toFixed(2) }}
+                                    ¥{{ Number.parseFloat(item.total_price).toFixed(2) }}
                                 </div>
                             </div>
                         </div>
@@ -158,16 +146,16 @@ definePageMeta({
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
                             <span>商品总额</span>
-                            <span>¥{{ order.product_money.toFixed(2) }}</span>
+                            <span>¥{{ Number.parseFloat(order.product_money).toFixed(2) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span>运费</span>
-                            <span>¥{{ order.shipping_money.toFixed(2) }}</span>
+                            <span>¥{{ Number.parseFloat(order.shipping_money).toFixed(2) }}</span>
                         </div>
                         <div class="divider my-2" />
                         <div class="flex justify-between text-lg font-bold">
                             <span>总计</span>
-                            <span class="text-primary">¥{{ order.payment_money.toFixed(2) }}</span>
+                            <span class="text-primary">¥{{ Number.parseFloat(order.payment_money).toFixed(2) }}</span>
                         </div>
                     </div>
                 </div>

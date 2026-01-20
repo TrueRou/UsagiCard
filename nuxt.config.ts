@@ -23,14 +23,14 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         leporid: {
-            baseURL: 'https://api.dev.turou.fun/leporid',
+            baseURL: 'https://api.turou.fun/leporid',
         },
         otoge: {
-            baseURL: 'https://api.dev.turou.fun/otoge',
+            baseURL: 'https://api.turou.fun/otoge',
         },
         public: {
-            imageURL: 'https://assets.dev.turou.fun/leporid/images',
-            imagePreviewURL: 'https://assets.dev.turou.fun/leporid/thumbnails',
+            imageURL: 'https://assets.turou.fun/leporid/images',
+            imagePreviewURL: 'https://assets.turou.fun/leporid/thumbnails',
         },
     },
     nitro: {

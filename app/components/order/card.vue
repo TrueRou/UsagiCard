@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props {
-    order: OrderResponse
+    order: OrderPublic
 }
 
 interface Emits {
@@ -12,36 +12,27 @@ const emit = defineEmits<Emits>()
 
 const isProcessing = ref(false)
 
-const paymentLabels: Record<string, string> = {
-    afdian: '爱发电',
-}
-
-function getPaymentLabel(method: string) {
-    return paymentLabels[method.toLowerCase()] ?? method
-}
-
-// 格式化日期时间
-function formatDateTime(timestamp: number) {
-    return new Date(timestamp * 1000).toLocaleDateString()
+// 格式化日期时间 (ISO string to local date)
+function formatDateTime(isoString: string) {
+    return new Date(isoString).toLocaleDateString()
 }
 
 // 判断是否可以取消订单
 const canCancelOrder = computed(() => {
-    return [0, 1].includes(props.order.status) // UNPAID 状态可以取消
+    return [OrderStatus.UNPAID, OrderStatus.PAID].includes(props.order.status)
 })
 
 // 判断是否可以支付订单
 const canPayOrder = computed(() => {
-    return props.order.status === 1 // UNPAID 状态可以支付
+    return props.order.status === OrderStatus.UNPAID
 })
 
 // 支付订单
 async function handlePayOrder() {
     isProcessing.value = true
     try {
-        await useLeporid('/orders/pay', {
+        await useLeporid(`/orders/${props.order.id}/pay`, {
             method: 'POST',
-            query: { orderSn: props.order.sn },
             showSuccessToast: true,
             successMessage: '支付已发起',
         })
@@ -77,7 +68,7 @@ async function handleCancelOrder() {
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
                         <h3 class="font-semibold text-lg">
-                            订单 #{{ order.sn }}
+                            订单 #{{ order.id.slice(-8) }}
                         </h3>
                         <OrderStatusBadge :status="order.status" />
                     </div>
@@ -89,7 +80,7 @@ async function handleCancelOrder() {
                     <!-- 订单商品摘要 -->
                     <div class="space-y-1">
                         <div v-for="item in order.items.slice(0, 2)" :key="item.id" class="text-sm">
-                            {{ item.product.name }} × {{ item.quantity }}
+                            {{ item.product?.name || '商品' }} × {{ item.quantity }}
                         </div>
                         <div v-if="order.items.length > 2" class="text-sm text-base-content/60">
                             还有{{ order.items.length - 2 }}件商品
@@ -101,10 +92,7 @@ async function handleCancelOrder() {
                 <div class="flex flex-col items-end gap-3 mt-4 lg:mt-0">
                     <div class="text-right">
                         <div class="text-xl font-bold text-primary">
-                            ¥{{ order.payment_money.toFixed(2) }}
-                        </div>
-                        <div class="text-sm text-base-content/70">
-                            支付方式: {{ getPaymentLabel(order.payment_method) }}
+                            ¥{{ Number.parseFloat(order.payment_money).toFixed(2) }}
                         </div>
                     </div>
 

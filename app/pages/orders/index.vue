@@ -1,14 +1,14 @@
 <script setup lang="ts">
 // 搜索表单
-const searchForm = reactive<OrderSearchRequest>({
-    keyword: '123',
+const searchForm = reactive<Exclude<GetOrdersOrdersGetData['query'], undefined>>({
+    keyword: '',
     status: undefined,
     page_number: 1,
     page_size: 10,
 })
 
 // 获取订单数据
-const { data: orders, refresh: refreshOrders } = await useLeporid<OrderPageResponse>('/api/orders')
+const { data: orders, refresh: refreshOrders } = await useLeporid<PageOrderPublic>('/api/orders')
 
 // 搜索处理
 function handleSearch() {
@@ -24,8 +24,8 @@ function goToPage(page: number) {
 
 // 生成页码数组
 function getPageNumbers() {
-    const totalPages = orders.value?.totalPage || 0
-    const current = searchForm.page_number
+    const totalPages = orders.value?.total_page || 0
+    const current = searchForm.page_number || 1
     const pages: (number | string)[] = []
 
     if (totalPages <= 7) {
@@ -80,28 +80,28 @@ definePageMeta({
                     class="input input-bordered w-full sm:w-64" @keyup.enter="handleSearch"
                 >
                 <select
-                    v-model="searchForm.status" class="select select-bordered w-full sm:w-40"
+                    v-model.number="searchForm.status" class="select select-bordered w-full sm:w-40"
                     @change="handleSearch"
                 >
-                    <option value="">
+                    <option :value="undefined">
                         全部状态
                     </option>
-                    <option value="UNPAID">
+                    <option :value="OrderStatus.UNPAID">
                         待付款
                     </option>
-                    <option value="PAID">
+                    <option :value="OrderStatus.PAID">
                         已付款
                     </option>
-                    <option value="SHIPPED">
+                    <option :value="OrderStatus.SHIPPED">
                         已发货
                     </option>
-                    <option value="SUCCESS">
+                    <option :value="OrderStatus.SUCCESS">
                         已完成
                     </option>
-                    <option value="CANCELED">
+                    <option :value="OrderStatus.CANCELED">
                         已取消
                     </option>
-                    <option value="CLOSED">
+                    <option :value="OrderStatus.CLOSED">
                         已关闭
                     </option>
                 </select>
@@ -122,7 +122,7 @@ definePageMeta({
         </div>
 
         <!-- 分页 -->
-        <div v-if="orders && orders.totalPage > 1" class="flex justify-center mt-8">
+        <div v-if="orders && orders.total_page > 1 && searchForm.page_number" class="flex justify-center mt-8">
             <div class="join">
                 <button
                     class="join-item btn btn-sm" :disabled="searchForm.page_number <= 1"
@@ -142,7 +142,7 @@ definePageMeta({
                 </template>
 
                 <button
-                    class="join-item btn btn-sm" :disabled="searchForm.page_number >= (orders?.totalPage || 0)"
+                    class="join-item btn btn-sm" :disabled="searchForm.page_number >= (orders?.total_page || 0)"
                     @click="goToPage(searchForm.page_number + 1)"
                 >
                     下一页

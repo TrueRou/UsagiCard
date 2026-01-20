@@ -1,23 +1,42 @@
 export default defineEventHandler(async (event) => {
     const { username, password, strategy }: UserAuthRequest = await readBody(event)
 
+    if (!username || !password) {
+        return {
+            code: 400,
+            message: '用户名或密码不能为空',
+            data: null,
+        }
+    }
+
     try {
         const tokenResponse = await $fetch<UserAuthResponse>(`/api/auth/token`, {
             method: 'POST',
-            query: {
+            body: new URLSearchParams({
                 grant_type: 'password',
+                strategy: (strategy ?? AuthStrategy.LOCAL).toString(),
                 username,
                 password,
-                strategy,
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
         })
 
-        const userResponse = await $fetch<{ data: UserResponse }>(`/api/users/me`, {
+        const userResponse = await $fetch<AppResponseUserPublic>(`/api/users/me`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${tokenResponse.access_token}`,
             },
         })
+
+        if (!userResponse.data) {
+            return {
+                code: userResponse.code,
+                message: userResponse.message,
+                data: null,
+            }
+        }
 
         await setUserSession(event, {
             user: {

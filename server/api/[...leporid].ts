@@ -14,9 +14,12 @@ export default defineEventHandler(async (event) => {
             await $fetch<UserAuthResponse>('/api/auth/token', {
                 method: 'POST',
                 ignoreResponseError: true,
-                query: {
+                body: new URLSearchParams({
                     grant_type: 'refresh_token',
                     refresh_token: session.secure.refreshToken,
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 async onResponse({ response }) {
                     if (response.status === 200) {
@@ -35,17 +38,18 @@ export default defineEventHandler(async (event) => {
                 },
             })
         }
-        // 使用访问令牌进行代理请求
-        headers.Authorization = `Bearer ${session.secure.accessToken}`
+        // 如果令牌不存在，使用后端访问令牌进行代理请求
+        const reqAuthorization = getHeader(event, 'authorization')
+        const curAuthorization = `Bearer ${session.secure.accessToken}`
+        headers.Authorization = reqAuthorization || curAuthorization
     }
 
     {
         const method = event.node?.req?.method ?? 'UNKNOWN'
         const userId = session?.user?.username ?? 'anonymous'
+        const safeUrl = event.node.req.url?.split('?')[0] ?? ''
 
-        console.info(
-            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url ?? event.path ?? ''} -> ${target} user=${userId}`,
-        )
+        console.info(`[proxy] ${new Date().toISOString()} ${method} ${safeUrl} -> ${proxyUrl} user=${userId}`)
     }
 
     return proxyRequest(event, target, { headers })
