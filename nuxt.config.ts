@@ -15,6 +15,7 @@ export default defineNuxtConfig({
         '@nuxt/icon',
         'nuxt-auth-utils',
         '@nuxt/eslint',
+        '@vueuse/nuxt',
     ],
     eslint: {
         config: {
@@ -22,6 +23,9 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
+        bunny: {
+            baseURL: 'http://localhost:7100',
+        },
         leporid: {
             baseURL: 'https://api.turou.fun/leporid',
         },

@@ -1,0 +1,161 @@
+<script setup lang="ts">
+import CharaInfo from './widget/chara-info.vue'
+import DXRating from './widget/dx-rating.vue'
+import PlayerInfo from './widget/player-info.vue'
+import QRCode from './widget/qr-code.vue'
+
+defineProps<{
+    artifactCtx: UseArtifactCtx
+    artifactDesign: UsagiCardDxDesign
+}>()
+const { img } = useUtils()
+</script>
+
+<template>
+    <div class="isolate h-dvh dark:bg-gray-800">
+        <div class="relative h-full w-fit mx-auto">
+            <img class="object-cover h-full" fetchpriority="low" :src="img(artifactDesign.background_id)">
+            <div class="absolute inset-0">
+                <img class="chara-center h-full absolute object-cover" fetchpriority="low" :src="img(artifactDesign.character_id)">
+                <template v-if="artifactDesign.enable_mask && artifactDesign.mask_id">
+                    <div class="lazer-mask h-full w-full absolute" :style="{ maskImage: `url(${img(artifactDesign.mask_id)})` }">
+                        <div class="h-full w-full flow-colorful" />
+                    </div>
+                </template>
+                <img class="frame-upper h-full absolute" fetchpriority="low" :src="img(artifactDesign.frame_id)">
+                <div class="absolute inset-0">
+                    <div class="relative space-y-2 w-full">
+                        <DXRating class="pt-4 w-[40%]" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+                        <PlayerInfo :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+                    </div>
+                </div>
+
+                <CharaInfo class="bottom-[18%] absolute" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+
+                <QRCode class="absolute right-0 bottom-[6%] z-10" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+
+                <div
+                    id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
+                    :style="{ '--b-bottom': `url(${img(artifactDesign.frame_id)})` }"
+                >
+                    <button class="cursor-pointer" data-tour="rocket-button">
+                        <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="rocket" role="img">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true"
+                            >
+                                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09zM12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" /><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="footer-widget flex justify-between py-1 rounded-2xl bg-gray-800 text-white opacity-85">
+                        <p class="footer-text font-sega">
+                            {{ artifactDesign.simplified_code }}
+                        </p>
+                        <p class="footer-text font-sega">
+                            {{ artifactDesign.game_version }}
+                        </p>
+                    </div>
+                    <NuxtLink to="/preference" data-tour="settings-button">
+                        <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="settings" role="img">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true"
+                            >
+                                <circle cx="12" cy="12" r="3" />
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 2.27 16.9l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.6 0 1.14-.36 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 6.1 2.27l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09c0 .6.36 1.14 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06A2 2 0 1 1 21.73 7.1l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09c-.6 0-1.14.36-1.51 1z"
+                                />
+                            </svg>
+                        </div>
+                    </NuxtLink>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.frame-upper {
+    object-fit: contain;
+    object-position: center top;
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+}
+
+.chara-center {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%)
+}
+
+.header-widget {
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-top: 0.4%;
+}
+
+.footer-widget {
+    width: 80%;
+    padding-left: 3%;
+    padding-right: 3%;
+}
+
+.footer-text {
+    font-size: clamp(1.2dvh, 2dvw, 1.8vmin);
+    line-height: 120%;
+}
+
+.footer-icon {
+    width: clamp(2dvh, 4dvw, 3vmin);;
+}
+
+.qr-front {
+    bottom: 7%;
+    right: 1%;
+}
+
+#c-footer {
+    &:before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding-top: 100vh;
+
+        background-image: var(--b-bottom);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: left bottom;
+        clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+    }
+
+    >* {
+        z-index: 1;
+    }
+}
+
+.lazer-mask {
+    mask-mode: alpha;
+    mask-repeat: no-repeat;
+    mask-size: cover;
+    mask-position: center;
+}
+
+.flow-colorful {
+    background: linear-gradient(to bottom right, red, yellow, blue);
+    animation: hue 4s linear infinite;
+}
+
+@keyframes hue {
+    from {
+        filter: hue-rotate(0deg);
+    }
+
+    to {
+        filter: hue-rotate(360deg);
+    }
+}
+</style>

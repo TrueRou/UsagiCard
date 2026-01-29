@@ -27,3 +27,14 @@ export enum AuthStrategy {
     DIVING_FISH = 1,
     LXNS = 2,
 }
+
+export enum ProductTypeDesign {
+    UsagiCardDX = 0,
+    UsagiCardWars = 1,
+}
+
+export enum ArtifactDisplayMode {
+    SKETCHPAD_FRONT = 0,
+    SKETCHPAD_BACK = 1,
+    ADAPTIVE_VIEW = 2,
+}

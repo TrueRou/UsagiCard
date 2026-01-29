@@ -1459,7 +1459,7 @@ export interface ProductSimpleResponse {
 /**
  * ProductTypeDesign
  */
-export type ProductTypeDesign = 0
+export type ProductTypeDesign = 0 | 1
 
 /**
  * ProductTypeFunction
@@ -1735,6 +1735,242 @@ export interface ValidationError {
      * Error Type
      */
     type: string
+}
+
+/**
+ * UsagiCardDXDesign
+ *
+ * 兔卡 DX 设计数据
+ */
+export interface UsagiCardDxDesign {
+    /**
+     * Game Version
+     *
+     * 游戏版本
+     */
+    game_version: string
+    /**
+     * Simplified Code
+     *
+     * 卡面标签
+     */
+    simplified_code: string
+    /**
+     * Character Name
+     *
+     * 立绘名称
+     */
+    character_name: string
+    /**
+     * Friend Code
+     *
+     * 好友代码
+     */
+    friend_code: string
+    /**
+     * Display Name
+     *
+     * 玩家名称
+     */
+    display_name: string
+    /**
+     * Dx Rating
+     *
+     * DX 分数
+     */
+    dx_rating: string
+    /**
+     * Qr Size
+     *
+     * 二维码大小
+     */
+    qr_size: number
+    /**
+     * Mask Type
+     *
+     * 遮罩类型
+     */
+    mask_type: number
+    /**
+     * Player Info Color
+     *
+     * 玩家信息颜色
+     */
+    player_info_color: string
+    /**
+     * Chara Info Color
+     *
+     * 角色信息颜色
+     */
+    chara_info_color: string
+    /**
+     * Show Qrcode Front
+     *
+     * 显示正面二维码
+     */
+    show_qrcode_front: boolean
+    /**
+     * Show Qrcode Back
+     *
+     * 显示反面二维码
+     */
+    show_qrcode_back: boolean
+    /**
+     * Show Dx Rating
+     *
+     * 显示 DX 分数
+     */
+    show_dx_rating: boolean
+    /**
+     * Show Display Name
+     *
+     * 显示玩家名称
+     */
+    show_display_name: boolean
+    /**
+     * Show Character Name
+     *
+     * 显示立绘名称
+     */
+    show_character_name: boolean
+    /**
+     * Show Friend Code
+     *
+     * 显示好友代码
+     */
+    show_friend_code: boolean
+    /**
+     * Enable Mask
+     *
+     * 启用遮罩
+     */
+    enable_mask: boolean
+    /**
+     * Character Id
+     *
+     * 立绘 ID
+     */
+    character_id: string
+    /**
+     * Mask Id
+     *
+     * 遮罩 ID
+     */
+    mask_id: string
+    /**
+     * Background Id
+     *
+     * 背景 ID
+     */
+    background_id: string
+    /**
+     * Cardback Id
+     *
+     * 卡背 ID
+     */
+    cardback_id: string
+    /**
+     * Frame Id
+     *
+     * 边框 ID
+     */
+    frame_id: string
+    /**
+     * Passname Id
+     *
+     * 通行证 ID
+     */
+    passname_id: string
+}
+
+/**
+ * UsagiCardWarsDesign
+ *
+ * 兔卡 Wars 设计数据
+ */
+export interface UsagiCardWarsDesign {
+    /**
+     * Character Name
+     *
+     * 立绘名称
+     */
+    character_name: string
+    /**
+     * Skill Name
+     *
+     * 技能名称
+     */
+    skill_name: string
+    /**
+     * Skill Description
+     *
+     * 技能描述
+     */
+    skill_description: string
+    /**
+     * Miss
+     *
+     * MISS 值
+     */
+    miss: number
+    /**
+     * Combo
+     *
+     * COMBO 值
+     */
+    combo: number
+    /**
+     * Chain
+     *
+     * CHAIN 值
+     */
+    chain: number
+    /**
+     * Character Id
+     *
+     * 立绘 ID
+     */
+    character_id: string
+    /**
+     * Background Id
+     *
+     * 背景 ID
+     */
+    background_id: string
+    /**
+     * Cardback Id
+     *
+     * 卡背 ID
+     */
+    cardback_id: string
+    /**
+     * Frame Id
+     *
+     * 边框 ID
+     */
+    frame_id: string
+    /**
+     * Label Id
+     *
+     * 标签 ID
+     */
+    label_id: string
+}
+
+/**
+ * UsagiCardStorage
+ *
+ * 兔卡存储数据
+ */
+export interface UsagiCardStorage {
+    /**
+     * Card Id
+     */
+    card_id: string
+    /**
+     * Activation Code
+     */
+    activation_code: string
 }
 
 export interface RootGetData {
