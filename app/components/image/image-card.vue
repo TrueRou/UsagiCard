@@ -1,0 +1,153 @@
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+
+const props = defineProps<{
+    image: ImageSimplePublic
+    imageAspect: ImageAspectPublic
+    hidedLabels?: string[]
+    imageUrl: string
+    selected: boolean
+    disabled?: boolean
+}>()
+
+const emit = defineEmits<{
+    (event: 'select', image: ImageSimplePublic): void
+    (event: 'rename', payload: { image: ImageSimplePublic, name: string }): void
+    (event: 'delete', image: ImageSimplePublic): void
+}>()
+
+const { user } = useUserSession()
+
+const isEditing = ref(false)
+const editableName = ref(props.image.name)
+const isLoaded = ref(false)
+
+watch(() => props.image.name, (name) => {
+    if (!isEditing.value) {
+        editableName.value = name
+    }
+})
+
+watch(() => props.image.id, () => {
+    isLoaded.value = false
+})
+
+function canModifyImage(image: ImageSimplePublic) {
+    return image.user_id === user.value?.id
+}
+
+function handleSelect() {
+    if (props.disabled)
+        return
+    emit('select', props.image)
+}
+
+function beginEdit() {
+    if (!canModifyImage(props.image)) {
+        return
+    }
+    isEditing.value = true
+    editableName.value = props.image.name
+}
+
+function submitRename() {
+    const trimmed = editableName.value.trim()
+    if (!trimmed || trimmed === props.image.name) {
+        isEditing.value = false
+        editableName.value = props.image.name
+        return
+    }
+    emit('rename', { image: props.image, name: trimmed })
+    isEditing.value = false
+}
+
+function cancelEdit() {
+    editableName.value = props.image.name
+    isEditing.value = false
+}
+
+function emitDelete() {
+    emit('delete', props.image)
+}
+
+const representativeLabels = computed(() => {
+    return props.image.labels.filter(label => !props.hidedLabels?.includes(label))
+})
+
+const skeletonAspectRatio = computed(() => {
+    const width = props.imageAspect.ratio_width_unit
+    const height = props.imageAspect.ratio_height_unit
+
+    return `${width} / ${height}`
+})
+
+function handleImageLoad() {
+    isLoaded.value = true
+}
+</script>
+
+<template>
+    <div
+        class="card bg-base-200 shadow-md hover:shadow-xl transition-shadow cursor-pointer" :class="{
+            'ring ring-primary ring-offset-2': selected,
+            'opacity-60 pointer-events-none': disabled,
+        }" @click="handleSelect"
+    >
+        <div class="relative">
+            <!-- 左上 图片名称 -->
+            <div class="absolute top-1 left-1 max-w-[calc(100%-0.5rem)] z-10">
+                <div v-if="!isEditing" class="badge lg:badge-lg max-w-full" :title="image.name" @click.stop="beginEdit">
+                    <span class="truncate">{{ image.name }}</span>
+                </div>
+                <div v-else class="flex gap-2 flex-col bg-black/50 p-2 rounded">
+                    <input
+                        v-model="editableName" type="text" class="input input-xs"
+                        placeholder="输入新名称"
+                    >
+                    <button class="btn btn-xs btn-primary" :disabled="!editableName.trim()" @click.stop="submitRename">
+                        保存
+                    </button>
+                    <button class="btn btn-xs" @click.stop="cancelEdit">
+                        取消
+                    </button>
+                </div>
+            </div>
+
+            <!-- 中间 图片本身 -->
+            <div class="w-full overflow-hidden">
+                <div class="relative w-full rounded-lg" :style="{ aspectRatio: skeletonAspectRatio }">
+                    <div
+                        class="skeleton absolute inset-0 h-full w-full rounded-lg transition-opacity duration-300 ease-out"
+                        :class="{ 'opacity-0': isLoaded }" aria-hidden="true"
+                    />
+                    <img
+                        :src="imageUrl" :alt="image.name" loading="lazy"
+                        class="absolute inset-0 h-full w-full rounded-lg object-cover transition-opacity duration-300 ease-out"
+                        :class="{ 'opacity-0': !isLoaded }" @load="handleImageLoad" @error="handleImageLoad"
+                    >
+                </div>
+            </div>
+
+            <!-- 右上 选中标记 -->
+            <template v-if="selected && !isEditing">
+                <div class="absolute top-1 right-1 badge lg:badge-lg badge-primary">
+                    已选
+                </div>
+            </template>
+
+            <!-- 右下 操作按钮 -->
+            <div v-if="canModifyImage(image)" class="absolute bottom-1 right-1">
+                <button class="bg-red-500/80 text-white p-1 rounded-full hover:bg-red-600" @click.stop="emitDelete">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+            </div>
+
+            <!-- 左下 标签 -->
+            <div class="absolute bottom-1 left-1 flex flex-col gap-1">
+                <span v-for="label in representativeLabels" :key="label" class="badge badge-soft badge-xs sm:badge-sm">
+                    {{ label }}
+                </span>
+            </div>
+        </div>
+    </div>
+</template>
