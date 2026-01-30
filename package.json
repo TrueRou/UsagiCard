@@ -15,6 +15,7 @@
     },
     "dependencies": {
         "@nuxt/icon": "2.0.0",
+        "@nuxtjs/i18n": "10.2.1",
         "@pinia/nuxt": "0.11.2",
         "@tailwindcss/vite": "^4.1.18",
         "@types/qrcode": "^1.5.6",

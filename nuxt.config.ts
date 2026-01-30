@@ -16,6 +16,7 @@ export default defineNuxtConfig({
         'nuxt-auth-utils',
         '@nuxt/eslint',
         '@vueuse/nuxt',
+        '@nuxtjs/i18n',
     ],
     eslint: {
         config: {
@@ -36,6 +37,17 @@ export default defineNuxtConfig({
             imageURL: 'https://assets.turou.fun/leporid/images',
             imagePreviewURL: 'https://assets.turou.fun/leporid/thumbnails',
         },
+    },
+    i18n: {
+        defaultLocale: 'zh-CN',
+        strategy: 'no_prefix',
+        locales: [
+            {
+                code: 'zh-CN',
+                flag: 'CN',
+                name: '简体中文 (中国)',
+            },
+        ],
     },
     nitro: {
         preset: 'bun',
