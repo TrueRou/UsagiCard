@@ -13,7 +13,7 @@ const { matchCharacterMetadata, showMatchCharacterMetadataHelp } = await useChar
 const imageSelectorCtx = await useImageSelector(currentDesign)
 
 function goToPrev() {
-    watch(() => props.artifactCtx.isSavingDesign, (newVal, oldVal) => {
+    watch(() => props.artifactCtx.isSavingDesign.value, (newVal, oldVal) => {
         if (oldVal === true && newVal === false)
             useRouter().go(-1)
     })
@@ -353,8 +353,8 @@ function goToPrev() {
                 </div>
 
                 <footer class="flex justify-end">
-                    <button class="btn btn-primary w-full md:w-auto" type="submit" data-tour="save-button" :disabled="artifactCtx.isSavingDesign" @click.stop="goToPrev()">
-                        <span v-if="artifactCtx.isSavingDesign" class="loading loading-spinner" />
+                    <button class="btn btn-primary w-full md:w-auto" type="submit" data-tour="save-button" :disabled="artifactCtx.isSavingDesign.value" @click.stop="goToPrev()">
+                        <span v-if="artifactCtx.isSavingDesign.value" class="loading loading-spinner" />
                         <span>保存修改</span>
                     </button>
                 </footer>

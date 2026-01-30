@@ -12,6 +12,10 @@ export async function useArtifact(artifactId: string): Promise<UseArtifactCtx> {
         throw createError({ statusCode: 500, statusText: 'Unsupported design type', fatal: true })
     }
 
+    // 响应式属性
+    const sketchpadScale = ref(1.0)
+    const displayMode = ref(ArtifactDisplayMode.SKETCHPAD_FRONT)
+
     // 设计器
     const isSavingDesign = ref(false)
     const saveDesign = async (newDesign: Record<string, any>) => {
@@ -33,10 +37,10 @@ export async function useArtifact(artifactId: string): Promise<UseArtifactCtx> {
 
     return {
         saveDesign,
-        artifact: data.value,
-        sketchpadScale: 1.0,
-        displayMode: ArtifactDisplayMode.SKETCHPAD_FRONT,
-        isSavingDesign: isSavingDesign.value,
+        artifact: data as Ref<ArtifactUserResponse>,
+        sketchpadScale,
+        displayMode,
+        isSavingDesign,
         designerComponent: resolveComponent(`${designType}Designer`),
         sketchpadComponent: resolveComponent(`${designType}Sketchpad`),
         adaptiveViewComponent: resolveComponent(`${designType}AdaptiveView`),

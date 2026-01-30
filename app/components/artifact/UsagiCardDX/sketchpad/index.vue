@@ -13,9 +13,9 @@ const { img } = useUtils()
 </script>
 
 <template>
-    <div class="card-hw isolate relative absolute-center font-adjust" :style="{ zoom: artifactCtx.sketchpadScale }">
+    <div class="card-hw isolate relative absolute-center font-adjust" :style="{ zoom: artifactCtx.sketchpadScale.value }">
         <!-- 卡片背面 -->
-        <template v-if="artifactCtx.displayMode === ArtifactDisplayMode.SKETCHPAD_BACK">
+        <template v-if="artifactCtx.displayMode.value === ArtifactDisplayMode.SKETCHPAD_BACK">
             <!-- 卡片背景 -->
             <img class="cover-image -z-20" :src="img(artifactDesign.cardback_id)">
 

@@ -63,11 +63,11 @@ export async function useImageSelector(currentDesign: Ref<UsagiCardDxDesign>): P
     })
 
     return {
-        selectorOpen: selectorOpen.value,
-        selectorImageKey: selectorImageKey.value,
-        selectorImageAspect: selectorImageAspect.value,
-        selectorInitialFilters: selectorInitialFilters.value,
-        selectorTitleLabel: selectorTitleLabel.value,
+        selectorOpen,
+        selectorImageKey,
+        selectorImageAspect,
+        selectorInitialFilters,
+        selectorTitleLabel,
         selectorReadonlyMode: !loggedIn.value,
         openImageSelector,
         closeImageSelector,

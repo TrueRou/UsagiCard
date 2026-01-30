@@ -24,8 +24,8 @@ const {
     refresh,
 } = useImageList({
     pageSize: props.selectorCtx.selectorDefaultPageSize,
-    aspectId: props.selectorCtx.selectorImageAspect?.id,
-    initialFilters: props.selectorCtx.selectorInitialFilters,
+    aspectId: props.selectorCtx.selectorImageAspect?.value?.id,
+    initialFilters: props.selectorCtx.selectorInitialFilters.value,
 })
 
 const activeSecondary = ref<string[]>([])
@@ -35,7 +35,7 @@ const openUploader = ref(false)
 const deleteTarget = ref<ImageSimplePublic | null>(null)
 const pending = ref(false)
 
-const title = computed(() => props.selectorCtx.selectorTitleLabel ?? '选择图片')
+const title = computed(() => props.selectorCtx.selectorTitleLabel?.value ?? '选择图片')
 const confirmButtonText = computed(() => props.selectorCtx.selectorConfirmLabel ?? '使用此图片')
 
 const imageKey = (image: ImageSimplePublic) => image.id
@@ -132,7 +132,7 @@ async function handleUploaded(image: ImageSimplePublic) {
     selectedImage.value = image
 }
 
-watch(() => props.selectorCtx.selectorOpen, async (isOpen) => {
+watch(() => props.selectorCtx.selectorOpen.value, async (isOpen) => {
     if (isOpen) {
         await list({ pageNumber: 1, filters: activeSecondary.value })
     }
@@ -149,7 +149,7 @@ watch([activeSecondary], async () => {
 </script>
 
 <template>
-    <dialog v-if="selectorCtx.selectorOpen" class="modal modal-open">
+    <dialog v-if="selectorCtx.selectorOpen.value" class="modal modal-open">
         <div class="modal-box max-w-6xl h-[88vh] md:h-[85vh] my-[6vh] md:my-[7.5vh] flex flex-col p-0">
             <!-- 固定头部 -->
             <div class="shrink-0 px-6 pt-6 pb-4 border-b">
@@ -163,8 +163,8 @@ watch([activeSecondary], async () => {
                         <h2 class="text-2xl font-semibold">
                             {{ title }}
                         </h2>
-                        <p v-if="selectorCtx.selectorImageAspect" class="text-sm text-base-content/70">
-                            比例：{{ selectorCtx.selectorImageAspect.name }} · {{ `${selectorCtx.selectorImageAspect.ratio_width_unit}:${selectorCtx.selectorImageAspect.ratio_height_unit}` }}
+                        <p v-if="selectorCtx.selectorImageAspect?.value" class="text-sm text-base-content/70">
+                            比例：{{ selectorCtx.selectorImageAspect.value.name }} · {{ `${selectorCtx.selectorImageAspect.value.ratio_width_unit}:${selectorCtx.selectorImageAspect.value.ratio_height_unit}` }}
                         </p>
                     </div>
                 </header>
@@ -215,7 +215,7 @@ watch([activeSecondary], async () => {
                                     上传新图片
                                 </button>
                             </div>
-                            <div v-else-if="!selectorCtx.selectorImageAspect">
+                            <div v-else-if="!selectorCtx.selectorImageAspect?.value">
                                 <p>
                                     图片比例加载失败
                                 </p>
@@ -223,9 +223,9 @@ watch([activeSecondary], async () => {
                             <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                                 <ImageCard
                                     v-for="image in images" :key="imageKey(image)" :image="image"
-                                    :image-aspect="selectorCtx.selectorImageAspect"
+                                    :image-aspect="selectorCtx.selectorImageAspect.value"
                                     :image-url="imageUrl(image)" :selected="isSelected(image)"
-                                    :disabled="pending" :hided-labels="selectorCtx.selectorInitialFilters"
+                                    :disabled="pending" :hided-labels="selectorCtx.selectorInitialFilters.value"
                                     @select="updateSelection"
                                     @rename="handleRename"
                                     @delete="confirmDelete"
@@ -276,7 +276,7 @@ watch([activeSecondary], async () => {
     </dialog>
 
     <ImageUploader
-        :open="openUploader" :aspect="selectorCtx.selectorImageAspect"
+        :open="openUploader" :aspect="selectorCtx.selectorImageAspect?.value"
         :suggested-labels="[...activeFilters]" @update:open="val => openUploader = val"
         @uploaded="handleUploaded"
     />

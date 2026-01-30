@@ -22,7 +22,7 @@ defineProps<{
         >
             <p class="text-center text-nowrap font-sega">
                 <span class="text-sm mr-1">カード 番号</span>
-                <b class="text-md">{{ artifactCtx.artifact.id.padStart(4, '0') }}</b>
+                <b class="text-md">{{ artifactCtx.artifact.value.id.padStart(4, '0') }}</b>
             </p>
         </div>
     </div>

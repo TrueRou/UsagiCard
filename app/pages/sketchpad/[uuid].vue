@@ -5,7 +5,7 @@ const { width, height } = useWindowSize()
 const route = useRoute()
 const artifactId = route.params.id as string // UUID string
 const artifactCtx = await useArtifact(artifactId)
-const artifactDesign = artifactCtx.artifact.product.design
+const artifactDesign = artifactCtx.artifact.value.product.design
 
 // onMounted(async () => {
 //     card.value = await cardStore.fetchCard(props.uuid);
@@ -19,7 +19,7 @@ watchEffect(() => {
     if (sketchpadRef.value?.$el) {
         const cardWidth: number = sketchpadRef.value.$el.clientWidth
         const cardHeight: number = sketchpadRef.value.$el.clientHeight
-        artifactCtx.sketchpadScale = Math.min(width.value / cardWidth, height.value / cardHeight)
+        artifactCtx.sketchpadScale.value = Math.min(width.value / cardWidth, height.value / cardHeight)
     }
 })
 </script>

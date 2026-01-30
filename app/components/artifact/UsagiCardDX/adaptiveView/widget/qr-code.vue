@@ -22,7 +22,7 @@ const qrUrl = computed(() => {
     if (props.artifactDesign.override_qrcode) {
         return props.artifactDesign.override_qrcode
     }
-    return joinURL(useRuntimeConfig().bunny.baseURL, 'cards', props.artifactCtx.artifact.id)
+    return joinURL(useRuntimeConfig().bunny.baseURL, 'cards', props.artifactCtx.artifact.value.id)
 })
 
 watchEffect(() => {
