@@ -3,12 +3,12 @@ import type { ConcreteComponent } from 'vue'
 export { useArtifact } from './artifact/useArtifact'
 
 export interface UseImageSelectorCtx {
-    selectorOpen: boolean
-    selectorImageKey?: string
-    selectorImageAspect?: ImageAspectPublic
-    selectorInitialFilters: string[]
+    selectorOpen: Ref<boolean>
+    selectorImageKey?: Ref<string | undefined>
+    selectorImageAspect?: Ref<ImageAspectPublic | undefined>
+    selectorInitialFilters: Ref<string[]>
     selectorDefaultPageSize?: number
-    selectorTitleLabel?: string
+    selectorTitleLabel?: Ref<string | undefined>
     selectorConfirmLabel?: string
     selectorReadonlyMode?: boolean
     openImageSelector: (key: string) => void
@@ -18,12 +18,12 @@ export interface UseImageSelectorCtx {
 }
 
 export interface UseArtifactCtx {
-    artifact: ArtifactUserResponse
-    sketchpadScale: number
-    displayMode: ArtifactDisplayMode
+    artifact: Ref<ArtifactUserResponse>
+    sketchpadScale: Ref<number>
+    displayMode: Ref<ArtifactDisplayMode>
     designerComponent?: ConcreteComponent | string
     sketchpadComponent?: ConcreteComponent | string
     adaptiveViewComponent?: ConcreteComponent | string
     saveDesign: (newDesign: Record<string, any>) => Promise<void>
-    isSavingDesign: boolean
+    isSavingDesign: Ref<boolean>
 }
