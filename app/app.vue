@@ -1,10 +1,5 @@
 <template>
-    <div>
-        <Navbar />
+    <NuxtLayout>
         <NuxtPage />
-        <ClientOnly>
-            <NuxtLoadingIndicator />
-            <BannerNotification />
-        </ClientOnly>
-    </div>
+    </NuxtLayout>
 </template>

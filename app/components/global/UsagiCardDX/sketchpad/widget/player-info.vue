@@ -14,7 +14,7 @@ defineProps<{
             <p class="font-bold font-sega text-[9.5px]">
                 {{ artifactDesign.display_name }}
             </p>
-            <img class="h-2.5" src="../assets/deluxe.png">
+            <img class="h-2.5" src="../../assets/icons/misc/deluxe.png">
         </div>
         <div v-if="artifactDesign.show_friend_code" class="flex items-center">
             <p class="friend-code-font text-white pl-1 pr-1 text-center rounded-sm text-nowrap font-sega">

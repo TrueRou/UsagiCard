@@ -4,6 +4,8 @@ import DXRating from './widget/dx-rating.vue'
 import PlayerInfo from './widget/player-info.vue'
 import QRCode from './widget/qr-code.vue'
 
+import '../assets/css/main.css'
+
 defineProps<{
     artifactCtx: UseArtifactCtx
     artifactDesign: UsagiCardDxDesign
@@ -13,7 +15,7 @@ const { img } = useUtils()
 </script>
 
 <template>
-    <div class="card-hw isolate relative absolute-center font-adjust" :style="{ zoom: artifactCtx.sketchpadScale.value }">
+    <div class="card-hw isolate relative absolute-center font-adjust" :style="{ zoom: artifactCtx.sketchpadScale.value }" data-theme="light">
         <!-- 卡片背面 -->
         <template v-if="artifactCtx.displayMode.value === ArtifactDisplayMode.SKETCHPAD_BACK">
             <!-- 卡片背景 -->

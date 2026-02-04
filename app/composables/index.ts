@@ -1,5 +1,3 @@
-import type { ConcreteComponent } from 'vue'
-
 export { useArtifact } from './artifact/useArtifact'
 
 export interface UseImageSelectorCtx {
@@ -21,9 +19,9 @@ export interface UseArtifactCtx {
     artifact: Ref<ArtifactUserResponse>
     sketchpadScale: Ref<number>
     displayMode: Ref<ArtifactDisplayMode>
-    designerComponent?: ConcreteComponent | string
-    sketchpadComponent?: ConcreteComponent | string
-    adaptiveViewComponent?: ConcreteComponent | string
+    designerComponent: string
+    sketchpadComponent: string
+    adaptiveViewComponent?: string
     saveDesign: (newDesign: Record<string, any>) => Promise<void>
     isSavingDesign: Ref<boolean>
 }

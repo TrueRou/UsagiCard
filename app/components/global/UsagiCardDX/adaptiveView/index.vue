@@ -4,6 +4,8 @@ import DXRating from './widget/dx-rating.vue'
 import PlayerInfo from './widget/player-info.vue'
 import QRCode from './widget/qr-code.vue'
 
+import '../assets/css/main.css'
+
 defineProps<{
     artifactCtx: UseArtifactCtx
     artifactDesign: UsagiCardDxDesign
@@ -12,7 +14,7 @@ const { img } = useUtils()
 </script>
 
 <template>
-    <div class="isolate h-dvh dark:bg-gray-800">
+    <div class="isolate h-dvh dark:bg-gray-800" data-theme="light">
         <div class="relative h-full w-fit mx-auto">
             <img class="object-cover h-full" fetchpriority="low" :src="img(artifactDesign.background_id)">
             <div class="absolute inset-0">

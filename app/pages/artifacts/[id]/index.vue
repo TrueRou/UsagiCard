@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+    layout: 'full-page',
+})
+
 const sketchpadRef = useTemplateRef<any>('sketchpad')
 const { width, height } = useWindowSize()
 
@@ -6,6 +10,7 @@ const route = useRoute()
 const artifactId = route.params.id as string // UUID string
 const artifactCtx = await useArtifact(artifactId)
 const artifactDesign = artifactCtx.artifact.value.product.design
+const sketchpadComponent = resolveComponent(artifactCtx.sketchpadComponent)
 
 // onMounted(async () => {
 //     card.value = await cardStore.fetchCard(props.uuid);
@@ -25,8 +30,8 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div v-if="artifactCtx.sketchpadComponent" class="w-full h-full overflow-hidden relative">
-        <component :is="artifactCtx.sketchpadComponent" ref="sketchpad" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+    <div class="w-full h-full overflow-hidden relative">
+        <component :is="sketchpadComponent" ref="sketchpad" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
     </div>
 </template>
 

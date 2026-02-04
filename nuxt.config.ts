@@ -24,9 +24,6 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
-        bunny: {
-            baseURL: 'http://localhost:7100',
-        },
         leporid: {
             baseURL: 'https://api.turou.fun/leporid',
         },
@@ -34,6 +31,7 @@ export default defineNuxtConfig({
             baseURL: 'https://api.turou.fun/otoge',
         },
         public: {
+            baseURL: 'http://localhost:7100',
             imageURL: 'https://assets.turou.fun/leporid/images',
             imagePreviewURL: 'https://assets.turou.fun/leporid/thumbnails',
         },

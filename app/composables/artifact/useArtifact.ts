@@ -1,6 +1,6 @@
 export async function useArtifact(artifactId: string): Promise<UseArtifactCtx> {
     // 基本属性
-    const { data, refresh } = await useLeporid<ArtifactUserResponse>(`/artifacts/${artifactId}`)
+    const { data, refresh } = await useLeporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
 
     if (data.value === undefined) {
         throw createError({ statusCode: 404, statusText: 'Artifact not found', fatal: true })
@@ -41,8 +41,8 @@ export async function useArtifact(artifactId: string): Promise<UseArtifactCtx> {
         sketchpadScale,
         displayMode,
         isSavingDesign,
-        designerComponent: resolveComponent(`${designType}Designer`),
-        sketchpadComponent: resolveComponent(`${designType}Sketchpad`),
-        adaptiveViewComponent: resolveComponent(`${designType}AdaptiveView`),
+        designerComponent: `${designType}Designer`,
+        sketchpadComponent: `${designType}Sketchpad`,
+        adaptiveViewComponent: `${designType}AdaptiveView`,
     }
 }

@@ -22,7 +22,7 @@ const qrUrl = computed(() => {
     if (props.artifactDesign.override_qrcode) {
         return props.artifactDesign.override_qrcode
     }
-    return joinURL(useRuntimeConfig().bunny.baseURL, 'cards', props.artifactCtx.artifact.value.id)
+    return joinURL(useRuntimeConfig().public.baseURL, 'cards', props.artifactCtx.artifact.value.id)
 })
 
 watchEffect(() => {
@@ -37,7 +37,7 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div class="p-0.5 rounded bg-white">
-        <img ref="qr-image" class="w-full h-full" fetchpriority="high" :style="{ width: `${artifactDesign.qr_size}vh` }">
+    <div class="w-full h-full rounded bg-white">
+        <img ref="qr-image" class="w-full h-full">
     </div>
 </template>
