@@ -6,9 +6,9 @@ defineProps<{
 </script>
 
 <template>
-    <div class="flex flex-col">
+    <div v-if="artifactDesign.enable_chara_info" class="flex flex-col">
         <div
-            v-if="artifactDesign.show_character_name"
+            v-if="artifactDesign.character_name"
             class="flex flex-col rounded-tr-md w-4/5 py-0.5"
             :style="{ 'background-color': artifactDesign.chara_info_color }"
         >
@@ -21,8 +21,9 @@ defineProps<{
             :style="{ 'background-color': artifactDesign.chara_info_color }"
         >
             <p class="text-center text-nowrap text-[7px] font-sega">
-                カード 番号
-                <b class="text-[9px] ml-0.5">{{ artifactCtx.artifact.value.id.padStart(4, '0') }}</b>
+                {{ artifactDesign.card_number_label || 'カード 番号' }}
+
+                <b class="text-[9px] ml-0.5">{{ artifactDesign.card_number || '0721' }}</b>
             </p>
         </div>
     </div>

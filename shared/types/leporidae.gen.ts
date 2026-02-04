@@ -1780,17 +1780,23 @@ export interface UsagiCardDxDesign {
      */
     dx_rating: string
     /**
-     * Qr Size
+     * Card Number
      *
-     * 二维码大小
+     * 卡片编号
      */
-    qr_size: number
+    card_number: string
     /**
-     * Mask Type
+     * Card Number Label
      *
-     * 遮罩类型
+     * 卡片编号标签内容
      */
-    mask_type: number
+    card_number_label: string
+    /**
+     * Override Qrcode
+     *
+     * 覆盖二维码内容
+     */
+    override_qrcode: string
     /**
      * Player Info Color
      *
@@ -1804,41 +1810,29 @@ export interface UsagiCardDxDesign {
      */
     chara_info_color: string
     /**
-     * Show Qrcode Front
+     * Enable Qrcode Front
      *
-     * 显示正面二维码
+     * 启用正面二维码
      */
-    show_qrcode_front: boolean
+    enable_qrcode_front: boolean
     /**
-     * Show Qrcode Back
+     * Enable Qrcode Back
      *
-     * 显示反面二维码
+     * 启用反面二维码
      */
-    show_qrcode_back: boolean
+    enable_qrcode_back: boolean
     /**
-     * Show Dx Rating
+     * Enable Chara Info
      *
-     * 显示 DX 分数
+     * 启用角色信息
      */
-    show_dx_rating: boolean
+    enable_chara_info: boolean
     /**
-     * Show Display Name
+     * Enable Landscape
      *
-     * 显示玩家名称
+     * 启用横向模式
      */
-    show_display_name: boolean
-    /**
-     * Show Character Name
-     *
-     * 显示立绘名称
-     */
-    show_character_name: boolean
-    /**
-     * Show Friend Code
-     *
-     * 显示好友代码
-     */
-    show_friend_code: boolean
+    enable_landscape: boolean
     /**
      * Enable Mask
      *

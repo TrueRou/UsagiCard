@@ -7,7 +7,7 @@ defineProps<{
 
 <template>
     <div
-        v-if="artifactDesign.show_display_name" class="right-0 flex flex-col rounded-sm"
+        v-if="artifactDesign.display_name" class="right-0 flex flex-col rounded-sm"
         :style="{ 'background-color': artifactDesign.player_info_color }"
     >
         <div class="flex items-center p-0.5">
@@ -16,7 +16,7 @@ defineProps<{
             </p>
             <img class="h-2.5" src="../../assets/icons/misc/deluxe.png">
         </div>
-        <div v-if="artifactDesign.show_friend_code" class="flex items-center">
+        <div v-if="artifactDesign.friend_code" class="flex items-center">
             <p class="friend-code-font text-white pl-1 pr-1 text-center rounded-sm text-nowrap font-sega">
                 フレンド<br>コ一ド
             </p>

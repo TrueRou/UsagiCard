@@ -6,12 +6,21 @@ import QRCode from './widget/qr-code.vue'
 
 import '../assets/css/main.css'
 
-defineProps<{
+const props = defineProps<{
     artifactCtx: UseArtifactCtx
     artifactDesign: UsagiCardDxDesign
 }>()
 
 const { img } = useUtils()
+const { processImage } = useImageProcessor({
+    rotate: Math.PI / 2, // 旋转90度
+    scale: 0.5, // 缩放到75%
+    featherSize: 50, // 50像素羽化
+}, img(props.artifactDesign.character_id))
+
+const landscapeCharacterImage = asyncComputed(() => {
+    return props.artifactDesign.enable_landscape ? processImage() : undefined
+})
 </script>
 
 <template>
@@ -22,12 +31,52 @@ const { img } = useUtils()
             <img class="cover-image -z-20" :src="img(artifactDesign.cardback_id)">
 
             <!-- 二维码 -->
-            <div v-if="artifactDesign.show_qrcode_back" class="qrcode-hw back absolute">
+            <div v-if="artifactDesign.enable_qrcode_back" class="qrcode-hw back absolute">
                 <QRCode :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
             </div>
         </template>
+        <!-- 卡片正面（横版） -->
+        <template v-else-if="artifactDesign.enable_landscape">
+            <!-- 卡片背景 -->
+            <img class="cover-image -z-20" :src="img(artifactDesign.background_id)">
+            <img v-if="landscapeCharacterImage" class="cover-image -z-15 character-landscape" :src="landscapeCharacterImage">
 
-        <!-- 卡片正面 -->
+            <!-- DX分数框 -->
+            <div class="dx-rating-hw-landscape absolute">
+                <DXRating :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+            </div>
+
+            <!-- 玩家信息框 -->
+            <div class="player-info-hw-landscape absolute">
+                <PlayerInfo :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+            </div>
+
+            <!-- 角色信息框 -->
+            <div class="chara-info-hw-landscape absolute">
+                <CharaInfo :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+            </div>
+
+            <!-- 二维码 -->
+            <div v-if="artifactDesign.enable_qrcode_front" class="qrcode-hw-landscape absolute">
+                <QRCode :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+            </div>
+
+            <!-- 底部版本 -->
+            <div
+                v-if="artifactDesign.simplified_code || artifactDesign.game_version"
+                class="footer-hw-landscape absolute flex justify-center"
+            >
+                <div class="w-[90%] flex justify-between py-0.5 rounded-2xl bg-gray-800 text-white opacity-85 px-1">
+                    <p class="footer-text font-sega">
+                        {{ artifactDesign.simplified_code }}
+                    </p>
+                    <p class="footer-text font-sega">
+                        {{ artifactDesign.game_version }}
+                    </p>
+                </div>
+            </div>
+        </template>
+        <!-- 卡片正面（竖版） -->
         <template v-else>
             <!-- 卡片背景 -->
             <img class="cover-image -z-20" :src="img(artifactDesign.background_id)">
@@ -36,22 +85,22 @@ const { img } = useUtils()
             <img class="contain-image under -z-5" :src="img(artifactDesign.frame_id)">
 
             <!-- DX分数框 -->
-            <div v-if="artifactDesign.show_dx_rating" class="dx-rating-hw absolute">
+            <div class="dx-rating-hw absolute">
                 <DXRating :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
             </div>
 
             <!-- 玩家信息框 -->
-            <div v-if="artifactDesign.show_character_name" class="player-info-hw absolute">
+            <div class="player-info-hw absolute">
                 <PlayerInfo :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
             </div>
 
             <!-- 角色信息框 -->
-            <div v-if="artifactDesign.show_character_name" class="chara-info-hw absolute">
+            <div class="chara-info-hw absolute">
                 <CharaInfo :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
             </div>
 
             <!-- 二维码 -->
-            <div v-if="artifactDesign.show_qrcode_front" class="qrcode-hw absolute">
+            <div v-if="artifactDesign.enable_qrcode_front" class="qrcode-hw absolute">
                 <QRCode :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
             </div>
 
@@ -85,6 +134,14 @@ const { img } = useUtils()
     width: 0.5in;
 }
 
+.qrcode-hw-landscape {
+    bottom: 0in;
+    right: 1.96in;
+    width: 0.5in;
+    transform-origin: bottom right; /* 以左上角为中心旋转 */
+    transform: rotate(90deg);
+}
+
 .qrcode-hw.back {
     bottom: 0.05in;
 }
@@ -95,10 +152,31 @@ const { img } = useUtils()
     width: 0.86in;
 }
 
+.character-landscape {
+    left: 0.12in;
+}
+
+.dx-rating-hw-landscape {
+    bottom: 0in;
+    right: 0.25in;
+    width: 0.86in;
+    transform-origin: bottom right;
+    transform: rotate(90deg);
+}
+
 .player-info-hw {
     top: 0.32in;
     right: 0.01in;
     width: 1in;
+}
+
+.player-info-hw-landscape {
+    bottom: 0in;
+    right: 0.6in;
+    width: 1in;
+    transform-origin: bottom right;
+    transform: rotate(90deg);
+    text-align: end;
 }
 
 .chara-info-hw {
@@ -106,11 +184,29 @@ const { img } = useUtils()
     width: 0.9in;
 }
 
+.chara-info-hw-landscape {
+    top: 0in;
+    left: 0.48in;
+    width: 0.9in;
+    transform-origin: top left;
+    transform: rotate(90deg);
+}
+
 .footer-hw {
     bottom: 0.04in;
     width: 100%;
     font-size: 4px;
     line-height: 120%;
+}
+
+.footer-hw-landscape {
+    left: 0.12in;
+    top: -0.16in;
+    width: 3.68in;
+    font-size: 4px;
+    line-height: 120%;
+    transform-origin: top left;
+    transform: rotate(90deg);
 }
 
 .control-hw {

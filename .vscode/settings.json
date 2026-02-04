@@ -45,5 +45,12 @@
         "scss",
         "pcss",
         "postcss"
+    ],
+    "python-envs.pythonProjects": [
+        {
+            "path": "",
+            "envManager": "ms-python.python:poetry",
+            "packageManager": "ms-python.python:poetry"
+        }
     ]
 }
