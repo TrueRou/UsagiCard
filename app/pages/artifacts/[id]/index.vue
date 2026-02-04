@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'full-page',
+
 })
 
 const sketchpadRef = useTemplateRef<any>('sketchpad')
@@ -31,7 +32,9 @@ watchEffect(() => {
 
 <template>
     <div class="w-full h-full overflow-hidden relative">
-        <component :is="sketchpadComponent" ref="sketchpad" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+        <client-only>
+            <component :is="sketchpadComponent" ref="sketchpad" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+        </client-only>
     </div>
 </template>
 
