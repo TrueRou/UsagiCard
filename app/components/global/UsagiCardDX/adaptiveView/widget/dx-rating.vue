@@ -100,12 +100,12 @@ async function drawCanvas() {
     }
 }
 
-watch([() => currentRating.value, baseImage, numImages], drawCanvas, { immediate: true })
+watch([() => currentRating.value, baseImage, numImages, canvasRef], drawCanvas, { immediate: true })
 </script>
 
 <template>
     <canvas
         ref="canvasRef" width="269" height="70" class="ms-auto"
-        :class="{ invisible: !artifactDesign.show_dx_rating }"
+        :class="{ invisible: artifactDesign.dx_rating === undefined || isNaN(parseInt(artifactDesign.dx_rating)) }"
     />
 </template>

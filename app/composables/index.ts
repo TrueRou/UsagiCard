@@ -21,7 +21,7 @@ export interface UseArtifactCtx {
     displayMode: Ref<ArtifactDisplayMode>
     designerComponent: string
     sketchpadComponent: string
-    adaptiveViewComponent?: string
+    adaptiveViewComponent: string
     saveDesign: (newDesign: Record<string, any>) => Promise<void>
     isSavingDesign: Ref<boolean>
 }
