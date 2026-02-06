@@ -6,7 +6,6 @@ export interface UseImageSelectorCtx {
     selectorImageAspect?: Ref<ImageAspectPublic | undefined>
     selectorInitialFilters: Ref<string[]>
     selectorDefaultPageSize?: number
-    selectorTitleLabel?: Ref<string | undefined>
     selectorConfirmLabel?: string
     selectorReadonlyMode?: boolean
     openImageSelector: (key: string) => void

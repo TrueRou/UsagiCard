@@ -56,7 +56,3 @@ Also, the project matainers own their personal styles and conventions, we will m
 - Bunny 使用 SSR，请考虑到服务端渲染的特性，避免出现水合错误，以及多次请求等问题。
 
 - Bunny 使用 TypeScript 进行类型检查，所有的组件和模块都应该有明确的类型定义，避免使用 `any` 类型，类型定义文件放在 `types/def` 目录下。
-
-- 由于 Bunny 使用了国际化（i18n），所有的文本内容请放在对应 vue 文件的 `<i18n>` 块中，避免硬编码文本，使用 t 函数进行文本的引用，在生成代码时，请你也生成对应的 en 与 zh_CN 翻译。
-
-- Bunny 使用了 SpringBoot 作为后端框架，如果提供了 openapi.json 文件，请你参考该文件生成调用，并且正确且完整的处理请求和响应的类型。
