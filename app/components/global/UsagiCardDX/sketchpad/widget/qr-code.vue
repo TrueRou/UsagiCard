@@ -5,8 +5,8 @@ import { joinURL } from 'ufo'
 import { useTemplateRef, watchEffect } from 'vue'
 
 const props = defineProps<{
-    artifactCtx: UseArtifactCtx
-    artifactDesign: UsagiCardDxDesign
+    useDesignCtx: UseDesignCtx
+    currentDesign: UsagiCardDxDesign
 }>()
 
 const qrcodeOpts = {
@@ -19,10 +19,13 @@ const qrcodeOpts = {
 const qrImage = useTemplateRef('qr-image')
 
 const qrUrl = computed(() => {
-    if (props.artifactDesign.override_qrcode) {
-        return props.artifactDesign.override_qrcode
+    if (props.currentDesign.override_qrcode) {
+        return props.currentDesign.override_qrcode
     }
-    return joinURL(useRuntimeConfig().public.baseURL, 'artifacts', props.artifactCtx.artifact.value.id)
+    if (props.useDesignCtx.artifactId.value) {
+        return joinURL(useRuntimeConfig().public.baseURL, 'artifacts', props.useDesignCtx.artifactId.value)
+    }
+    return useRuntimeConfig().public.baseURL
 })
 
 watchEffect(() => {

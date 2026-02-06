@@ -4,7 +4,9 @@ interface ImageProcessOptions {
     featherSize?: number // 羽化大小（像素）
 }
 
-export function useImageProcessor(options: ImageProcessOptions = {}, imageUrl: string) {
+export function useImageProcessor(options: ImageProcessOptions = {}) {
+    const { img } = useUtils()
+
     /**
      * 对图片边缘应用羽化效果
      */
@@ -63,7 +65,7 @@ export function useImageProcessor(options: ImageProcessOptions = {}, imageUrl: s
      * 处理图片：旋转、缩放、羽化
      * @returns 处理后的图片DataURL
      */
-    const processImage = async (): Promise<string> => {
+    const processImage = async (imageId: string): Promise<string> => {
         const {
             rotate = 0,
             scale = 1,
@@ -77,7 +79,7 @@ export function useImageProcessor(options: ImageProcessOptions = {}, imageUrl: s
         await new Promise((resolve, reject) => {
             image.onload = resolve
             image.onerror = reject
-            image.src = imageUrl
+            image.src = img(imageId)
         })
 
         // 创建canvas

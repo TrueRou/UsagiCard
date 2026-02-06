@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{
-    artifactCtx: UseArtifactCtx
-    artifactDesign: UsagiCardDxDesign
+    currentDesign: UsagiCardDxDesign
 }>()
 
 const ratingLevels: any = [
@@ -33,7 +32,7 @@ function countOccurrences(str: string, searchTerm: string) {
 }
 
 const currentRating = computed(() => {
-    return props.artifactDesign.dx_rating
+    return props.currentDesign.dx_rating
 })
 
 const numImages = computed(() => {
@@ -106,6 +105,6 @@ watch([() => currentRating.value, baseImage, numImages, canvasRef], drawCanvas, 
 <template>
     <canvas
         ref="canvasRef" width="269" height="70" class="ms-auto"
-        :class="{ invisible: artifactDesign.dx_rating === undefined || isNaN(parseInt(artifactDesign.dx_rating)) }"
+        :class="{ invisible: currentDesign.dx_rating === undefined || isNaN(parseInt(currentDesign.dx_rating)) }"
     />
 </template>

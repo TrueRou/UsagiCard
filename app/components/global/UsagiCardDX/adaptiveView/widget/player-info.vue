@@ -1,22 +1,21 @@
 <script setup lang="ts">
 defineProps<{
-    artifactCtx: UseArtifactCtx
-    artifactDesign: UsagiCardDxDesign
+    currentDesign: UsagiCardDxDesign
 }>()
 </script>
 
 <template>
     <div
-        v-if="artifactDesign.show_display_name" class="rounded-s-md ms-auto w-fit text-black"
-        :style="{ 'background-color': artifactDesign.player_info_color }"
+        v-if="currentDesign.display_name" class="rounded-s-md ms-auto w-fit text-black"
+        :style="{ 'background-color': currentDesign.player_info_color }"
     >
         <div class="p-1 space-x-1">
             <p class="inline font-bold font-sega align-middle adapt-text-lg">
-                {{ artifactDesign.display_name }}
+                {{ currentDesign.display_name }}
             </p>
             <img class="inline align-middle" style="height: 3.5vh;" src="../../assets/icons/misc/deluxe.png">
         </div>
-        <div v-if="artifactDesign.show_friend_code">
+        <div v-if="currentDesign.friend_code">
             <div
                 class="inline-block align-middle text-white pl-2 pr-2 text-center font-extrabold rounded-bl-md text-nowrap font-sega"
                 style="font-size: max(6pt, 1.2vh); background-color: #405baa; -webkit-text-stroke: 1px #fff"
@@ -24,7 +23,7 @@ defineProps<{
                 フレンド<br>コ一ド
             </div>
             <p class="inline align-middle ml-0.5 font-extrabold font-sega adapt-text-md">
-                {{ artifactDesign.friend_code }}
+                {{ currentDesign.friend_code }}
             </p>
         </div>
     </div>

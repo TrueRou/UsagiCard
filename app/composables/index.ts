@@ -1,4 +1,4 @@
-export { useArtifact } from './artifact/useArtifact'
+export { useArtifact } from './useArtifact'
 
 export interface UseImageSelectorCtx {
     selectorOpen: Ref<boolean>
@@ -15,13 +15,12 @@ export interface UseImageSelectorCtx {
     clearImageSelect: (key: string) => void
 }
 
-export interface UseArtifactCtx {
-    artifact: Ref<ArtifactUserResponse>
+export interface UseDesignCtx {
+    artifactId: Ref<string | undefined>
+    rawDesign: Ref<Record<string, any>>
     sketchpadScale: Ref<number>
     displayMode: Ref<ArtifactDisplayMode>
-    designerComponent: string
-    sketchpadComponent: string
-    adaptiveViewComponent: string
-    saveDesign: (newDesign: Record<string, any>) => Promise<void>
-    isSavingDesign: Ref<boolean>
+    designerComponent: Ref<string>
+    sketchpadComponent: Ref<string>
+    adaptiveViewComponent: Ref<string>
 }

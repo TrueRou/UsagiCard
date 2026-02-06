@@ -1,44 +1,43 @@
 <script setup lang="ts">
+import { useDefaultDesign } from '~/composables/design/UsagiCardDX/useDefaultDesign'
 import CharaInfo from './widget/chara-info.vue'
 import DXRating from './widget/dx-rating.vue'
 import PlayerInfo from './widget/player-info.vue'
-import QRCode from './widget/qr-code.vue'
 
+import QRCode from './widget/qr-code.vue'
 import '../assets/css/main.css'
 
-defineProps<{
-    artifactCtx: UseArtifactCtx
-    artifactDesign: UsagiCardDxDesign
-}>()
+const props = defineProps<{ useDesignCtx: UseDesignCtx }>()
 const { img } = useUtils()
+const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
 </script>
 
 <template>
     <div class="isolate h-dvh dark:bg-gray-800">
         <div class="relative h-full w-fit mx-auto" data-theme="light">
-            <img class="object-cover h-full" fetchpriority="low" :src="img(artifactDesign.background_id)">
+            <img class="object-cover h-full" fetchpriority="low" :src="img(currentDesign.background_id)">
             <div class="absolute inset-0">
-                <img class="chara-center h-full absolute object-cover" fetchpriority="low" :src="img(artifactDesign.character_id)">
-                <template v-if="artifactDesign.enable_mask && artifactDesign.mask_id">
-                    <div class="lazer-mask h-full w-full absolute" :style="{ maskImage: `url(${img(artifactDesign.mask_id)})` }">
+                <img class="chara-center h-full absolute object-cover" fetchpriority="low" :src="img(currentDesign.character_id)">
+                <template v-if="currentDesign.enable_mask && currentDesign.mask_id">
+                    <div class="lazer-mask h-full w-full absolute" :style="{ maskImage: `url(${img(currentDesign.mask_id)})` }">
                         <div class="h-full w-full flow-colorful" />
                     </div>
                 </template>
-                <img class="frame-upper h-full absolute" fetchpriority="low" :src="img(artifactDesign.frame_id)">
+                <img class="frame-upper h-full absolute" fetchpriority="low" :src="img(currentDesign.frame_id)">
                 <div class="absolute inset-0">
                     <div class="relative space-y-2 w-full">
-                        <DXRating class="pt-4 w-[40%]" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
-                        <PlayerInfo :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+                        <DXRating class="pt-4 w-[40%]" :current-design="currentDesign" />
+                        <PlayerInfo :current-design="currentDesign" />
                     </div>
                 </div>
 
-                <CharaInfo class="bottom-[18%] absolute" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+                <CharaInfo class="bottom-[18%] absolute" :cuttent-design="currentDesign" />
 
-                <QRCode class="absolute right-0 bottom-[6%] z-10" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+                <QRCode class="absolute right-0 bottom-[6%] z-10" :use-design-ctx="useDesignCtx" :current-design="currentDesign" />
 
                 <div
                     id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
-                    :style="{ '--b-bottom': `url(${img(artifactDesign.frame_id)})` }"
+                    :style="{ '--b-bottom': `url(${img(currentDesign.frame_id)})` }"
                 >
                     <button class="cursor-pointer" data-tour="rocket-button">
                         <div class="p-1 rounded-full bg-white" aria-label="rocket" role="img">
@@ -53,10 +52,10 @@ const { img } = useUtils()
                     </button>
                     <div class="footer-widget flex justify-between py-1 rounded-2xl bg-gray-800 text-white opacity-85">
                         <p class="footer-text font-sega">
-                            {{ artifactDesign.simplified_code }}
+                            {{ currentDesign.simplified_code }}
                         </p>
                         <p class="footer-text font-sega">
-                            {{ artifactDesign.game_version }}
+                            {{ currentDesign.game_version }}
                         </p>
                     </div>
                     <NuxtLink to="/preference" data-tour="settings-button">
