@@ -8,15 +8,14 @@ const { width, height } = useWindowSize()
 
 const route = useRoute()
 const artifactId = route.params.id as string // UUID string
-const artifactCtx = await useArtifact(artifactId)
-const artifactDesign = artifactCtx.artifact.value.product.design
-const sketchpadComponent = resolveComponent(artifactCtx.sketchpadComponent)
+const { useDesignCtx } = await useArtifact(artifactId)
+const sketchpadComponent = computed(() => useDesignCtx.sketchpadComponent.value)
 
 watchEffect(() => {
     if (sketchpadRef.value?.$el) {
         const cardWidth: number = sketchpadRef.value.$el.clientWidth
         const cardHeight: number = sketchpadRef.value.$el.clientHeight
-        artifactCtx.sketchpadScale.value = Math.min(width.value / cardWidth, height.value / cardHeight)
+        useDesignCtx.sketchpadScale.value = Math.min(width.value / cardWidth, height.value / cardHeight)
     }
 })
 </script>
@@ -24,7 +23,7 @@ watchEffect(() => {
 <template>
     <div class="w-full h-full overflow-hidden relative">
         <client-only>
-            <component :is="sketchpadComponent" ref="sketchpad" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+            <component :is="sketchpadComponent" ref="sketchpad" :use-design-ctx="useDesignCtx" />
         </client-only>
     </div>
 </template>

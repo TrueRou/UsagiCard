@@ -5,13 +5,12 @@ definePageMeta({
 
 const route = useRoute()
 const artifactId = route.params.id as string // UUID string
-const artifactCtx = await useArtifact(artifactId)
-const artifactDesign = artifactCtx.artifact.value.product.design
-const adaptiveComponent = resolveComponent(artifactCtx.adaptiveViewComponent)
+const { useDesignCtx } = await useArtifact(artifactId)
+const adaptiveComponent = computed(() => useDesignCtx.adaptiveViewComponent.value)
 </script>
 
 <template>
     <div class="w-full h-full overflow-hidden relative">
-        <component :is="adaptiveComponent" :artifact-ctx="artifactCtx" :artifact-design="artifactDesign" />
+        <component :is="adaptiveComponent" :use-design-ctx="useDesignCtx" />
     </div>
 </template>
