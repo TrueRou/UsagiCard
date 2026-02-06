@@ -35,9 +35,6 @@ const openUploader = ref(false)
 const deleteTarget = ref<ImageSimplePublic | null>(null)
 const pending = ref(false)
 
-const title = computed(() => props.selectorCtx.selectorTitleLabel?.value ?? '选择图片')
-const confirmButtonText = computed(() => props.selectorCtx.selectorConfirmLabel ?? '使用此图片')
-
 const imageKey = (image: ImageSimplePublic) => image.id
 
 const imageUrl = (image: ImageSimplePublic) => imgPreview(image.id)
@@ -161,7 +158,7 @@ watch([activeSecondary], async () => {
                 <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h2 class="text-2xl font-semibold">
-                            {{ title }}
+                            选择图片
                         </h2>
                         <p v-if="selectorCtx.selectorImageAspect?.value" class="text-sm text-base-content/70">
                             比例：{{ selectorCtx.selectorImageAspect.value.name }} · {{ `${selectorCtx.selectorImageAspect.value.ratio_width_unit}:${selectorCtx.selectorImageAspect.value.ratio_height_unit}` }}
@@ -268,7 +265,7 @@ watch([activeSecondary], async () => {
                         @click="confirmSelection"
                     >
                         <span v-if="pending" class="loading loading-spinner" />
-                        <span>{{ confirmButtonText }}</span>
+                        <span>使用此图片</span>
                     </button>
                 </div>
             </div>

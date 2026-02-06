@@ -14,7 +14,7 @@ export function useDefaultDesign(overrideDesign: Ref<Partial<UsagiCardDxDesign>>
         enable_qrcode_front: false,
         enable_qrcode_back: false,
         enable_chara_info: true,
-        enable_landscape: true,
+        enable_landscape: false,
         enable_mask: false,
         character_id: '9bc837c2-0f9a-4d98-9874-15c0f00bce52',
         mask_id: '0cc5d8e5-8bb8-4c48-bfca-6f334319b530',

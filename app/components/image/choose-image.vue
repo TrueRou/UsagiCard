@@ -3,7 +3,7 @@ const props = defineProps<{
     imageId?: string
     label: string
     helper: string
-    alt: string
+    alt?: string
     allowClear?: boolean
 }>()
 

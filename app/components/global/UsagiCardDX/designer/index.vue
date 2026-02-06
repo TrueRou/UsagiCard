@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { useCharacterMetadata } from '~/composables/artifact/UsagiCardDX/useCharacterMetadata'
-import { useImageSelector } from '~/composables/artifact/UsagiCardDX/useImageSelector'
+import { useCharacterMetadata } from '~/composables/design/UsagiCardDX/useCharacterMetadata'
+import { useDefaultDesign } from '~/composables/design/UsagiCardDX/useDefaultDesign'
+import { useImageSelector } from '~/composables/design/UsagiCardDX/useImageSelector'
 
 const props = defineProps<{
-    artifactCtx: UseArtifactCtx
-    artifactDesign: UsagiCardDxDesign
+    useDesignCtx: UseDesignCtx
 }>()
 
-const { t } = useI18n()
-const currentDesign = ref<UsagiCardDxDesign>({ ...props.artifactDesign })
+const currentDesign = ref<UsagiCardDxDesign>({ ...useDefaultDesign(props.useDesignCtx.rawDesign).currentDesign.value })
 const { matchCharacterMetadata, showMatchCharacterMetadataHelp } = await useCharacterMetadata(currentDesign)
 const imageSelectorCtx = await useImageSelector(currentDesign)
+const { save, isSaving } = useDesigner()
 
 function goToPrev() {
-    watch(() => props.artifactCtx.isSavingDesign.value, (newVal, oldVal) => {
+    watch(() => isSaving.value, (newVal, oldVal) => {
         if (oldVal === true && newVal === false)
             useRouter().go(-1)
     })
@@ -42,10 +42,10 @@ function goToPrev() {
                 </div>
             </section>
 
-            <form class="space-y-4" @submit.prevent="artifactCtx.saveDesign(currentDesign)">
+            <form class="space-y-4" @submit.prevent="save(currentDesign)">
                 <!-- 偏好设置标题 -->
                 <div class="divider my-2">
-                    {{ t("sections.preference") }}
+                    偏好设置
                 </div>
 
                 <!-- 偏好设置表单 -->
@@ -54,16 +54,16 @@ function goToPrev() {
                     <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
-                                {{ t("fields.displayName.label") }}
+                                玩家名称
                             </p>
                             <p class="text-xs text-base-content/60">
-                                {{ t(`fields.displayName.helper`) }}
+                                卡面右上方显示的玩家名称
                             </p>
                         </label>
                         <div class="flex items-center gap-3">
                             <input
                                 v-model="currentDesign.display_name" class="input input-bordered flex-1"
-                                type="text" :placeholder="t('fields.displayName.placeholder')"
+                                type="text" placeholder="留空以隐藏角色信息框"
                             >
                         </div>
                     </div>
@@ -72,16 +72,16 @@ function goToPrev() {
                     <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
-                                {{ t("fields.simplifiedCode.label") }}
+                                卡面标签
                             </p>
                             <p class="text-xs text-base-content/60">
-                                {{ t(`fields.simplifiedCode.helper`) }}
+                                卡面底栏左侧显示的文字内容
                             </p>
                         </label>
                         <div class="flex items-center gap-3">
                             <input
                                 v-model="currentDesign.simplified_code" class="input input-bordered flex-1"
-                                type="text" :placeholder="t('fields.simplifiedCode.placeholder')"
+                                type="text" placeholder="留空以隐藏文本"
                             >
                         </div>
                     </div>
@@ -90,16 +90,16 @@ function goToPrev() {
                     <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
-                                {{ t("fields.friendCode.label") }}
+                                好友代码
                             </p>
                             <p class="text-xs text-base-content/60">
-                                {{ t(`fields.friendCode.helper`) }}
+                                卡面右上方显示的好友代码
                             </p>
                         </label>
                         <div class="flex items-center gap-3">
                             <input
                                 v-model="currentDesign.friend_code" class="input input-bordered flex-1"
-                                type="text" :placeholder="t('fields.friendCode.placeholder')"
+                                type="text" placeholder="留空以隐藏好友代码区域"
                             >
                         </div>
                     </div>
@@ -108,16 +108,16 @@ function goToPrev() {
                     <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
-                                {{ t("fields.maimaiVersion.label") }}
+                                游戏版本
                             </p>
                             <p class="text-xs text-base-content/60">
-                                {{ t(`fields.maimaiVersion.helper`) }}
+                                卡面底栏右侧显示的机台版本信息
                             </p>
                         </label>
                         <div class="flex items-center gap-3">
                             <input
                                 v-model="currentDesign.game_version" class="input input-bordered flex-1"
-                                type="text" :placeholder="t('fields.maimaiVersion.placeholder')"
+                                type="text" placeholder="留空以隐藏文本"
                             >
                         </div>
                     </div>
@@ -126,16 +126,16 @@ function goToPrev() {
                     <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
-                                {{ t("fields.dxRating.label") }}
+                                DX 分数
                             </p>
                             <p class="text-xs text-base-content/60">
-                                {{ t(`fields.dxRating.helper`) }}
+                                卡面顶栏右侧显示的 DX Rating
                             </p>
                         </label>
                         <div class="flex items-center gap-3">
                             <input
                                 v-model="currentDesign.dx_rating" class="input input-bordered flex-1"
-                                type="text" :placeholder="t('fields.dxRating.placeholder')"
+                                type="text" placeholder="留空以隐藏分数框"
                             >
                         </div>
                     </div>
@@ -144,16 +144,52 @@ function goToPrev() {
                     <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
-                                {{ t("fields.characterName.label") }}
+                                立绘名称
                             </p>
                             <p class="text-xs text-base-content/60">
-                                {{ t(`fields.characterName.helper`) }}
+                                卡面左下方显示的角色立绘名称
                             </p>
                         </label>
                         <div class="flex items-center gap-3">
                             <input
                                 v-model="currentDesign.character_name" class="input input-bordered flex-1"
-                                type="text" :placeholder="t('fields.characterName.placeholder')"
+                                type="text" placeholder="留空以单独隐藏立绘名称"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- 卡号标签 -->
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
+                        <label>
+                            <p class="font-medium text-sm">
+                                卡号标签
+                            </p>
+                            <p class="text-xs text-base-content/60">
+                                卡面左下方显示的卡号标签
+                            </p>
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input
+                                v-model="currentDesign.card_number_label" class="input input-bordered flex-1"
+                                type="text" placeholder="カード 番号"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- 卡号内容 -->
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
+                        <label>
+                            <p class="font-medium text-sm">
+                                卡号内容
+                            </p>
+                            <p class="text-xs text-base-content/60">
+                                卡面左下方显示的卡号内容
+                            </p>
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input
+                                v-model="currentDesign.card_number" class="input input-bordered flex-1"
+                                type="text" placeholder="0721"
                             >
                         </div>
                     </div>
@@ -162,10 +198,10 @@ function goToPrev() {
                     <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
-                                {{ t("fields.charaInfoColor.label") }}
+                                角色立绘区颜色
                             </p>
                             <p class="text-xs text-base-content/60">
-                                {{ t(`fields.charaInfoColor.helper`) }}
+                                角色立绘信息区的背景颜色
                             </p>
                         </label>
                         <div class="flex items-center gap-3">
@@ -180,10 +216,10 @@ function goToPrev() {
                     <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
-                                {{ t("fields.playerInfoColor.label") }}
+                                玩家信息区颜色
                             </p>
                             <p class="text-xs text-base-content/60">
-                                {{ t(`fields.playerInfoColor.helper`) }}
+                                玩家信息区的背景颜色
                             </p>
                         </label>
                         <div class="flex items-center gap-3">
@@ -193,81 +229,75 @@ function goToPrev() {
                             >
                         </div>
                     </div>
-
-                    <!-- 二维码尺寸 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
-                        <label>
-                            <p class="font-medium text-sm">
-                                {{ t("fields.qrSize.label") }}
-                            </p>
-                            <p class="text-xs text-base-content/60">
-                                {{ t("fields.qrSize.helper") }}
-                            </p>
-                        </label>
-                        <div class="flex items-center gap-3 h-10">
-                            <input
-                                v-model="currentDesign.qr_size" class="range range-primary flex-1" type="range" min="8"
-                                max="40"
-                            >
-                            <span class="badge badge-lg">
-                                {{ currentDesign.qr_size }}
-                                {{ t("fields.qrSize.unit") }}
-                            </span>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- 显示设置标题 -->
                 <div class="divider my-2">
-                    {{ t("sections.display") }}
+                    显示设置
                 </div>
 
                 <!-- 显示设置表单 -->
                 <div class="grid gap-4 md:grid-cols-2">
-                    <!-- 显示玩家名称 -->
+                    <!-- 显示正面二维码 -->
                     <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
                         <div>
                             <p class="font-medium text-sm">
-                                {{ t("fields.showDisplayName.label") }}
+                                显示正面二维码
                             </p>
                             <p class="text-xs text-base-content/70">
-                                {{ t("fields.showDisplayName.helper") }}
+                                在卡片正面显示二维码
                             </p>
                         </div>
                         <input
-                            v-model="currentDesign.show_display_name" class="toggle toggle-primary"
+                            v-model="currentDesign.enable_qrcode_front" class="toggle toggle-primary"
                             type="checkbox"
                         >
                     </div>
 
-                    <!-- 显示好友代码 -->
+                    <!-- 显示正面二维码 -->
                     <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
                         <div>
                             <p class="font-medium text-sm">
-                                {{ t("fields.showFriendCode.label") }}
+                                显示反面二维码
                             </p>
                             <p class="text-xs text-base-content/70">
-                                {{ t("fields.showFriendCode.helper") }}
+                                在卡片反面显示二维码
                             </p>
                         </div>
                         <input
-                            v-model="currentDesign.show_friend_code" class="toggle toggle-primary"
+                            v-model="currentDesign.enable_qrcode_back" class="toggle toggle-primary"
                             type="checkbox"
                         >
                     </div>
 
-                    <!-- 显示玩家评分 -->
+                    <!-- 显示立绘信息 -->
                     <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
                         <div>
                             <p class="font-medium text-sm">
-                                {{ t("fields.showDxRating.label") }}
+                                显示立绘信息
                             </p>
                             <p class="text-xs text-base-content/70">
-                                {{ t("fields.showDxRating.helper") }}
+                                显示卡面左下方的立绘信息
                             </p>
                         </div>
                         <input
-                            v-model="currentDesign.show_dx_rating" class="toggle toggle-primary"
+                            v-model="currentDesign.enable_chara_info" class="toggle toggle-primary"
+                            type="checkbox"
+                        >
+                    </div>
+
+                    <!-- 启用横版显示 -->
+                    <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
+                        <div>
+                            <p class="font-medium text-sm">
+                                启用横版布局
+                            </p>
+                            <p class="text-xs text-base-content/70">
+                                使用横版卡面布局
+                            </p>
+                        </div>
+                        <input
+                            v-model="currentDesign.enable_landscape" class="toggle toggle-primary"
                             type="checkbox"
                         >
                     </div>
@@ -276,10 +306,10 @@ function goToPrev() {
                     <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
                         <div>
                             <p class="font-medium text-sm">
-                                {{ t("fields.enableMask.label") }}
+                                开启遮罩图层
                             </p>
                             <p class="text-xs text-base-content/70">
-                                {{ t("fields.enableMask.helper") }}
+                                在立绘上应用遮罩图层渐变效果
                             </p>
                         </div>
                         <input
@@ -291,17 +321,16 @@ function goToPrev() {
 
                 <!-- 图片设置标题 -->
                 <div class="divider my-2">
-                    {{ t("sections.images") }}
+                    图片设置
                 </div>
 
                 <!-- 图片设置表单 -->
-                <div class="grid gap-4 md:grid-cols-2" data-tour="image-settings">
+                <div class="grid gap-4 md:grid-cols-2">
                     <!-- 角色立绘 -->
                     <ImageChooseImage
                         :image-id="currentDesign.character_id"
-                        :label="t('images.character.label')"
-                        :helper="t('images.character.helper')"
-                        :alt="t('images.character.label')"
+                        label="角色立绘"
+                        helper="覆盖在立绘上的装饰或遮挡层"
                         :allow-clear="true"
                         @select="imageSelectorCtx.openImageSelector('character')"
                         @clear="imageSelectorCtx.clearImageSelect('character')"
@@ -321,20 +350,28 @@ function goToPrev() {
                     <!-- 遮罩图层 -->
                     <ImageChooseImage
                         :image-id="currentDesign.mask_id"
-                        :label="t('images.mask.label')"
-                        :helper="t('images.mask.helper')"
-                        :alt="t('images.mask.label')"
+                        label="遮罩图层"
+                        helper="覆盖在立绘上的装饰或遮挡层"
                         :allow-clear="true"
                         @select="imageSelectorCtx.openImageSelector('mask')"
                         @clear="imageSelectorCtx.clearImageSelect('mask')"
                     />
 
-                    <!-- 背景 -->
+                    <!-- 正面背景 -->
                     <ImageChooseImage
                         :image-id="currentDesign.background_id"
-                        :label="t('images.background.label')"
-                        :helper="t('images.background.helper')"
-                        :alt="t('images.background.label')"
+                        label="正面背景"
+                        helper="角色背后展示的背景"
+                        :allow-clear="false"
+                        @select="imageSelectorCtx.openImageSelector('background')"
+                        @clear="imageSelectorCtx.clearImageSelect('background')"
+                    />
+
+                    <!-- 反面背景 -->
+                    <ImageChooseImage
+                        :image-id="currentDesign.background_id"
+                        label="反面背景"
+                        helper="卡背印刷的图片"
                         :allow-clear="false"
                         @select="imageSelectorCtx.openImageSelector('background')"
                         @clear="imageSelectorCtx.clearImageSelect('background')"
@@ -343,18 +380,43 @@ function goToPrev() {
                     <!-- 边框 -->
                     <ImageChooseImage
                         :image-id="currentDesign.frame_id"
-                        :label="t('images.frame.label')"
-                        :helper="t('images.frame.helper')"
-                        :alt="t('images.frame.label')"
+                        label="边框"
+                        helper="包裹卡面的装饰框体"
                         :allow-clear="true"
                         @select="imageSelectorCtx.openImageSelector('frame')"
                         @clear="imageSelectorCtx.clearImageSelect('frame')"
                     />
                 </div>
 
+                <!-- 额外设置标题 -->
+                <div class="divider my-2">
+                    额外设置
+                </div>
+
+                <!-- 额外设置表单 -->
+                <div class="grid gap-4 md:grid-cols-2">
+                    <!-- 覆盖二维码 -->
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
+                        <label>
+                            <p class="font-medium text-sm">
+                                覆盖二维码
+                            </p>
+                            <p class="text-xs text-base-content/60">
+                                覆盖二维码扫描内容
+                            </p>
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input
+                                v-model="currentDesign.override_qrcode" class="input input-bordered flex-1"
+                                type="text" placeholder="留空以保持默认行为"
+                            >
+                        </div>
+                    </div>
+                </div>
+
                 <footer class="flex justify-end">
-                    <button class="btn btn-primary w-full md:w-auto" type="submit" data-tour="save-button" :disabled="artifactCtx.isSavingDesign.value" @click.stop="goToPrev()">
-                        <span v-if="artifactCtx.isSavingDesign.value" class="loading loading-spinner" />
+                    <button class="btn btn-primary w-full md:w-auto" type="submit" :disabled="isSaving" @click.stop="goToPrev()">
+                        <span v-if="isSaving" class="loading loading-spinner" />
                         <span>保存修改</span>
                     </button>
                 </footer>
@@ -362,87 +424,3 @@ function goToPrev() {
         </div>
     </div>
 </template>
-
-<i18n lang="yaml">
-zh-CN:
-  sections:
-    preference: 自定义选项
-    display: 显示设置
-    images: 图片预览与设定
-    accounts: 账号绑定
-  fields:
-    displayName:
-      label: 玩家名称
-      helper: 覆盖卡面右上方显示的玩家名称
-      placeholder: 留空以自动获取
-    simplifiedCode:
-      label: 卡面标签
-      helper: 覆盖卡面底栏左侧显示的随机码内容
-      placeholder: 留空以自动获取
-    friendCode:
-      label: 好友代码
-      helper: 覆盖卡面右上方显示的好友代码
-      placeholder: 留空以自动获取
-    characterName:
-      label: 立绘名称
-      helper: 覆盖卡面左下方显示的角色立绘名称
-      placeholder: 留空以隐藏
-    maimaiVersion:
-      label: 游戏版本
-      helper: 覆盖卡面底栏右侧显示的机台版本信息
-      placeholder: 留空以自动获取
-    dxRating:
-      label: DX 分数
-      helper: 覆盖卡面顶栏右侧显示的 DX Rating
-      placeholder: 留空以自动获取
-    qrSize:
-      label: 二维码尺寸
-      helper: 调整展示在卡面右下方的二维码大小
-      unit: px
-    charaInfoColor:
-      label: 角色立绘区颜色
-      helper: 角色立绘信息区的背景颜色
-    playerInfoColor:
-      label: 玩家信息区颜色
-      helper: 玩家信息区的背景颜色
-    showDisplayName:
-      label: 显示玩家名称
-      helper: 是否显示右上方玩家名称
-    showFriendCode:
-      label: 显示好友代码
-      helper: 是否显示右上方好友代码
-    showDxRating:
-      label: 显示 DX 分数
-      helper: 是否显示顶栏右侧 DX Rating
-    showDate:
-      label: 显示日期
-      helper: 是否显示左下方日期
-    enableMask:
-      label: 开启遮罩图层
-      helper: 是否在角色立绘上应用遮罩图层渐变效果
-    account:
-      server: 选择服务器
-      credentials: 账号凭据
-  images:
-    title-default: 选择图片
-    character:
-      label: 角色立绘
-      title: 选择角色立绘
-      helper: 卡面正面展示的角色形象
-    mask:
-      label: 遮罩图层
-      title: 选择遮罩图层
-      helper: 覆盖在立绘上的装饰或遮挡层
-    background:
-      label: 背景
-      title: 选择背景
-      helper: 角色背后展示的背景
-    frame:
-      label: 边框
-      title: 选择边框
-      helper: 包裹卡面的装饰框体
-    passname:
-      label: 名牌横幅
-      title: 选择名牌横幅
-      helper: 卡片顶部显示名牌的横幅
-</i18n>

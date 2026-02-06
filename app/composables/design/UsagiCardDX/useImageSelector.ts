@@ -1,7 +1,6 @@
 export async function useImageSelector(currentDesign: Ref<UsagiCardDxDesign>): Promise<UseImageSelectorCtx> {
     const { data: ID_1_FF } = await useLeporid<ImageAspectPublic>('/api/images/aspects/id-1-ff')
     const { loggedIn } = useUserSession()
-    const { t } = useI18n()
 
     const imageFieldMap: Record<string, keyof UsagiCardDxDesign> = {
         character: 'character_id',
@@ -58,16 +57,11 @@ export async function useImageSelector(currentDesign: Ref<UsagiCardDxDesign>): P
         return selectorImageKey.value ? [selectorImageKey.value] : []
     })
 
-    const selectorTitleLabel = computed(() => {
-        return selectorImageKey.value ? t(`images.${selectorImageKey.value}.title`) : t('images.title-default')
-    })
-
     return {
         selectorOpen,
         selectorImageKey,
         selectorImageAspect,
         selectorInitialFilters,
-        selectorTitleLabel,
         selectorReadonlyMode: !loggedIn.value,
         openImageSelector,
         closeImageSelector,

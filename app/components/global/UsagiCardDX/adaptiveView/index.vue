@@ -39,7 +39,7 @@ const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
                     id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
                     :style="{ '--b-bottom': `url(${img(currentDesign.frame_id)})` }"
                 >
-                    <button class="cursor-pointer" data-tour="rocket-button">
+                    <button class="cursor-pointer">
                         <div class="p-1 rounded-full bg-white" aria-label="rocket" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
@@ -58,7 +58,7 @@ const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
                             {{ currentDesign.game_version }}
                         </p>
                     </div>
-                    <NuxtLink to="/preference" data-tour="settings-button">
+                    <NuxtLink to="/preference">
                         <div class="p-1 rounded-full bg-white" aria-label="settings" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="0 0 24 24"
