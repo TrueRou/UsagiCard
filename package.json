@@ -22,15 +22,18 @@
         "@vueuse/nuxt": "14.1.0",
         "axios": "^1.13.2",
         "daisyui": "^5.5.14",
+        "flexsearch": "^0.8.212",
         "nuxt": "^4.2.2",
         "nuxt-auth-utils": "0.5.25",
         "pinia": "^3.0.4",
+        "pinyin-pro": "^3.28.0",
         "qrcode": "^1.5.4",
         "tailwindcss": "^4.1.18",
         "ufo": "^1.6.3",
         "vue": "^3.5.26",
         "vue-cropper": "^1.1.4",
         "vue-router": "^4.6.4",
+        "wanakana": "^5.3.1",
         "zod": "^4.3.5"
     },
     "devDependencies": {

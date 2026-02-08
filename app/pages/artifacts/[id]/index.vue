@@ -1,6 +1,10 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'full-page',
+    pageTransition: {
+        name: 'function-page',
+        mode: 'out-in',
+    },
 })
 
 const route = useRoute()

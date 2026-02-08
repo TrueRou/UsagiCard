@@ -1,6 +1,10 @@
 <script setup lang="ts">
 definePageMeta({
     layout: 'full-page',
+    pageTransition: {
+        name: 'function-page',
+        mode: 'out-in',
+    },
 })
 
 const route = useRoute()
@@ -39,13 +43,17 @@ function goBack() {
                 </li>
                 <li v-for="(item, index) in tabConfigs" :key="item.label">
                     <details :ref="el => { if (el) mobileDetailsRefs[index] = el as HTMLDetailsElement }">
-                        <summary>
+                        <summary class="text-base font-medium">
                             <span v-if="item.icon">{{ item.icon }}</span>
                             {{ item.label }}
                         </summary>
-                        <ul class="dropdown-content">
+                        <ul class="dropdown-content bg-base-100 shadow-lg rounded-box w-56 z-50">
                             <li v-for="val, key in item.items" :key="key">
-                                <a :class="{ active: activeTabKey === key }" @click="handleTabKeySwap(key)">
+                                <a
+                                    :class="{ active: activeTabKey === key }"
+                                    class="text-base py-3 px-4"
+                                    @click="handleTabKeySwap(key)"
+                                >
                                     <span v-if="val.icon">{{ val.icon }}</span>
                                     {{ val.label }}
                                 </a>
@@ -59,25 +67,31 @@ function goBack() {
         <!-- 桌面端侧边菜单栏 -->
         <aside class="hidden lg:block w-64 min-h-full bg-base-200 border-r overflow-y-auto">
             <div class="p-2">
-                <ul class="menu menu-compact rounded-box">
-                    <li>
-                        <button @click="goBack">
+                <ul class="menu menu-compact rounded-box w-full">
+                    <li class="w-full">
+                        <button class="w-full justify-start" @click="goBack">
                             <svg data-v-1c88b26a="" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path data-v-1c88b26a="" fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>Back
                         </button>
                     </li>
-                    <li v-for="item in tabConfigs" :key="item.label">
-                        <summary>
-                            <span v-if="item.icon">{{ item.icon }}</span>
-                            {{ item.label }}
-                        </summary>
-                        <ul>
-                            <li v-for="val, key in item.items" :key="key">
-                                <a :class="{ active: activeTabKey === key }" @click="handleTabKeySwap(key)">
-                                    <span v-if="val.icon">{{ val.icon }}</span>
-                                    {{ val.label }}
-                                </a>
-                            </li>
-                        </ul>
+                    <li v-for="item in tabConfigs" :key="item.label" class="w-full">
+                        <details open class="w-full">
+                            <summary class="w-full">
+                                <span v-if="item.icon">{{ item.icon }}</span>
+                                {{ item.label }}
+                            </summary>
+                            <ul class="w-full">
+                                <li v-for="val, key in item.items" :key="key" class="w-full">
+                                    <a
+                                        :class="{ active: activeTabKey === key }"
+                                        class="w-full justify-start"
+                                        @click="handleTabKeySwap(key)"
+                                    >
+                                        <span v-if="val.icon">{{ val.icon }}</span>
+                                        {{ val.label }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </details>
                     </li>
                 </ul>
             </div>
@@ -85,9 +99,11 @@ function goBack() {
 
         <!-- 主内容区域 -->
         <main class="flex-1 overflow-y-auto bg-base-100">
-            <div v-if="activeComponent" class="container mx-auto p-4 lg:p-6">
-                <component :is="activeComponent" :artifact="artifact" />
-            </div>
+            <Transition name="content-fade" mode="out-in">
+                <div v-if="activeComponent" :key="activeTabKey" class="container mx-auto p-4 lg:p-6">
+                    <component :is="activeComponent" :artifact="artifact" />
+                </div>
+            </Transition>
         </main>
     </div>
 </template>
@@ -110,5 +126,37 @@ function goBack() {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.3);
+}
+
+/* 页面进入/退出过渡效果 */
+.function-page-enter-active,
+.function-page-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.function-page-enter-from {
+    opacity: 0;
+    transform: translateX(10px);
+}
+
+.function-page-leave-to {
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+/* 内容切换过渡效果 */
+.content-fade-enter-active,
+.content-fade-leave-active {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.content-fade-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.content-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
 }
 </style>
