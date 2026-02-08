@@ -33,6 +33,10 @@ export enum ProductTypeDesign {
     UsagiCardWars = 1,
 }
 
+export enum ProductTypeFunction {
+    MaimaiCN = 0,
+}
+
 export enum ArtifactDisplayMode {
     SKETCHPAD_FRONT = 0,
     SKETCHPAD_BACK = 1,

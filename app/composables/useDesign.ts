@@ -14,8 +14,8 @@ export async function useDesign(
         rawDesign: rawDesignRef,
         sketchpadScale: sketchpadScaleRef,
         displayMode: displayModeRef,
-        designerComponent: computed(() => `${designTypeLiteral.value}Designer`),
-        sketchpadComponent: computed(() => `${designTypeLiteral.value}Sketchpad`),
-        adaptiveViewComponent: computed(() => `${designTypeLiteral.value}AdaptiveView`),
+        designerComponent: computed(() => `Design${designTypeLiteral.value}Designer`),
+        sketchpadComponent: computed(() => `Design${designTypeLiteral.value}Sketchpad`),
+        adaptiveViewComponent: computed(() => `Design${designTypeLiteral.value}AdaptiveView`),
     }
 }
