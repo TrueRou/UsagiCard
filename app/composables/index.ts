@@ -1,5 +1,3 @@
-export { useArtifact } from './useArtifact'
-
 export interface UseImageSelectorCtx {
     selectorOpen: Ref<boolean>
     selectorImageKey?: Ref<string | undefined>
@@ -22,4 +20,17 @@ export interface UseDesignCtx {
     designerComponent: Ref<string>
     sketchpadComponent: Ref<string>
     adaptiveViewComponent: Ref<string>
+}
+
+export interface UseFunctionTabsCtx {
+    tabConfig: {
+        label: string
+        icon?: string
+        items: Record<string, {
+            label: string
+            component: string
+            icon?: string
+        }>
+    }
+    defaultTabKey: string
 }
