@@ -58,7 +58,7 @@ const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
                             {{ currentDesign.game_version }}
                         </p>
                     </div>
-                    <NuxtLink to="/preference">
+                    <NuxtLink :to="`/artifacts/${useDesignCtx.artifactId.value}/functions`">
                         <div class="p-1 rounded-full bg-white" aria-label="settings" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="0 0 24 24"

@@ -1,3 +1,0 @@
-<template>
-    MaimaiMinfo
-</template>
