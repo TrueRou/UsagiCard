@@ -1,9 +1,9 @@
 export async function useArtifact(artifactId: string) {
-    const { data, refresh } = await useLeporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
+    const { data, refresh, error } = await useLeporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
 
     const artifact = computed(() => {
         if (data.value === undefined) {
-            throw createError({ statusCode: 404, statusText: 'Artifact not found', fatal: true })
+            throw createError({ statusCode: 404, statusText: '工件不存在', fatal: true, data: error.value })
         }
         return data.value
     })

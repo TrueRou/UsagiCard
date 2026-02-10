@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import type { MaimaiBests } from '~/composables/function/MaimaiCN/useMaimaiUtils'
+import { useMaimaiScores } from '~/composables/function/MaimaiCN/useMaimaiScores'
 import { TileDisplayMode, ViewMode } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 import ScoreList from './components/score-list.vue'
 
-const props = withDefaults(defineProps<{
-    bests: MaimaiBests
-    isLoading?: boolean
-}>(), {
-    isLoading: false,
-})
+const props = defineProps<{
+    artifact: ArtifactUserResponse
+}>()
+
+const { bests } = await useMaimaiScores(props.artifact)
 
 const currentViewMode = ref<ViewMode>(ViewMode.LIST)
 const tileDisplayMode = ref<TileDisplayMode>(TileDisplayMode.RATING)
@@ -24,18 +23,18 @@ function toggleTileDisplayMode(mode: TileDisplayMode) {
 const stats = computed(() => {
     const data = []
 
-    const total = props.bests.rating_b35 + props.bests.rating_b15
+    const total = bests.value.rating_b35 + bests.value.rating_b15
     data.push({
         label: 'BEST 35',
-        count: props.bests.rating_b35,
-        part: Math.round(props.bests.rating_b35 / total * 100),
+        count: bests.value.rating_b35,
+        part: Math.round(bests.value.rating_b35 / total * 100),
         color: '#228be6',
     })
 
     data.push({
         label: 'BEST 15',
-        count: props.bests.rating_b15,
-        part: Math.round(props.bests.rating_b15 / total * 100),
+        count: bests.value.rating_b15,
+        part: Math.round(bests.value.rating_b15 / total * 100),
         color: '#fd7e14',
     })
 
@@ -50,23 +49,12 @@ const stats = computed(() => {
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h3 class="text-xl font-bold mb-1 dark:text-white">
-                        {{ Math.floor(props.bests.rating * 100) / 100
+                        {{ Math.floor(bests.rating * 100) / 100
                         }}
                     </h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         DX Rating 总和
                     </p>
-                </div>
-                <div v-if="props.isLoading" class="animate-spin mr-2 text-gray-700 dark:text-gray-300">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                    </svg>
                 </div>
             </div>
 

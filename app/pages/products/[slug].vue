@@ -102,7 +102,7 @@ const productDetails: Record<string, ProductDetail> = {
 const product = productDetails[route.params.slug as string]
 
 if (!product) {
-    throw createError({ statusCode: 404, statusMessage: '未找到对应产品' })
+    throw createError({ statusCode: 404, statusMessage: '未找到对应产品', fatal: true })
 }
 
 useHead({
@@ -121,8 +121,8 @@ useHead({
                 <p class="text-2xl text-slate-200">{{ product.headline }}</p>
                 <p class="text-lg text-slate-300 leading-relaxed">{{ product.description }}</p>
             </div>
-            <div class="rounded-[32px] overflow-hidden border border-white/10 bg-gradient-to-br from-white/10 to-transparent">
-                <img :src="product.heroImage" :alt="product.name" class="w-full h-[26rem] object-cover">
+            <div class="rounded-4xl overflow-hidden border border-white/10 bg-linear-to-br from-white/10 to-transparent">
+                <img :src="product.heroImage" :alt="product.name" class="w-full h-104 object-cover">
             </div>
             <div class="grid md:grid-cols-3 gap-6">
                 <div
@@ -138,7 +138,7 @@ useHead({
 
         <section class="max-w-5xl mx-auto px-6 sm:px-10 pb-20">
             <div class="grid md:grid-cols-2 gap-8">
-                <article class="rounded-[32px] border border-white/10 bg-white/5 p-8 space-y-4">
+                <article class="rounded-4xl border border-white/10 bg-white/5 p-8 space-y-4">
                     <p class="text-xs tracking-[0.4em] uppercase text-slate-400">Highlights</p>
                     <h2 class="text-3xl font-semibold">设计亮点</h2>
                     <ul class="space-y-3 text-slate-300">
@@ -148,7 +148,7 @@ useHead({
                         </li>
                     </ul>
                 </article>
-                <article class="rounded-[32px] border border-white/10 bg-gradient-to-br from-indigo-500/20 to-slate-900 p-8 space-y-4">
+                <article class="rounded-4xl border border-white/10 bg-linear-to-br from-indigo-500/20 to-slate-900 p-8 space-y-4">
                     <p class="text-xs tracking-[0.4em] uppercase text-slate-200">Experience</p>
                     <h2 class="text-3xl font-semibold">沉浸式体验</h2>
                     <p class="text-slate-100 leading-relaxed">
@@ -162,7 +162,7 @@ useHead({
                 <div
                     v-for="(image, index) in product.gallery"
                     :key="index"
-                    class="rounded-[32px] overflow-hidden border border-white/10"
+                    class="rounded-4xl overflow-hidden border border-white/10"
                 >
                     <img :src="image" :alt="`${product.name} gallery ${index + 1}`" class="w-full h-72 object-cover">
                 </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MaimaiScore } from '~/composables/function/MaimaiCN/useMaimaiUtils'
+import type { MaimaiScore, Song, SongDifficulty } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 import { SongType, useMaimaiUtils } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 import ScoreBlock from './score-block.vue'
 
@@ -82,7 +82,7 @@ watch(() => props.song, async (newSong) => {
             id: String(newSong.id),
             uuid: props.artifactId,
         })
-        const responseData: any = await useNuxtApp().$leporid(`/maimai/minfo?${params.toString()}`)
+        const responseData: any = await useNuxtApp().$leporid(`/maimai/usagicard/minfo?${params.toString()}`)
         songScores.value = responseData.scores
     }
     isLoading.value = false

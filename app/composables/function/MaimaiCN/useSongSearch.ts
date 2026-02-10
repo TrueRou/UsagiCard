@@ -1,4 +1,5 @@
 import type { Document, DocumentData } from 'flexsearch'
+import type { Song } from './useMaimaiUtils'
 import FlexSearch from 'flexsearch'
 import { pinyin } from 'pinyin-pro'
 import { toHiragana } from 'wanakana'

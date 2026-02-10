@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Song } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 import { useMaimaiUtils } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 import { useSongSearch } from '~/composables/function/MaimaiCN/useSongSearch'
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MaimaiScore } from '~/composables/function/MaimaiCN/useMaimaiUtils'
+import type { MaimaiScore, SongDifficulty, SongDifficultyUtage } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 import { SongType, useMaimaiUtils } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 
 const props = defineProps<{
