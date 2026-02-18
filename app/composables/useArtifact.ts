@@ -7,20 +7,30 @@ export async function useArtifact(artifactId: string) {
         }
         return data.value
     })
+    const artifactDesignType = computed(() => artifact.value.product.type.design_type)
+    const artifactDesign = computed(() => artifact.value.product.design)
+    const artifactProduct = computed(() => artifact.value.product)
+    const useDesignCtx = await useDesign(artifactDesignType, artifactDesign, artifactProduct, artifact)
 
-    const artifactDesignType = computed(() => {
-        return artifact.value.product.type.design_type
-    })
-
-    const artifactDesign = computed(() => {
-        return artifact.value.product.design
-    })
-
-    const useDesignCtx = await useDesign(artifactDesignType, artifactDesign, artifact)
+    const storageSaving = ref(false)
+    const storageSave = async (newStorage: Record<string, any>) => {
+        storageSaving.value = true
+        try {
+            data.value = await useNuxtApp().$leporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
+                method: 'PATCH',
+                body: { storage: newStorage },
+            })
+        }
+        finally {
+            setTimeout(() => storageSaving.value = false, 500)
+        }
+    }
 
     return {
         artifact,
         refresh,
+        storageSave,
+        storageSaving,
         useDesignCtx,
     }
 }
