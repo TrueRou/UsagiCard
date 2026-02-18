@@ -1464,7 +1464,7 @@ export type ProductTypeDesign = 0 | 1
 /**
  * ProductTypeFunction
  */
-export type ProductTypeFunction = 0
+export type ProductTypeFunction = 0 | 1
 
 /**
  * ProductTypePublic
@@ -1952,19 +1952,90 @@ export interface UsagiCardWarsDesign {
 }
 
 /**
+ * MaimaiStorage
+ *
+ * 舞萌存储数据
+ */
+export interface MaimaiStorage {
+    /**
+     * Player Name
+     *
+     * 玩家名称
+     */
+    player_name?: string | null
+    /**
+     * Player Rating
+     *
+     * 玩家评分
+     */
+    player_rating?: number | null
+    /**
+     * Friend Code
+     *
+     * 好友代码
+     */
+    friend_code?: string | null
+    /**
+     * Rem Accounts
+     *
+     * 记住账号列表
+     */
+    rem_accounts?: Array<{
+        /**
+         * MaimaiServer
+         */
+        server: 'diving_fish' | 'lxns'
+        /**
+         * Credential
+         *
+         * 账号鉴权信息
+         */
+        credential: string
+    }>
+    /**
+     * Updating At
+     *
+     * 数据更新时间
+     */
+    updating_at?: string | null
+    /**
+     * MaimaiUpdatingBehavior
+     */
+    updating_behavior?: 'adhoc' | 'aggregate'
+}
+
+/**
  * UsagiCardStorage
  *
  * 兔卡存储数据
  */
 export interface UsagiCardStorage {
     /**
-     * Card Id
+     * SecondaryAuthPolicy
      */
-    card_id: string
+    secondary_auth_policy?: 'private' | 'public_read' | 'public_read_write'
     /**
-     * Activation Code
+     * Secondary Auth Enabled
+     *
+     * 启用二级认证
      */
-    activation_code: string
+    secondary_auth_enabled?: boolean
+    /**
+     * Secondary Auth Users
+     *
+     * 二级认证用户列表
+     */
+    secondary_auth_users?: Array<string>
+    /**
+     * Derived From
+     *
+     * 派生源工件
+     */
+    derived_from?: string | null
+    /**
+     * DerivedBehavior
+     */
+    derived_behavior?: 'none' | 'redirect'
 }
 
 export interface RootGetData {

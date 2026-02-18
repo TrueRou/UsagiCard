@@ -1,26 +1,35 @@
-export async function useProduct(defaultDesign: Record<string, any>) {
-    const designerSaving = ref(false)
-    const designerContent = ref(defaultDesign)
+export async function useProduct(productId: Ref<string>) {
+    const { data, refresh, error } = await useLeporid<ProductPublic>(`/api/products/${productId}`)
 
-    const designerSave = async (newDesign: Record<string, any>) => {
-        designerSaving.value = true
+    const product = computed(() => {
+        if (data.value === undefined) {
+            throw createError({ statusCode: 404, statusText: '工件不存在', fatal: true, data: error.value })
+        }
+        return data.value
+    })
+
+    const productSaving = ref(false)
+    const productSave = async (newProduct: Record<string, any>) => {
+        productSaving.value = true
         try {
-            // TODO: 改为真正的保存接口
-            await useNuxtApp().$leporid('/api/nuxt/profile', {
-                method: 'PUT',
-                body: newDesign,
-                showSuccessToast: true,
-                successMessage: '设计已保存',
+            data.value = await useNuxtApp().$leporid<ProductPublic>(`/api/products/${productId}`, {
+                method: 'PATCH',
+                body: newProduct,
             })
         }
         finally {
-            setTimeout(() => designerSaving.value = false, 500)
+            setTimeout(() => productSaving.value = false, 500)
         }
+    }
+    const productSaveDesign = async (newDesign: Record<string, any>) => {
+        await productSave({ design: newDesign })
     }
 
     return {
-        designerContent,
-        designerSaving,
-        designerSave,
+        product,
+        refresh,
+        productSaving,
+        productSave,
+        productSaveDesign,
     }
 }

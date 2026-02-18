@@ -34,7 +34,8 @@ export enum ProductTypeDesign {
 }
 
 export enum ProductTypeFunction {
-    MaimaiCN = 0,
+    UsagiCard = 0,
+    MaimaiCN = 1,
 }
 
 export enum ArtifactDisplayMode {

@@ -7,10 +7,10 @@ const props = defineProps<{
     useDesignCtx: UseDesignCtx
 }>()
 
+const { productSaveDesign: save, productSaving: isSaving } = await useProduct(props.useDesignCtx.productId)
 const currentDesign = ref<UsagiCardDxDesign>({ ...useDefaultDesign(props.useDesignCtx.rawDesign).currentDesign.value })
 const { matchCharacterMetadata, showMatchCharacterMetadataHelp } = await useCharacterMetadata(currentDesign)
 const imageSelectorCtx = await useImageSelector(currentDesign)
-const { save, isSaving } = useDesigner()
 
 function goToPrev() {
     watch(() => isSaving.value, (newVal, oldVal) => {
