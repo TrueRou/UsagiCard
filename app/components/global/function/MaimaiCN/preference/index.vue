@@ -124,7 +124,7 @@ function serverName(identifier: string) {
                 </label>
                 <input
                     :value="storage.player_name ?? ''"
-                    class="input input-bordered input-disabled"
+                    class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
                     disabled
@@ -142,7 +142,7 @@ function serverName(identifier: string) {
                 </label>
                 <input
                     :value="storage.player_rating ?? ''"
-                    class="input input-bordered input-disabled"
+                    class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
                     disabled
@@ -160,7 +160,7 @@ function serverName(identifier: string) {
                 </label>
                 <input
                     :value="storage.friend_code ?? ''"
-                    class="input input-bordered input-disabled"
+                    class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
                     disabled
@@ -178,7 +178,7 @@ function serverName(identifier: string) {
                 </label>
                 <input
                     :value="storage.updating_at ?? ''"
-                    class="input input-bordered input-disabled"
+                    class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
                     disabled

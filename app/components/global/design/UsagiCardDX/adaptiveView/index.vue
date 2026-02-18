@@ -8,12 +8,23 @@ import QRCode from './widget/qr-code.vue'
 import '../assets/css/main.css'
 
 const props = defineProps<{ useDesignCtx: UseDesignCtx }>()
+const route = useRoute()
+const tabKey = route.query.tab as string | undefined
 const { img } = useUtils()
 const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
+
+const useQButtonCtx = asyncComputed(async () => {
+    if (props.useDesignCtx.artifactId.value) {
+        const { artifact } = await useArtifact(props.useDesignCtx.artifactId.value)
+        return useQButton(artifact, tabKey)
+    }
+})
 </script>
 
 <template>
     <div class="isolate h-dvh dark:bg-gray-800">
+        <DialogQButton v-if="useQButtonCtx" :ctx="useQButtonCtx" />
+
         <div class="relative h-full w-fit mx-auto" data-theme="light">
             <img class="object-cover h-full" fetchpriority="low" :src="img(currentDesign.background_id)">
             <div class="absolute inset-0">
@@ -39,7 +50,7 @@ const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
                     id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
                     :style="{ '--b-bottom': `url(${img(currentDesign.frame_id)})` }"
                 >
-                    <button class="cursor-pointer">
+                    <button v-if="useQButtonCtx" class="cursor-pointer" @click="useQButtonCtx.qDialogOpen(true)">
                         <div class="p-1 rounded-full bg-white" aria-label="rocket" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"

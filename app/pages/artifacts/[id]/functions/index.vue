@@ -48,16 +48,18 @@ function goBack() {
                             {{ item.label }}
                         </summary>
                         <ul class="dropdown-content bg-base-100 shadow-lg rounded-box w-56 z-50">
-                            <li v-for="val, key in item.items" :key="key">
-                                <a
-                                    :class="{ active: activeTabKey === key }"
-                                    class="text-base py-3 px-4"
-                                    @click="handleTabKeySwap(key)"
-                                >
-                                    <span v-if="val.icon">{{ val.icon }}</span>
-                                    {{ val.label }}
-                                </a>
-                            </li>
+                            <template v-for="val, key in item.items" :key="key">
+                                <li v-if="!val.hidden">
+                                    <a
+                                        :class="{ active: activeTabKey === key }"
+                                        class="text-base py-3 px-4"
+                                        @click="handleTabKeySwap(key)"
+                                    >
+                                        <span v-if="val.icon">{{ val.icon }}</span>
+                                        {{ val.label }}
+                                    </a>
+                                </li>
+                            </template>
                         </ul>
                     </details>
                 </li>
@@ -80,16 +82,18 @@ function goBack() {
                                 {{ item.label }}
                             </summary>
                             <ul class="w-full">
-                                <li v-for="val, key in item.items" :key="key" class="w-full">
-                                    <a
-                                        :class="{ active: activeTabKey === key }"
-                                        class="w-full justify-start"
-                                        @click="handleTabKeySwap(key)"
-                                    >
-                                        <span v-if="val.icon">{{ val.icon }}</span>
-                                        {{ val.label }}
-                                    </a>
-                                </li>
+                                <template v-for="val, key in item.items" :key="key">
+                                    <li v-if="!val.hidden" class="w-full">
+                                        <a
+                                            :class="{ active: activeTabKey === key }"
+                                            class="w-full justify-start"
+                                            @click="handleTabKeySwap(key)"
+                                        >
+                                            <span v-if="val.icon">{{ val.icon }}</span>
+                                            {{ val.label }}
+                                        </a>
+                                    </li>
+                                </template>
                             </ul>
                         </details>
                     </li>
