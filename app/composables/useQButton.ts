@@ -34,9 +34,9 @@ export function useQButton(artifact: Ref<ArtifactUserResponse>, potentialTabKey?
         }
     })
 
-    const activeComponent = computed(() => {
+    const activeTabValue = computed(() => {
         if (activeTabKey.value && qButtonTabs.value) {
-            return qButtonTabs.value[activeTabKey.value]?.component
+            return qButtonTabs.value[activeTabKey.value]
         }
     })
 
@@ -51,11 +51,12 @@ export function useQButton(artifact: Ref<ArtifactUserResponse>, potentialTabKey?
     }
 
     return {
+        artifact,
         switchTab,
         qDialogOpen,
         qDialogOpened,
         qButtonTabs,
         activeTabKey,
-        activeComponent,
+        activeTabValue,
     }
 }
