@@ -13,7 +13,8 @@ const artifactId = route.params.id as string
 const tabKey = route.query.tab as string | undefined
 
 const { artifact } = await useArtifact(artifactId)
-const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabKey)
+const storageDefaultTab = (artifact.value.storage as UsagiCardStorage)?.default_function_tab ?? undefined
+const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabKey || storageDefaultTab)
 
 const mobileDetailsRefs = ref<HTMLDetailsElement[]>([])
 

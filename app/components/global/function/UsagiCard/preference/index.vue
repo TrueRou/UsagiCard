@@ -5,6 +5,21 @@ const props = defineProps<{
 const { storageSave, storageSaving } = await useArtifact(props.artifact.id)
 const { user, loggedIn } = useUserSession()
 
+const artifactRef = toRef(props, 'artifact')
+const { tabConfigs } = useFunction(artifactRef)
+const { qButtonTabs } = useQButton(artifactRef)
+
+const allFunctionTabItems = computed(() => {
+    const items: Record<string, { from: string, label: string, component: string }> = {}
+    for (const tc of tabConfigs.value ?? []) {
+        Object.entries(tc.items).forEach(([key, val]) => {
+            if (!val.hidden)
+                items[key] = { from: tc.label, ...val }
+        })
+    }
+    return items
+})
+
 const storage = ref<UsagiCardStorage>({
     secondary_auth_enabled: false,
     secondary_auth_policy: 'private',
@@ -45,8 +60,19 @@ const derivedBehaviors = [
 
 const newUserId = ref('')
 const addUserError = ref('')
+const showAddUserDialog = ref(false)
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function openUserDialog() {
+    showAddUserDialog.value = true
+}
+
+function closeUserDialog() {
+    showAddUserDialog.value = false
+    newUserId.value = ''
+    addUserError.value = ''
+}
 
 function addUser(id?: string) {
     const target = (id ?? newUserId.value).trim()
@@ -66,6 +92,9 @@ function addUser(id?: string) {
     }
     storage.value.secondary_auth_users = [...list, target]
     newUserId.value = ''
+    if (id === undefined) {
+        closeUserDialog()
+    }
 }
 
 function removeUser(id: string) {
@@ -75,14 +104,58 @@ function removeUser(id: string) {
 
 <template>
     <form class="space-y-4" @submit.prevent="storageSave(storage)">
-        <!-- 访问控制标题 -->
+        <!-- 默认标签页 -->
         <div class="divider my-2">
-            访问控制
+            默认标签页
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+            <!-- 默认功能标签页 -->
+            <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
+                <label>
+                    <p class="font-medium text-sm">
+                        默认功能标签页
+                    </p>
+                    <p class="text-xs text-base-content/60">
+                        打开功能面板时默认显示的标签页
+                    </p>
+                </label>
+                <select v-model="storage.default_function_tab" class="select select-bordered w-full">
+                    <option v-for="(val, key) in allFunctionTabItems" :key="key" :value="key">
+                        {{ `${val.from} - ${val.label}` }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- 默认快捷功能标签页 -->
+            <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
+                <label>
+                    <p class="font-medium text-sm">
+                        默认快捷功能标签页
+                    </p>
+                    <p class="text-xs text-base-content/60">
+                        打开快捷功能面板时默认显示的标签页
+                    </p>
+                </label>
+                <select
+                    v-model="storage.default_qbutton_tab"
+                    class="select select-bordered w-full"
+                    :disabled="!qButtonTabs || Object.keys(qButtonTabs).length === 0"
+                >
+                    <option v-for="(val, key) in qButtonTabs" :key="key" :value="key">
+                        {{ `${val.from} - ${val.label}` }}
+                    </option>
+                </select>
+            </div>
         </div>
 
+        <!-- 授权用户 -->
+        <div class="divider my-2">
+            二级认证
+        </div>
+        <!-- 访问控制 -->
         <div class="grid gap-4 md:grid-cols-2">
             <!-- 启用二级认证 -->
-            <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3 md:col-span-2">
+            <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-2 md:col-span-2">
                 <div>
                     <p class="font-medium text-sm">
                         启用二级认证
@@ -128,60 +201,46 @@ function removeUser(id: string) {
                 </div>
             </div>
 
-            <!-- 授权用户 -->
-            <div class="divider my-2">
-                授权用户
-            </div>
-
-            <div class="flex flex-col gap-3">
-                <!-- 已有用户列表 -->
-                <div
-                    v-for="uid in (storage.secondary_auth_users ?? [])"
-                    :key="uid"
-                    class="flex items-center justify-between gap-3 rounded-lg px-4 py-2 bg-base-200"
-                >
-                    <span class="font-mono text-sm break-all">{{ uid }}</span>
+            <div class="form-control flex flex-col gap-2 rounded-lg px-4">
+                <div class="flex items-center justify-between">
+                    <label>
+                        <p class="font-medium text-sm">
+                            授权用户
+                        </p>
+                        <p class="text-xs text-base-content/60">
+                            管理可以访问此卡片的用户
+                        </p>
+                    </label>
+                    <!-- 添加用户按钮 -->
                     <button
-                        class="btn btn-ghost btn-sm btn-circle text-error shrink-0"
+                        class="btn btn-outline btn-sm"
                         type="button"
-                        @click="removeUser(uid)"
+                        @click="openUserDialog()"
                     >
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
+                        <span>添加</span>
                     </button>
                 </div>
-
-                <!-- 添加用户 -->
                 <div class="flex flex-col gap-2">
-                    <div class="flex items-center gap-2">
-                        <input
-                            v-model="newUserId"
-                            class="input input-bordered flex-1"
-                            :class="addUserError ? 'input-error' : ''"
-                            type="text"
-                            placeholder="手动输入用户 UUID"
-                            @keydown.enter.prevent="addUser()"
-                        >
+                    <!-- 已有用户列表 -->
+                    <div
+                        v-for="uid in (storage.secondary_auth_users ?? [])"
+                        :key="uid"
+                        class="flex items-center justify-between gap-3 rounded-lg px-4 py-3 bg-base-200"
+                    >
+                        <span class="font-mono text-sm break-all">{{ uid }}</span>
                         <button
-                            class="btn btn-outline btn-sm shrink-0"
+                            class="btn btn-ghost btn-sm btn-circle text-error shrink-0"
                             type="button"
-                            @click="addUser()"
+                            @click="removeUser(uid)"
                         >
-                            添加
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
-                    <p v-if="addUserError" class="text-error text-xs">
-                        {{ addUserError }}
-                    </p>
-                    <button
-                        v-if="loggedIn && user && !(storage.secondary_auth_users ?? []).includes(user.id)"
-                        class="btn btn-ghost btn-sm self-start w-full"
-                        type="button"
-                        @click="addUser(user.id)"
-                    >
-                        + 添加当前账号 {{ user.username }} ({{ user.id }})
-                    </button>
                 </div>
             </div>
         </template>
@@ -227,4 +286,63 @@ function removeUser(id: string) {
             </button>
         </footer>
     </form>
+
+    <!-- 添加用户对话框 -->
+    <dialog v-if="showAddUserDialog" class="modal modal-open">
+        <div class="modal-box max-w-2xl">
+            <!-- 关闭按钮 -->
+            <form method="dialog">
+                <button
+                    class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
+                    type="button"
+                    @click="closeUserDialog()"
+                >
+                    ✕
+                </button>
+            </form>
+
+            <!-- 标题 -->
+            <h3 class="font-semibold text-lg mb-4">
+                添加授权用户
+            </h3>
+
+            <!-- 表单内容 -->
+            <div class="space-y-4">
+                <!-- 手动输入用户 UUID -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">
+                        用户 UUID
+                    </label>
+                    <input
+                        v-model="newUserId"
+                        class="input input-bordered w-full"
+                        :class="{ 'input-error': addUserError }"
+                        type="text"
+                        placeholder="输入用户的 UUID"
+                        @keydown.enter.prevent="addUser()"
+                    >
+                    <p v-if="addUserError" class="text-error text-sm mt-1">
+                        {{ addUserError }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex justify-between">
+                <div class="modal-action">
+                    <button :disabled="!loggedIn || !user || (storage.secondary_auth_users ?? []).includes(user.id)" class="btn" type="button" @click="addUser(user?.id)">
+                        添加当前账号
+                    </button>
+                </div>
+                <div class="modal-action">
+                    <button class="btn" type="button" @click="closeUserDialog()">
+                        取消
+                    </button>
+                    <button class="btn btn-primary" type="button" @click="addUser()">
+                        添加
+                    </button>
+                </div>
+            </div>
+        </div>
+    </dialog>
 </template>

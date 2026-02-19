@@ -1982,6 +1982,12 @@ export interface MaimaiStorage {
      */
     rem_accounts?: Array<{
         /**
+         * Label
+         *
+         * 账号标签
+         */
+        label: string
+        /**
          * MaimaiServer
          */
         server: 'diving_fish' | 'lxns'
@@ -2010,6 +2016,42 @@ export interface MaimaiStorage {
  * 兔卡存储数据
  */
 export interface UsagiCardStorage {
+    /**
+     * Card Title
+     *
+     * 卡片标题
+     */
+    card_title?: string | null
+    /**
+     * Card Avatar
+     *
+     * 卡片头像
+     */
+    card_avatar?: string | null
+    /**
+     * Card Profile
+     *
+     * 卡片简介
+     */
+    card_profile?: string | null
+    /**
+     * Skip Tour
+     *
+     * 跳过开场引导
+     */
+    skip_tour?: boolean
+    /**
+     * Default Function Tab
+     *
+     * 默认功能菜单标签页
+     */
+    default_function_tab?: string | null
+    /**
+     * Default Qbutton Tab
+     *
+     * 默认快捷菜单标签页
+     */
+    default_qbutton_tab?: string | null
     /**
      * SecondaryAuthPolicy
      */

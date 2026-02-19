@@ -15,8 +15,8 @@ export function useFunctionTabs(): UseFunctionTabsCtx {
             items: {
                 'maicn-bests': { label: '最佳成绩', component: 'FunctionMaimaiCNBests' },
                 'maicn-minfo': { label: '单曲查询', component: 'FunctionMaimaiCNMinfo' },
+                'maicn-update': { label: '数据更新', component: 'FunctionMaimaiCNUpdate' },
                 'maicn-pref': { label: '账号设置', component: 'FunctionMaimaiCNPreference' },
-                'maicn-update': { label: '数据更新', component: 'FunctionMaimaiCNUpdate', hidden: true },
             },
         },
         defaultTabKey: 'maicn-bests',

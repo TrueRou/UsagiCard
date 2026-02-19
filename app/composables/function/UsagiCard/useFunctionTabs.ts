@@ -1,4 +1,4 @@
-export type TabKey = 'uc-pref'
+export type TabKey = 'uc-home' | 'uc-pref'
 
 export interface FunctionTabItem {
     key: TabKey
@@ -12,9 +12,11 @@ export function useFunctionTabs(): UseFunctionTabsCtx {
         tabConfig: {
             label: 'UsagiCard',
             items: {
+                'uc-home': { label: '卡片主页', component: 'FunctionUsagiCardHome' },
                 'uc-pref': { label: '卡片设置', component: 'FunctionUsagiCardPreference' },
             },
         },
-        defaultTabKey: 'uc-pref',
+        defaultTabKey: 'uc-home',
+        qButtonTabKey: 'uc-home',
     }
 }

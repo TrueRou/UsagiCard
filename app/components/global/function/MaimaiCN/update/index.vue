@@ -19,6 +19,13 @@ interface DataSourceDef {
     credentialLabel: string
 }
 
+const SOURCE_COLORS: Record<string, string> = {
+    arcade: 'border-primary bg-primary/10 hover:bg-primary/20',
+    usagicard: 'border-secondary bg-secondary/10 hover:bg-secondary/20',
+    diving_fish: 'border-accent bg-accent/10 hover:bg-accent/20',
+    lxns: 'border-warning bg-warning/10 hover:bg-warning/20',
+}
+
 const DATA_SOURCES: DataSourceDef[] = [
     {
         id: 'arcade',
@@ -85,6 +92,10 @@ const placedIds = computed(() => {
 
 function getSourceDef(id: string): DataSourceDef {
     return DATA_SOURCES.find(s => s.id === id)!
+}
+
+function getSourceColor(id: string): string {
+    return SOURCE_COLORS[id] || 'border-base-300 bg-base-200 hover:bg-base-300'
 }
 
 // ─── Remembered accounts helpers ──────────────────────────────────────────────
@@ -319,7 +330,7 @@ async function submit() {
         <!-- 数据源调色盘 -->
         <div>
             <p class="flex justify-between items-center text-sm font-medium mb-2">
-                <span>可用数据源<b class="text-xs text-base-content/50 font-normal">（拖拽到下方区域）</b></span>
+                <span>数据源<b class="text-xs text-base-content/50 font-normal">（拖拽到下方区域）</b></span>
                 <button class="text-xs text-primary underline mt-1 text-left w-fit cursor-pointer" type="button" @click="goToPrefs">
                     前往账号设置 →
                 </button>
@@ -328,10 +339,12 @@ async function submit() {
                 <div
                     v-for="src in DATA_SOURCES"
                     :key="src.id"
-                    class="flex flex-col items-center justify-center gap-1 rounded-xl border border-base-300 bg-base-100 p-3 min-h-16 select-none transition-opacity touch-none text-center"
-                    :class="placedIds.has(src.id)
-                        ? 'opacity-30 cursor-not-allowed'
-                        : 'cursor-grab hover:border-primary hover:bg-base-200 active:cursor-grabbing'"
+                    class="flex flex-col items-center justify-center gap-1 rounded-xl border-2 p-3 min-h-16 select-none transition-all touch-none text-center"
+                    :class="[
+                        placedIds.has(src.id)
+                            ? 'opacity-30 cursor-not-allowed'
+                            : `cursor-grab active:cursor-grabbing ${getSourceColor(src.id)}`,
+                    ]"
                     @pointerdown="(e) => startDrag(e, src.id)"
                 >
                     <span class="text-sm font-semibold">{{ src.name }}</span>
@@ -354,7 +367,8 @@ async function submit() {
                     <div
                         v-for="item in sourceSources"
                         :key="item.id"
-                        class="rounded-lg bg-base-200 px-3 py-2 space-y-2"
+                        class="rounded-lg px-3 py-2 space-y-2 border-2"
+                        :class="getSourceColor(item.id)"
                     >
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>
@@ -416,7 +430,8 @@ async function submit() {
                     <div
                         v-for="item in targetSources"
                         :key="item.id"
-                        class="rounded-lg bg-base-200 px-3 py-2 space-y-2"
+                        class="rounded-lg px-3 py-2 space-y-2 border-2"
+                        :class="getSourceColor(item.id)"
                     >
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>
@@ -481,7 +496,8 @@ async function submit() {
                     <div
                         v-for="item in aggregateSources"
                         :key="item.id"
-                        class="rounded-lg bg-base-200 px-3 py-2 space-y-2 w-full"
+                        class="rounded-lg px-3 py-2 space-y-2 w-full border-2"
+                        :class="getSourceColor(item.id)"
                     >
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>

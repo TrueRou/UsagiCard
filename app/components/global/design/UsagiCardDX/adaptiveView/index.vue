@@ -16,7 +16,8 @@ const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
 const useQButtonCtx = asyncComputed(async () => {
     if (props.useDesignCtx.artifactId.value) {
         const { artifact } = await useArtifact(props.useDesignCtx.artifactId.value)
-        return useQButton(artifact, tabKey)
+        const storageDefaultTab = (artifact.value.storage as UsagiCardStorage)?.default_qbutton_tab ?? undefined
+        return useQButton(artifact, tabKey || storageDefaultTab)
     }
 })
 </script>
