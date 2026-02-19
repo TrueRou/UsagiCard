@@ -14,12 +14,12 @@ const showTabs = computed(() => tabs.value.length > 1)
                 @click="ctx.qDialogOpen(false)"
             >
                 <div
-                    class="modal-card bg-base-100 rounded-2xl w-full max-w-md h-[70dvh] flex flex-col shadow-xl overflow-hidden"
+                    class="modal-card bg-base-100 rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col shadow-xl overflow-hidden"
                     @click.stop
                 >
                     <!-- 标题栏 -->
-                    <div class="flex items-center justify-between px-5 py-4 border-b border-base-200 shrink-0">
-                        <span class="font-semibold text-base">快捷菜单</span>
+                    <div class="flex items-center justify-between px-4 py-4 border-b border-base-200 shrink-0">
+                        <span class="font-semibold text-base">快捷菜单 - {{ ctx.activeTabValue.value?.label }}</span>
                         <button class="btn btn-ghost btn-sm btn-circle" @click="ctx.qDialogOpen(false)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M18 6 6 18M6 6l12 12" />
@@ -43,17 +43,15 @@ const showTabs = computed(() => tabs.value.length > 1)
                     </div>
 
                     <!-- 内容区 -->
-                    <div class="flex-1 min-h-0 overflow-y-auto">
+                    <div class="flex-1 min-h-0 overflow-y-auto p-2">
                         <Transition name="tab-fade" mode="out-in">
                             <component
-                                :is="ctx.activeComponent.value"
-                                v-if="ctx.activeComponent.value"
+                                :is="ctx.activeTabValue.value?.component"
                                 :key="ctx.activeTabKey.value"
+                                :artifact="ctx.artifact.value"
+                                :from-dialog="true"
                                 class="w-full h-full"
                             />
-                            <div v-else class="flex items-center justify-center h-full text-base-content/40 text-sm">
-                                暂无内容
-                            </div>
                         </Transition>
                     </div>
                 </div>

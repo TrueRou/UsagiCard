@@ -39,10 +39,11 @@ export interface UseFunctionTabsCtx {
 }
 
 export interface UseQButtonCtx {
+    artifact: Ref<ArtifactUserResponse>
     switchTab: (tabKey: string) => void
     qDialogOpen: (val: boolean) => void
     qDialogOpened: Ref<boolean>
     qButtonTabs: Ref<Record<string, { label: string, component: string, icon?: string }> | undefined>
     activeTabKey: Ref<string | undefined>
-    activeComponent: ComputedRef<string | undefined>
+    activeTabValue: ComputedRef<{ label: string, component: string, icon?: string } | undefined>
 }
