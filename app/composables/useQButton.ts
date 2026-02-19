@@ -13,12 +13,12 @@ export function useQButton(artifact: Ref<ArtifactUserResponse>, potentialTabKey?
     }, undefined, { lazy: true })
 
     const qButtonTabs = computed(() => {
-        const qTabs: Record<string, { label: string, component: string, icon?: string }> = {}
+        const qTabs: Record<string, { from: string, label: string, component: string, icon?: string }> = {}
         for (const tab of functionTabs.value ?? []) {
             if (tab.qButtonTabKey) {
                 const item = tab.tabConfig.items[tab.qButtonTabKey]
                 if (item) {
-                    qTabs[tab.qButtonTabKey] = item
+                    qTabs[tab.qButtonTabKey] = { from: tab.tabConfig.label, ...item }
                 }
             }
         }
@@ -30,7 +30,10 @@ export function useQButton(artifact: Ref<ArtifactUserResponse>, potentialTabKey?
 
     watch([qButtonTabs], () => {
         if (qButtonTabs.value !== undefined && Object.keys(qButtonTabs.value).length > 0) {
-            activeTabKey.value = Object.keys(qButtonTabs.value)[0]
+            // Only fall back to first key if current activeTabKey is not a valid tab
+            if (!activeTabKey.value || !qButtonTabs.value[activeTabKey.value]) {
+                activeTabKey.value = Object.keys(qButtonTabs.value)[0]
+            }
         }
     })
 

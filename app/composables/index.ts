@@ -43,7 +43,7 @@ export interface UseQButtonCtx {
     switchTab: (tabKey: string) => void
     qDialogOpen: (val: boolean) => void
     qDialogOpened: Ref<boolean>
-    qButtonTabs: Ref<Record<string, { label: string, component: string, icon?: string }> | undefined>
+    qButtonTabs: Ref<Record<string, { from: string, label: string, component: string, icon?: string }> | undefined>
     activeTabKey: Ref<string | undefined>
     activeTabValue: ComputedRef<{ label: string, component: string, icon?: string } | undefined>
 }

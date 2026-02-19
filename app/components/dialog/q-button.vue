@@ -2,7 +2,6 @@
 const props = defineProps<{ ctx: UseQButtonCtx }>()
 
 const tabs = computed(() => Object.entries(props.ctx.qButtonTabs.value ?? {}))
-const showTabs = computed(() => tabs.value.length > 1)
 </script>
 
 <template>
@@ -14,21 +13,11 @@ const showTabs = computed(() => tabs.value.length > 1)
                 @click="ctx.qDialogOpen(false)"
             >
                 <div
-                    class="modal-card bg-base-100 rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col shadow-xl overflow-hidden"
+                    class="modal-card bg-base-100 rounded-2xl w-full max-w-md max-h-[90dvh] min-h-[50dvh] flex flex-col shadow-xl overflow-hidden"
                     @click.stop
                 >
-                    <!-- 标题栏 -->
-                    <div class="flex items-center justify-between px-4 py-4 border-b border-base-200 shrink-0">
-                        <span class="font-semibold text-base">快捷菜单 - {{ ctx.activeTabValue.value?.label }}</span>
-                        <button class="btn btn-ghost btn-sm btn-circle" @click="ctx.qDialogOpen(false)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 6 6 18M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- Tab 导航栏（仅 >1 个 tab 时显示） -->
-                    <div v-if="showTabs" class="flex border-b border-base-200 px-2 shrink-0">
+                    <!-- Tab 导航栏（兼作标题栏） -->
+                    <div class="flex items-center border-b border-base-200 px-2 shrink-0">
                         <button
                             v-for="[key, tab] in tabs"
                             :key="key"
@@ -39,6 +28,11 @@ const showTabs = computed(() => tabs.value.length > 1)
                             @click="ctx.switchTab(key)"
                         >
                             {{ tab.label }}
+                        </button>
+                        <button class="btn btn-ghost btn-sm btn-circle ml-auto" @click="ctx.qDialogOpen(false)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6 6 18M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
 
