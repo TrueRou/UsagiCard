@@ -11,6 +11,12 @@ export default defineNuxtPlugin((_nuxtApp) => {
                 loadingIndicator.start()
             }
         },
+        onRequestError() {
+            if (import.meta.client) {
+                const loadingIndicator = useLoadingIndicator()
+                loadingIndicator.finish()
+            }
+        },
         onResponse(context) {
             const rawData = context.response._data
 
@@ -30,7 +36,7 @@ export default defineNuxtPlugin((_nuxtApp) => {
                     })
                 }
 
-                if (rawData.code !== 200) {
+                if (rawData !== undefined && rawData.code !== 200) {
                     const message = rawData.message || context.response.statusText
                     addNotification({
                         type: 'error',
