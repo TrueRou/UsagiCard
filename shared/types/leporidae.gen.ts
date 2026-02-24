@@ -274,6 +274,25 @@ export interface AppResponsePageProductPublic {
 }
 
 /**
+ * AppResponse[PlatformRedemptionPreviewPublic]
+ */
+export interface AppResponsePlatformRedemptionPreviewPublic {
+    data?: PlatformRedemptionPreviewPublic | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
  * AppResponse[ProductConsultResponse]
  */
 export interface AppResponseProductConsultResponse {
@@ -1236,6 +1255,98 @@ export interface PageProductPublic {
      * Page Size
      */
     page_size: number
+}
+
+/**
+ * PlatformPresetPublic
+ *
+ * 预设公共信息（用于激活页展示）
+ */
+export interface PlatformPresetPublic {
+    /**
+     * Id
+     *
+     * 预设ID
+     */
+    id: string
+    /**
+     * Product Name
+     *
+     * 商品名称
+     */
+    product_name: string
+    /**
+     * Product Description
+     *
+     * 商品描述
+     */
+    product_description: string
+    /**
+     * Created At
+     *
+     * 创建时间
+     */
+    created_at: string
+}
+
+/**
+ * PlatformRedemptionPreviewPublic
+ *
+ * 兑换码预览信息（用于激活页展示，未领取时返回）
+ */
+export interface PlatformRedemptionPreviewPublic {
+    /**
+     * Code
+     *
+     * 兑换码
+     */
+    code: string
+    /**
+     * Platform
+     *
+     * 平台标识
+     */
+    platform: string
+    /**
+     * Shipping Name
+     *
+     * 收件人姓名
+     */
+    shipping_name: string
+    /**
+     * Shipping Phone
+     *
+     * 收件人电话
+     */
+    shipping_phone: string
+    /**
+     * Shipping Address
+     *
+     * 收件人地址
+     */
+    shipping_address: string
+    /**
+     * Claimed At
+     *
+     * 领取时间（为空表示未领取）
+     */
+    claimed_at: string | null
+    /**
+     * Order Id
+     *
+     * 关联订单ID（领取后回填）
+     */
+    order_id: string | null
+    /**
+     * 预设信息
+     */
+    preset: PlatformPresetPublic
+    /**
+     * Created At
+     *
+     * 创建时间
+     */
+    created_at: string
 }
 
 /**
@@ -3070,3 +3181,67 @@ export interface MergeUsersAuthMergePostResponses {
 }
 
 export type MergeUsersAuthMergePostResponse = MergeUsersAuthMergePostResponses[keyof MergeUsersAuthMergePostResponses]
+
+export interface GetRedemptionRedemptionsCodeGetData {
+    body?: never
+    path: {
+        /**
+         * Code
+         *
+         * 兑换码
+         */
+        code: string
+    }
+    query?: never
+    url: '/redemptions/{code}'
+}
+
+export interface GetRedemptionRedemptionsCodeGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type GetRedemptionRedemptionsCodeGetError = GetRedemptionRedemptionsCodeGetErrors[keyof GetRedemptionRedemptionsCodeGetErrors]
+
+export interface GetRedemptionRedemptionsCodeGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponsePlatformRedemptionPreviewPublic
+}
+
+export type GetRedemptionRedemptionsCodeGetResponse = GetRedemptionRedemptionsCodeGetResponses[keyof GetRedemptionRedemptionsCodeGetResponses]
+
+export interface ClaimRedemptionRedemptionsCodeClaimPostData {
+    body?: never
+    path: {
+        /**
+         * Code
+         *
+         * 兑换码
+         */
+        code: string
+    }
+    query?: never
+    url: '/redemptions/{code}/claim'
+}
+
+export interface ClaimRedemptionRedemptionsCodeClaimPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type ClaimRedemptionRedemptionsCodeClaimPostError = ClaimRedemptionRedemptionsCodeClaimPostErrors[keyof ClaimRedemptionRedemptionsCodeClaimPostErrors]
+
+export interface ClaimRedemptionRedemptionsCodeClaimPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseOrderSimplePublic
+}
+
+export type ClaimRedemptionRedemptionsCodeClaimPostResponse = ClaimRedemptionRedemptionsCodeClaimPostResponses[keyof ClaimRedemptionRedemptionsCodeClaimPostResponses]
