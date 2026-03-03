@@ -3,6 +3,10 @@ import type { Song } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 import SongDetail from './components/song-detail.vue'
 import SongSearch from './components/song-search.vue'
 
+defineProps<{
+    artifact: ArtifactUserResponse
+}>()
+
 const selectedSong = ref<Song | null>(null)
 
 function handleSongSelect(song: Song | null) {
@@ -36,7 +40,7 @@ function handleSongSelect(song: Song | null) {
         </div>
 
         <div v-if="selectedSong" class="mt-4">
-            <SongDetail :song="selectedSong" />
+            <SongDetail :song="selectedSong" :artifact-id="artifact.id" />
         </div>
     </div>
 </template>

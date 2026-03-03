@@ -77,12 +77,14 @@ watch(() => props.song, async (newSong) => {
     isLoading.value = true
     songScores.value = []
 
+    console.log('newSong', newSong, 'atfId', props.artifactId)
+
     if (newSong !== null && props.artifactId) {
         const params = new URLSearchParams({
             id: String(newSong.id),
             uuid: props.artifactId,
         })
-        const responseData: any = await useNuxtApp().$leporid(`/maimai/usagicard/minfo?${params.toString()}`)
+        const responseData: any = await useNuxtApp().$leporid(`/api/otoge/maimai/usagicard/minfo?${params.toString()}`)
         songScores.value = responseData.scores
     }
     isLoading.value = false

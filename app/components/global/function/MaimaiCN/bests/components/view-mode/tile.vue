@@ -78,7 +78,7 @@ function getDisplayClass(score: MaimaiScore) {
 
             <div
                 v-if="currentDisplayMode !== TileDisplayMode.NONE"
-                class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"
+                class="absolute inset-0 bg-black/50 flex items-center justify-center"
             >
                 <!-- RATING模式显示评级图标 -->
                 <div

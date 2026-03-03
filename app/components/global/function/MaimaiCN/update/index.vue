@@ -4,7 +4,6 @@ const props = defineProps<{
     fromDialog?: boolean
 }>()
 
-const notifications = useNotificationsStore()
 const router = useRouter()
 
 function goToPrefs() {
@@ -17,6 +16,7 @@ interface DataSourceDef {
     name: string
     description: string
     credentialLabel: string
+    chainLabel: string
 }
 
 const SOURCE_COLORS: Record<string, string> = {
@@ -29,24 +29,28 @@ const SOURCE_COLORS: Record<string, string> = {
 const DATA_SOURCES: DataSourceDef[] = [
     {
         id: 'arcade',
+        chainLabel: 'arcade_new',
         name: '机台',
         description: '通过机台账号直接同步成绩',
         credentialLabel: '微信二维码识别内容',
     },
     {
         id: 'usagicard',
+        chainLabel: 'usagicard',
         name: '兔卡',
         description: '通过绑定的兔卡账户同步成绩',
         credentialLabel: '留空视为当前卡片',
     },
     {
         id: 'diving_fish',
+        chainLabel: 'divingfish',
         name: '水鱼',
         description: 'DivingFish - 舞萌 DX 查分器',
         credentialLabel: 'Import-Token',
     },
     {
         id: 'lxns',
+        chainLabel: 'lxns',
         name: '落雪',
         description: '落雪咖啡屋 - maimai DX 查分器',
         credentialLabel: '个人 API 密钥',
@@ -55,8 +59,20 @@ const DATA_SOURCES: DataSourceDef[] = [
 
 interface PlacedItem {
     id: string
+    chainLabel: string
     credential: string
     isNew: boolean
+}
+
+interface UpdatesChainEntryResult {
+    errors: string | null
+    scores_num: number
+    scores_rating: number
+}
+
+interface UpdatesChainResult {
+    source: Record<string, UpdatesChainEntryResult>
+    target: Record<string, UpdatesChainEntryResult>
 }
 
 const STORAGE_KEY = `maimai_update_rule_${props.artifact.id}`
@@ -76,6 +92,7 @@ const rememberLayout = ref(false)
 const savedLayoutLoaded = ref(false)
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
+const updateResult = ref<UpdatesChainResult | null>(null)
 
 // ─── Derived ───────────────────────────────────────────────────────────────────
 const placedIds = computed(() => {
@@ -98,11 +115,30 @@ function getSourceColor(id: string): string {
     return SOURCE_COLORS[id] || 'border-base-300 bg-base-200 hover:bg-base-300'
 }
 
+function chainLabelToName(chainLabel: string): string {
+    return DATA_SOURCES.find(s => s.chainLabel === chainLabel)?.name ?? chainLabel
+}
+
+function chainLabelToColor(chainLabel: string): string {
+    const id = DATA_SOURCES.find(s => s.chainLabel === chainLabel)?.id ?? ''
+    return getSourceColor(id)
+}
+
 // ─── Remembered accounts helpers ──────────────────────────────────────────────
 const SUPPORTS_REM_ACCOUNTS = ['diving_fish', 'lxns']
 
 function getRemAccounts(sourceId: string) {
     return (storage.value.rem_accounts ?? []).filter(a => a.server === sourceId)
+}
+
+function initItemCredential(item: PlacedItem) {
+    if (!SUPPORTS_REM_ACCOUNTS.includes(item.id))
+        return
+    const saved = getRemAccounts(item.id)
+    if (saved.length > 0 && saved[0]) {
+        item.isNew = false
+        item.credential = saved[0].credential
+    }
 }
 
 function onSelectAccount(item: PlacedItem, value: string) {
@@ -191,7 +227,13 @@ function onPointerUp(e: PointerEvent) {
     if (!zone)
         return
 
-    const item: PlacedItem = { id, credential: id === 'usagicard' ? props.artifact.id : '', isNew: true }
+    const item: PlacedItem = {
+        id,
+        chainLabel: getSourceDef(id).chainLabel,
+        credential: id === 'usagicard' ? props.artifact.id : '',
+        isNew: true,
+    }
+    initItemCredential(item)
     if (zone === 'source')
         sourceSources.value = [...sourceSources.value, item]
     else if (zone === 'target')
@@ -208,11 +250,23 @@ function loadSavedLayout() {
     try {
         const saved = JSON.parse(raw)
         if (saved.mode === 'adhoc') {
-            sourceSources.value = (saved.sourceIds ?? []).map((sid: string) => ({ id: sid, credential: '', isNew: true }))
-            targetSources.value = (saved.targetIds ?? []).map((sid: string) => ({ id: sid, credential: '', isNew: true }))
+            sourceSources.value = (saved.sourceIds ?? []).map((sid: string) => {
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: '', isNew: true }
+                initItemCredential(item)
+                return item
+            })
+            targetSources.value = (saved.targetIds ?? []).map((sid: string) => {
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: '', isNew: true }
+                initItemCredential(item)
+                return item
+            })
         }
         else {
-            aggregateSources.value = (saved.aggregateIds ?? []).map((sid: string) => ({ id: sid, credential: '', isNew: true }))
+            aggregateSources.value = (saved.aggregateIds ?? []).map((sid: string) => {
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: '', isNew: true }
+                initItemCredential(item)
+                return item
+            })
         }
         savedLayoutLoaded.value = true
         rememberLayout.value = true
@@ -250,17 +304,17 @@ function buildRule() {
         const source: Record<string, { credentials: string }> = {}
         const target: Record<string, { credentials: string }> = {}
         sourceSources.value.forEach((i) => {
-            source[i.id] = { credentials: i.credential }
+            source[i.chainLabel] = { credentials: i.credential }
         })
         targetSources.value.forEach((i) => {
-            target[i.id] = { credentials: i.credential }
+            target[i.chainLabel] = { credentials: i.credential }
         })
         return { source, target }
     }
     else {
         const dict: Record<string, { credentials: string }> = {}
         aggregateSources.value.forEach((i) => {
-            dict[i.id] = { credentials: i.credential }
+            dict[i.chainLabel] = { credentials: i.credential }
         })
         return { source: dict, target: dict }
     }
@@ -286,8 +340,14 @@ function validate(): string | null {
     return null
 }
 
+function resetForNewUpdate() {
+    updateResult.value = null
+    submitError.value = null
+}
+
 async function submit() {
     submitError.value = null
+    updateResult.value = null
     const err = validate()
     if (err) {
         submitError.value = err
@@ -297,13 +357,16 @@ async function submit() {
     try {
         const rule = buildRule()
         // TODO: 确认更新 API 路径
-        await useNuxtApp().$leporid(`/api/otoge/maimai/${props.artifact.id}/update`, {
+        const res = await useNuxtApp().$leporid<UpdatesChainResult>(`/api/otoge/maimai/updates_chain`, {
             method: 'POST',
             body: rule,
         })
+        updateResult.value = res
         if (rememberLayout.value)
             saveLayout()
-        notifications.addNotification({ type: 'success', message: '成绩更新任务已提交！' })
+        sourceSources.value = []
+        targetSources.value = []
+        aggregateSources.value = []
     }
     catch (e: any) {
         submitError.value = e?.message ?? '提交失败，请重试'
@@ -317,7 +380,7 @@ async function submit() {
 <template>
     <div class="w-full space-y-2">
         <!-- 已加载布局提示 -->
-        <div v-if="savedLayoutLoaded" role="alert" class="alert alert-warning">
+        <div v-if="savedLayoutLoaded && !updateResult" role="alert" class="alert alert-warning">
             <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
@@ -353,200 +416,202 @@ async function submit() {
             </div>
         </div>
 
-        <!-- adhoc: 左右两个 Drop Zone -->
-        <div v-if="mode === 'adhoc'" class="grid gap-4">
-            <div
-                data-dropzone="source"
-                class="rounded-xl border-2 border-dashed p-4 min-h-20 transition-colors"
-                :class="dragOverZone === 'source' ? 'border-primary bg-primary/5' : 'border-base-300'"
-            >
-                <p class="text-xs font-semibold text-base-content/60 mb-3 uppercase tracking-wide">
-                    数据来源
-                </p>
-                <div class="space-y-3">
-                    <div
-                        v-for="item in sourceSources"
-                        :key="item.id"
-                        class="rounded-lg px-3 py-2 space-y-2 border-2"
-                        :class="getSourceColor(item.id)"
-                    >
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>
-                            <button
-                                class="btn btn-ghost btn-xs btn-circle text-error"
-                                type="button"
-                                @click="removeFromZone('source', item.id)"
-                            >
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <template v-if="SUPPORTS_REM_ACCOUNTS.includes(item.id)">
-                            <select
-                                class="select select-bordered select-sm w-full"
-                                :value="item.isNew ? '__new__' : item.credential"
-                                @change="(e) => onSelectAccount(item, (e.target as HTMLSelectElement).value)"
-                            >
-                                <option value="__new__">
-                                    输入新账号
-                                </option>
-                                <option v-for="acc in getRemAccounts(item.id)" :key="acc.credential" :value="acc.credential">
-                                    {{ acc.credential }}
-                                </option>
-                            </select>
-                            <input
-                                v-if="item.isNew"
-                                v-model="item.credential"
-                                class="input input-bordered input-sm w-full"
-                                type="text"
-                                :placeholder="getSourceDef(item.id).credentialLabel"
-                            >
-                        </template>
-                        <template v-else>
-                            <input
-                                v-model="item.credential"
-                                class="input input-bordered input-sm w-full"
-                                type="text"
-                                :placeholder="getSourceDef(item.id).credentialLabel"
-                            >
-                        </template>
-                    </div>
-                    <p v-if="sourceSources.length === 0" class="text-xs text-base-content/40 text-center py-4">
-                        将数据源拖到这里
+        <!-- adhoc / aggregate Drop Zone -->
+        <template v-if="!updateResult">
+            <div v-if="mode === 'adhoc'" class="grid gap-4">
+                <div
+                    data-dropzone="source"
+                    class="rounded-xl border-2 border-dashed p-4 min-h-20 transition-colors"
+                    :class="dragOverZone === 'source' ? 'border-primary bg-primary/5' : 'border-base-300'"
+                >
+                    <p class="text-xs font-semibold text-base-content/60 mb-3 uppercase tracking-wide">
+                        数据来源
                     </p>
+                    <div class="space-y-3">
+                        <div
+                            v-for="item in sourceSources"
+                            :key="item.id"
+                            class="rounded-lg px-3 py-2 space-y-2 border-2"
+                            :class="getSourceColor(item.id)"
+                        >
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>
+                                <button
+                                    class="btn btn-ghost btn-xs btn-circle text-error"
+                                    type="button"
+                                    @click="removeFromZone('source', item.id)"
+                                >
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <template v-if="SUPPORTS_REM_ACCOUNTS.includes(item.id)">
+                                <select
+                                    class="select select-bordered select-sm w-full"
+                                    :value="item.isNew ? '__new__' : item.credential"
+                                    @change="(e) => onSelectAccount(item, (e.target as HTMLSelectElement).value)"
+                                >
+                                    <option value="__new__">
+                                        ＋ 输入新账号
+                                    </option>
+                                    <option v-for="acc in getRemAccounts(item.id)" :key="acc.credential" :value="acc.credential">
+                                        {{ acc.label }}
+                                    </option>
+                                </select>
+                                <input
+                                    v-if="item.isNew"
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    :placeholder="getSourceDef(item.id).credentialLabel"
+                                >
+                            </template>
+                            <template v-else>
+                                <input
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    :placeholder="getSourceDef(item.id).credentialLabel"
+                                >
+                            </template>
+                        </div>
+                        <p v-if="sourceSources.length === 0" class="text-xs text-base-content/40 text-center py-4">
+                            将数据源拖到这里
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    data-dropzone="target"
+                    class="rounded-xl border-2 border-dashed p-4 min-h-20 transition-colors"
+                    :class="dragOverZone === 'target' ? 'border-primary bg-primary/5' : 'border-base-300'"
+                >
+                    <p class="text-xs font-semibold text-base-content/60 mb-3 uppercase tracking-wide">
+                        更新目标
+                    </p>
+                    <div class="space-y-3">
+                        <div
+                            v-for="item in targetSources"
+                            :key="item.id"
+                            class="rounded-lg px-3 py-2 space-y-2 border-2"
+                            :class="getSourceColor(item.id)"
+                        >
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>
+                                <button
+                                    class="btn btn-ghost btn-xs btn-circle text-error"
+                                    type="button"
+                                    @click="removeFromZone('target', item.id)"
+                                >
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <template v-if="SUPPORTS_REM_ACCOUNTS.includes(item.id)">
+                                <select
+                                    class="select select-bordered select-sm w-full"
+                                    :value="item.isNew ? '__new__' : item.credential"
+                                    @change="(e) => onSelectAccount(item, (e.target as HTMLSelectElement).value)"
+                                >
+                                    <option value="__new__">
+                                        ＋ 输入新账号
+                                    </option>
+                                    <option v-for="acc in getRemAccounts(item.id)" :key="acc.credential" :value="acc.credential">
+                                        {{ acc.label }}
+                                    </option>
+                                </select>
+                                <input
+                                    v-if="item.isNew"
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    :placeholder="getSourceDef(item.id).credentialLabel"
+                                >
+                            </template>
+                            <template v-else>
+                                <input
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    :placeholder="getSourceDef(item.id).credentialLabel"
+                                >
+                            </template>
+                        </div>
+                        <p v-if="targetSources.length === 0" class="text-xs text-base-content/40 text-center py-4">
+                            将数据源拖到这里
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div
-                data-dropzone="target"
-                class="rounded-xl border-2 border-dashed p-4 min-h-20 transition-colors"
-                :class="dragOverZone === 'target' ? 'border-primary bg-primary/5' : 'border-base-300'"
-            >
-                <p class="text-xs font-semibold text-base-content/60 mb-3 uppercase tracking-wide">
-                    更新目标
-                </p>
-                <div class="space-y-3">
-                    <div
-                        v-for="item in targetSources"
-                        :key="item.id"
-                        class="rounded-lg px-3 py-2 space-y-2 border-2"
-                        :class="getSourceColor(item.id)"
-                    >
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>
-                            <button
-                                class="btn btn-ghost btn-xs btn-circle text-error"
-                                type="button"
-                                @click="removeFromZone('target', item.id)"
-                            >
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <template v-if="SUPPORTS_REM_ACCOUNTS.includes(item.id)">
-                            <select
-                                class="select select-bordered select-sm w-full"
-                                :value="item.isNew ? '__new__' : item.credential"
-                                @change="(e) => onSelectAccount(item, (e.target as HTMLSelectElement).value)"
-                            >
-                                <option value="__new__">
-                                    输入新账号
-                                </option>
-                                <option v-for="acc in getRemAccounts(item.id)" :key="acc.credential" :value="acc.credential">
-                                    {{ acc.credential }}
-                                </option>
-                            </select>
-                            <input
-                                v-if="item.isNew"
-                                v-model="item.credential"
-                                class="input input-bordered input-sm w-full"
-                                type="text"
-                                :placeholder="getSourceDef(item.id).credentialLabel"
-                            >
-                        </template>
-                        <template v-else>
-                            <input
-                                v-model="item.credential"
-                                class="input input-bordered input-sm w-full"
-                                type="text"
-                                :placeholder="getSourceDef(item.id).credentialLabel"
-                            >
-                        </template>
-                    </div>
-                    <p v-if="targetSources.length === 0" class="text-xs text-base-content/40 text-center py-4">
-                        将数据源拖到这里
+            <!-- aggregate: 单个 Drop Zone -->
+            <div v-else>
+                <div
+                    data-dropzone="aggregate"
+                    class="rounded-xl border-2 border-dashed p-4 min-h-52 transition-colors"
+                    :class="dragOverZone === 'aggregate' ? 'border-primary bg-primary/5' : 'border-base-300'"
+                >
+                    <p class="text-xs font-semibold text-base-content/60 mb-3 uppercase tracking-wide">
+                        同步节点（从所有数据源获取，再更新到所有数据源）
                     </p>
+                    <div class="flex flex-wrap gap-3">
+                        <div
+                            v-for="item in aggregateSources"
+                            :key="item.id"
+                            class="rounded-lg px-3 py-2 space-y-2 w-full border-2"
+                            :class="getSourceColor(item.id)"
+                        >
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>
+                                <button
+                                    class="btn btn-ghost btn-xs btn-circle text-error"
+                                    type="button"
+                                    @click="removeFromZone('aggregate', item.id)"
+                                >
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <template v-if="SUPPORTS_REM_ACCOUNTS.includes(item.id)">
+                                <select
+                                    class="select select-bordered select-sm w-full"
+                                    :value="item.isNew ? '__new__' : item.credential"
+                                    @change="(e) => onSelectAccount(item, (e.target as HTMLSelectElement).value)"
+                                >
+                                    <option value="__new__">
+                                        ＋ 输入新账号
+                                    </option>
+                                    <option v-for="acc in getRemAccounts(item.id)" :key="acc.credential" :value="acc.credential">
+                                        {{ acc.label }}
+                                    </option>
+                                </select>
+                                <input
+                                    v-if="item.isNew"
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    :placeholder="getSourceDef(item.id).credentialLabel"
+                                >
+                            </template>
+                            <template v-else>
+                                <input
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    :placeholder="getSourceDef(item.id).credentialLabel"
+                                >
+                            </template>
+                        </div>
+                        <p v-if="aggregateSources.length === 0" class="text-xs text-base-content/40 text-center py-4 w-full">
+                            将数据源拖到这里
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- aggregate: 单个 Drop Zone -->
-        <div v-else>
-            <div
-                data-dropzone="aggregate"
-                class="rounded-xl border-2 border-dashed p-4 min-h-52 transition-colors"
-                :class="dragOverZone === 'aggregate' ? 'border-primary bg-primary/5' : 'border-base-300'"
-            >
-                <p class="text-xs font-semibold text-base-content/60 mb-3 uppercase tracking-wide">
-                    同步节点（从所有数据源获取，再更新到所有数据源）
-                </p>
-                <div class="flex flex-wrap gap-3">
-                    <div
-                        v-for="item in aggregateSources"
-                        :key="item.id"
-                        class="rounded-lg px-3 py-2 space-y-2 w-full border-2"
-                        :class="getSourceColor(item.id)"
-                    >
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium">{{ getSourceDef(item.id).name }}</span>
-                            <button
-                                class="btn btn-ghost btn-xs btn-circle text-error"
-                                type="button"
-                                @click="removeFromZone('aggregate', item.id)"
-                            >
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <template v-if="SUPPORTS_REM_ACCOUNTS.includes(item.id)">
-                            <select
-                                class="select select-bordered select-sm w-full"
-                                :value="item.isNew ? '__new__' : item.credential"
-                                @change="(e) => onSelectAccount(item, (e.target as HTMLSelectElement).value)"
-                            >
-                                <option value="__new__">
-                                    输入新账号
-                                </option>
-                                <option v-for="acc in getRemAccounts(item.id)" :key="acc.credential" :value="acc.credential">
-                                    {{ acc.credential }}
-                                </option>
-                            </select>
-                            <input
-                                v-if="item.isNew"
-                                v-model="item.credential"
-                                class="input input-bordered input-sm w-full"
-                                type="text"
-                                :placeholder="getSourceDef(item.id).credentialLabel"
-                            >
-                        </template>
-                        <template v-else>
-                            <input
-                                v-model="item.credential"
-                                class="input input-bordered input-sm w-full"
-                                type="text"
-                                :placeholder="getSourceDef(item.id).credentialLabel"
-                            >
-                        </template>
-                    </div>
-                    <p v-if="aggregateSources.length === 0" class="text-xs text-base-content/40 text-center py-4 w-full">
-                        将数据源拖到这里
-                    </p>
-                </div>
-            </div>
-        </div>
+        </template>
 
         <!-- 校验错误提示 -->
         <div v-if="submitError" role="alert" class="alert alert-error">
@@ -554,6 +619,94 @@ async function submit() {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span class="text-sm">{{ submitError }}</span>
+        </div>
+
+        <!-- 更新结果 -->
+        <div v-if="updateResult" class="rounded-xl border border-base-300 bg-base-200/50 p-4 space-y-3">
+            <p class="text-sm font-semibold">
+                更新结果
+            </p>
+            <template v-if="mode === 'aggregate'">
+                <div class="space-y-2">
+                    <div
+                        v-for="(entry, key) in updateResult.source"
+                        :key="key"
+                        class="rounded-lg px-3 py-2 border-2"
+                        :class="chainLabelToColor(key)"
+                    >
+                        <p class="text-sm font-medium mb-1">
+                            {{ chainLabelToName(key) }}
+                        </p>
+                        <p v-if="entry.errors" class="text-xs text-error">
+                            {{ entry.errors }}
+                        </p>
+                        <template v-else>
+                            <p class="text-xs text-base-content/70">
+                                曲目数：{{ entry.scores_num }}
+                            </p>
+                            <p class="text-xs text-base-content/70">
+                                Rating：{{ entry.scores_rating }}
+                            </p>
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <template v-else>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-2">
+                        <p class="text-xs font-semibold text-base-content/50 uppercase tracking-wide">
+                            来源
+                        </p>
+                        <div
+                            v-for="(entry, key) in updateResult.source"
+                            :key="key"
+                            class="rounded-lg px-3 py-2 border-2"
+                            :class="chainLabelToColor(key)"
+                        >
+                            <p class="text-sm font-medium mb-1">
+                                {{ chainLabelToName(key) }}
+                            </p>
+                            <p v-if="entry.errors" class="text-xs text-error">
+                                {{ entry.errors }}
+                            </p>
+                            <template v-else>
+                                <p class="text-xs text-base-content/70">
+                                    曲目数：{{ entry.scores_num }}
+                                </p>
+                                <p class="text-xs text-base-content/70">
+                                    Rating：{{ entry.scores_rating }}
+                                </p>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-xs font-semibold text-base-content/50 uppercase tracking-wide">
+                            目标
+                        </p>
+                        <div
+                            v-for="(entry, key) in updateResult.target"
+                            :key="key"
+                            class="rounded-lg px-3 py-2 border-2"
+                            :class="chainLabelToColor(key)"
+                        >
+                            <p class="text-sm font-medium mb-1">
+                                {{ chainLabelToName(key) }}
+                            </p>
+                            <p v-if="entry.errors" class="text-xs text-error">
+                                {{ entry.errors }}
+                            </p>
+                            <template v-else>
+                                <p class="text-xs text-base-content/70">
+                                    曲目数：{{ entry.scores_num }}
+                                </p>
+                                <p class="text-xs text-base-content/70">
+                                    Rating：{{ entry.scores_rating }}
+                                </p>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
         </div>
 
         <!-- 底部操作 -->
@@ -564,9 +717,13 @@ async function submit() {
                     <span class="text-sm">记住本次布局</span>
                 </label>
             </div>
-            <button class="btn btn-primary" :disabled="submitting" @click="submit">
+            <button v-if="!updateResult" class="btn btn-primary" :disabled="submitting" @click="submit">
                 <span v-if="submitting" class="loading loading-spinner loading-sm" />
                 执行更新
+            </button>
+            <button v-if="updateResult" class="btn btn-accent" :disabled="submitting" @click="resetForNewUpdate">
+                <span v-if="submitting" class="loading loading-spinner loading-sm" />
+                再次更新
             </button>
         </div>
     </div>

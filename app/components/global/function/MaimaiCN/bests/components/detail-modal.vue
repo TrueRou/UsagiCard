@@ -18,7 +18,7 @@ const { getFCText, getFSText } = useMaimaiUtils()
     <Teleport to="body">
         <div
             v-if="show && score"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-1000 p-4"
+            class="fixed inset-0 bg-black/50 flex items-center justify-center z-1000 p-4"
         >
             <div class="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full max-h-[90vh] overflow-auto">
                 <div class="p-4 bg-blue-400 dark:bg-blue-600 text-white flex justify-between items-center">
