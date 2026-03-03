@@ -9,7 +9,7 @@ const detached = computed(() => scrollY.value > 0)
 <template>
     <div class="navbar bg-base-100 shadow-sm sticky top-0 z-10" :class="[detached && 'detached']">
         <div class="navbar-start">
-            <a class="btn btn-ghost text-xl">月兔礼品</a>
+            <a class="btn btn-ghost text-xl">Bunny</a>
         </div>
         <div class="navbar-center hidden lg:flex">
             <NuxtLink class="btn btn-ghost" to="/">
