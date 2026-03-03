@@ -205,20 +205,20 @@ export function useMaimaiUtils() {
             return undefined
 
         const rankIcons: { [key: string]: string } = {
-            'SSS+': new URL('../assets/UI_TTR_Rank_SSSp.png', import.meta.url).href,
-            'SSS': new URL('../assets/UI_TTR_Rank_SSS.png', import.meta.url).href,
-            'SS+': new URL('../assets/UI_TTR_Rank_SSp.png', import.meta.url).href,
-            'SS': new URL('../assets/UI_TTR_Rank_SS.png', import.meta.url).href,
-            'S+': new URL('../assets/UI_TTR_Rank_Sp.png', import.meta.url).href,
-            'S': new URL('../assets/UI_TTR_Rank_S.png', import.meta.url).href,
-            'AAA': new URL('../assets/UI_TTR_Rank_AAA.png', import.meta.url).href,
-            'AA': new URL('../assets/UI_TTR_Rank_AA.png', import.meta.url).href,
-            'A': new URL('../assets/UI_TTR_Rank_A.png', import.meta.url).href,
-            'BBB': new URL('../assets/UI_TTR_Rank_BBB.png', import.meta.url).href,
-            'BB': new URL('../assets/UI_TTR_Rank_BB.png', import.meta.url).href,
-            'B': new URL('../assets/UI_TTR_Rank_B.png', import.meta.url).href,
-            'C': new URL('../assets/UI_TTR_Rank_C.png', import.meta.url).href,
-            'D': new URL('../assets/UI_TTR_Rank_D.png', import.meta.url).href,
+            'SSS+': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_SSSp.png', import.meta.url).href,
+            'SSS': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_SSS.png', import.meta.url).href,
+            'SS+': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_SSp.png', import.meta.url).href,
+            'SS': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_SS.png', import.meta.url).href,
+            'S+': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_Sp.png', import.meta.url).href,
+            'S': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_S.png', import.meta.url).href,
+            'AAA': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_AAA.png', import.meta.url).href,
+            'AA': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_AA.png', import.meta.url).href,
+            'A': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_A.png', import.meta.url).href,
+            'BBB': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_BBB.png', import.meta.url).href,
+            'BB': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_BB.png', import.meta.url).href,
+            'B': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_B.png', import.meta.url).href,
+            'C': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_C.png', import.meta.url).href,
+            'D': new URL('@/components/global/function/MaimaiCN/assets/UI_TTR_Rank_D.png', import.meta.url).href,
         }
 
         const style = getAchievementStyle(achievements)
@@ -237,7 +237,7 @@ export function useMaimaiUtils() {
     }
 
     // 将FC状态转换为显示文本
-    const getFCText = (fc: FcType | null, useNoFC = false) => {
+    const getFCText = (fc: FCType | null, useNoFC = false) => {
         if (fc === null)
             return useNoFC ? 'NO FC' : '无'
         const fcMap = {
@@ -250,7 +250,7 @@ export function useMaimaiUtils() {
     }
 
     // 将FS状态转换为显示文本
-    const getFSText = (fs: FsType | null, useNoFS = false) => {
+    const getFSText = (fs: FSType | null, useNoFS = false) => {
         if (fs === null)
             return useNoFS ? 'NO FS' : '无'
         const fsMap = {
@@ -268,10 +268,10 @@ export function useMaimaiUtils() {
         if (fc === null)
             return undefined
         const fcIcons = {
-            0: new URL('../assets/UI_MSS_MBase_Icon_APp.png', import.meta.url).href, // APP
-            1: new URL('../assets/UI_MSS_MBase_Icon_AP.png', import.meta.url).href, // AP
-            2: new URL('../assets/UI_MSS_MBase_Icon_FCp.png', import.meta.url).href, // FCP
-            3: new URL('../assets/UI_MSS_MBase_Icon_FC.png', import.meta.url).href, // FC
+            0: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_APp.png', import.meta.url).href, // APP
+            1: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_AP.png', import.meta.url).href, // AP
+            2: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_FCp.png', import.meta.url).href, // FCP
+            3: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_FC.png', import.meta.url).href, // FC
         }
         return fcIcons[fc]
     }
@@ -281,11 +281,11 @@ export function useMaimaiUtils() {
         if (fs === null)
             return undefined
         const fsIcons = {
-            0: new URL('../assets/UI_MSS_MBase_Icon_Sync.png', import.meta.url).href, // SYNC
-            1: new URL('../assets/UI_MSS_MBase_Icon_FS.png', import.meta.url).href, // FS
-            2: new URL('../assets/UI_MSS_MBase_Icon_FSp.png', import.meta.url).href, // FSP
-            3: new URL('../assets/UI_MSS_MBase_Icon_FSD.png', import.meta.url).href, // FSD
-            4: new URL('../assets/UI_MSS_MBase_Icon_FSDp.png', import.meta.url).href, // FSDP
+            0: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_Sync.png', import.meta.url).href, // SYNC
+            1: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_FS.png', import.meta.url).href, // FS
+            2: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_FSp.png', import.meta.url).href, // FSP
+            3: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_FSD.png', import.meta.url).href, // FSD
+            4: new URL('@/components/global/function/MaimaiCN/assets/UI_MSS_MBase_Icon_FSDp.png', import.meta.url).href, // FSDP
         }
         return fsIcons[fs]
     }
