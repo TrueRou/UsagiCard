@@ -12,90 +12,97 @@ interface ProductDetail {
 }
 
 const productDetails: Record<string, ProductDetail> = {
-    'card-film': {
-        name: '卡贴',
-        headline: '以陶瓷光泽映衬你的收藏',
+    'aime-official': {
+        name: '双面定制AIME蓝白卡',
+        headline: '官方认证，完整体验',
         description:
-            '采用多层纳米雾面工艺，卡贴在任何角度都能呈现柔和质感。透过 CNC 倒角结构，边缘顺滑且耐磨，专为日常携带打造。',
-        heroImage: 'https://images.unsplash.com/photo-1515168861092-9d3c0a0f0534?auto=format&fit=crop&w=1600&q=80',
+            '采用官方AIME蓝白卡，认证度最高。双面全彩定制，可使用素材库或上传自定义素材。卡片背面二维码可直接进入个人卡片主页，并享受完整的账号系统功能（支持 maimai 等音游）。',
+        heroImage: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1600&q=80',
         gallery: [
-            'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80',
         ],
         specs: [
-            { title: '材质', value: '陶瓷粉末涂层 · 复合纤维' },
-            { title: '厚度', value: '0.32 mm' },
-            { title: '颜色', value: '暮蓝 / 霜白 / 砂银' },
+            { title: '卡片类型', value: 'AIME 官方蓝白卡' },
+            { title: '卡片主页', value: '支持（扫码进入）' },
+            { title: '账号系统', value: '完整支持' },
         ],
-        highlights: ['抗刮耐磨', '指纹自净涂层', '可替换光学底纸'],
+        highlights: [
+            '官方AIME蓝白卡，认证度最高',
+            '可通过二维码进入个人卡片主页',
+            '支持完整账号系统（maimai 等音游）',
+            '双面定制，素材库或自定义上传均可',
+            '下单前可免费体验在线设计器',
+        ],
+    },
+    'aime-compat': {
+        name: '双面定制AIME兼容卡',
+        headline: '高性价比，灵活选择',
+        description:
+            '采用自制AIME兼容卡，成本更低，是预算有限玩家的理想之选。仅限在手台登录私服使用，同样支持扫码进入个人卡片主页。双面全彩定制，素材库与自定义上传均可使用。',
+        heroImage: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1600&q=80',
+        gallery: [
+            'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80',
+        ],
+        specs: [
+            { title: '卡片类型', value: 'AIME 自制兼容卡' },
+            { title: '卡片主页', value: '支持（扫码进入）' },
+            { title: '账号系统', value: '仅限手台私服' },
+        ],
+        highlights: [
+            '自制兼容卡，性价比更高',
+            '可通过二维码进入个人卡片主页',
+            '仅限手台登录私服，不支持官服',
+            '双面定制，素材库或自定义上传均可',
+            '下单前可免费体验在线设计器',
+        ],
     },
     'nfc-card': {
-        name: 'NFC 卡片',
-        headline: '灵动响应，一触即发',
+        name: '双面定制NFC卡',
+        headline: '个性定制，随贴随用',
         description:
-            '新一代低功耗芯片带来毫秒级识别速度。卡片采用对称金属骨架，防止弯折，同时保留顺滑手感。',
-        heroImage: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80',
+            '标准双面定制NFC卡，可通过卡片背面二维码进入个人卡片主页。暂不支持账号系统功能，适合侧重展示与分享卡面的用户。',
+        heroImage: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1600&q=80',
         gallery: [
             'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80',
         ],
         specs: [
-            { title: '芯片', value: 'Secure NFC v3' },
-            { title: '存储', value: '128 KB' },
-            { title: '系统', value: 'iOS / Android / Arcade' },
+            { title: '卡片类型', value: '双面定制NFC卡' },
+            { title: '卡片主页', value: '支持（扫码进入）' },
+            { title: '账号系统', value: '暂不支持' },
         ],
-        highlights: ['双面陶瓷喷砂', 'IPX4 级防护', '可编程动态动画'],
+        highlights: [
+            '标准NFC定制卡，通用性强',
+            '可通过二维码进入个人卡片主页',
+            '暂不支持账号系统功能',
+            '双面定制，素材库或自定义上传均可',
+            '下单前可免费体验在线设计器',
+        ],
     },
-    'aime-card': {
-        name: 'AIME 卡片',
-        headline: '为音游玩家量身定制',
+    'crystal-sticker': {
+        name: '双面定制水晶卡贴',
+        headline: '轻薄贴合，经济之选',
         description:
-            '与日本工作室联合开发，支持主流街机终端。内置频段调校与金属微孔结构，确保在嘈杂环境中依然精准识别。',
-        heroImage: 'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=1600&q=80',
+            '双面定制水晶卡贴，后背自带背胶，直接贴于手机背面即可使用，无需其他配件。暂不支持卡片主页与账号系统功能，是追求简便、注重性价比的入门选择。',
+        heroImage: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1600&q=80',
         gallery: [
-            'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80',
         ],
         specs: [
-            { title: '兼容机台', value: 'maimai / Ongeki / Chunithm 等' },
-            { title: '同步', value: 'Bunny Cloud 全自动备份' },
-            { title: '材质', value: '航天级铝合金 + 树脂包覆' },
+            { title: '类型', value: '双面定制水晶卡贴' },
+            { title: '背胶', value: '自带背胶，直接贴用' },
+            { title: '卡片主页', value: '不支持' },
         ],
-        highlights: ['音游专属主题', '赛事加密模式', '多账号一键切换'],
-    },
-    'aime-plus': {
-        name: 'AIME 兼容卡',
-        headline: '跨区域游玩亦可即刻同步',
-        description:
-            '自研全球漫游技术，即使跨区域也能实时更新分数与收藏。采用双通道安全芯片，守护每一次游玩记录。',
-        heroImage: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1600&q=80',
-        gallery: [
-            'https://images.unsplash.com/photo-1454165205744-3b78555e5572?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
+        highlights: [
+            '后背自带背胶，无需额外处理',
+            '轻薄贴合，方便携带',
+            '暂不支持卡片主页与账号系统',
+            '双面定制，素材库或自定义上传均可',
+            '下单前可免费体验在线设计器',
         ],
-        specs: [
-            { title: '漫游区域', value: '亚太 / 北美 / 欧洲' },
-            { title: '安全', value: 'EAL6+ 安全芯片' },
-            { title: '续航', value: '约 2 年无需维护' },
-        ],
-        highlights: ['全球巡礼限量设计', '多语言 UI', '旅程时间线'],
-    },
-    'bunny-pass': {
-        name: '通行证',
-        headline: '一张卡片，开启沉浸式旅程',
-        description:
-            '融合身份识别、礼遇凭证与定制内容，适配线下门店与联名空间。以渐层玻璃工艺呈现品牌故事。',
-        heroImage: 'https://images.unsplash.com/photo-1500534319217-43b75f4525e0?auto=format&fit=crop&w=1600&q=80',
-        gallery: [
-            'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1474631245212-32dc3c8310c6?auto=format&fit=crop&w=1200&q=80',
-        ],
-        specs: [
-            { title: '核验', value: 'Bunny Gate · 双因子' },
-            { title: '权益', value: '尊享通道 / 线下展览 / 特别活动' },
-            { title: '定制', value: '提供品牌联名服务' },
-        ],
-        highlights: ['渐层玻璃', '光流电镀边框', '城市限定皮肤'],
     },
 }
 
@@ -106,7 +113,7 @@ if (!product) {
 }
 
 useHead({
-    title: `${product.name} — Bunny`,
+    title: `${product.name} — 月兔礼品`,
 })
 </script>
 
@@ -149,11 +156,10 @@ useHead({
                     </ul>
                 </article>
                 <article class="rounded-4xl border border-white/10 bg-linear-to-br from-indigo-500/20 to-slate-900 p-8 space-y-4">
-                    <p class="text-xs tracking-[0.4em] uppercase text-slate-200">Experience</p>
-                    <h2 class="text-3xl font-semibold">沉浸式体验</h2>
+                    <p class="text-xs tracking-[0.4em] uppercase text-slate-200">定制流程</p>
+                    <h2 class="text-3xl font-semibold">从设计到收货</h2>
                     <p class="text-slate-100 leading-relaxed">
-                        Bunny 团队在全球甄选材质与工艺，保证每个细节都达到商业陈列标准。我们同步提供
-                        Studio Crafted 定制服务，可为品牌打造独一无二的艺术化介质。
+                        下单并完成设计后，卡片进入草稿状态，锁定前仍可随时修改。我们每月 10 / 20 / 30 日锁定订单并投入制作，锁定后两周内完成发货，还望谅解 🙏
                     </p>
                 </article>
             </div>
