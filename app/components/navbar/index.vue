@@ -30,7 +30,7 @@ const detached = computed(() => scrollY.value > 0)
 <style scoped lang="postcss">
 .navbar {
     @apply transition-[border-radius] duration-500;
-    @apply p-1 top-0 h-12 min-h-fit md:h-14 from-primary/30 mix-blend-multiply bg-gradient-to-b;
+    @apply p-1 top-0 h-12 min-h-fit md:h-14 from-primary/30 mix-blend-multiply bg-linear-to-b;
 }
 
 .detached {

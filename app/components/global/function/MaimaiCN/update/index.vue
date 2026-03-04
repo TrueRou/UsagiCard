@@ -29,7 +29,7 @@ const SOURCE_COLORS: Record<string, string> = {
 const DATA_SOURCES: DataSourceDef[] = [
     {
         id: 'arcade',
-        chainLabel: 'arcade_new',
+        chainLabel: 'arcade',
         name: '机台',
         description: '通过机台账号直接同步成绩',
         credentialLabel: '微信二维码识别内容',

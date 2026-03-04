@@ -2,6 +2,7 @@ import { joinURL } from 'ufo'
 
 export default defineEventHandler(async (event) => {
     const proxyUrl = useRuntimeConfig().otoge.baseURL
+    const otogeDeveloperToken = useRuntimeConfig().otoge.developerToken
 
     const path = event.path.replace(/^\/api\/otoge/, '')
     const target = joinURL(proxyUrl, path)
@@ -14,5 +15,9 @@ export default defineEventHandler(async (event) => {
         )
     }
 
-    return proxyRequest(event, target)
+    return proxyRequest(event, target, {
+        headers: {
+            'x-developer-token': otogeDeveloperToken,
+        },
+    })
 })
