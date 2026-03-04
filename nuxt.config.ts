@@ -28,6 +28,7 @@ export default defineNuxtConfig({
         },
         otoge: {
             baseURL: 'https://api.turou.fun/otoge',
+            developerToken: '',
         },
         public: {
             baseURL: 'http://localhost:7100',
