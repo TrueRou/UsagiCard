@@ -1,7 +1,11 @@
 <script setup lang="ts">
+const route = useRoute()
 const { loggedIn, clear } = useUserSession()
 
 const userSw = ref<HTMLElement | null>(null)
+
+const loginPath = computed(() => ({ path: '/auth/login', query: { redirect: route.fullPath } }))
+const registerPath = computed(() => ({ path: '/auth/register', query: { redirect: route.fullPath } }))
 
 async function handleLogout() {
     await clear()
@@ -12,8 +16,8 @@ async function handleLogout() {
 <template>
     <li tabindex="0" class="self-center">
         <details ref="userSw">
-            <summary>
-                <div role="button" tabindex="0" class="avatar h-8 w-8">
+            <summary class="py-1 px-2">
+                <div role="button" tabindex="0" class="avatar h-7 w-7">
                     <div class="rounded-full">
                         <img v-if="loggedIn" src="https://a.ppy.sb/1094">
                         <img v-else src="https://a.ppy.sb/-1">
@@ -35,12 +39,12 @@ async function handleLogout() {
                 </template>
                 <template v-else>
                     <li>
-                        <NuxtLink to="/auth/login">
+                        <NuxtLink :to="loginPath">
                             登录
                         </NuxtLink>
                     </li>
                     <li>
-                        <NuxtLink to="/auth/register">
+                        <NuxtLink :to="registerPath">
                             注册
                         </NuxtLink>
                     </li>
