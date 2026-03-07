@@ -152,6 +152,17 @@ function onSelectAccount(item: PlacedItem, value: string) {
     }
 }
 
+function onSelectCardOption(item: PlacedItem, value: string) {
+    if (value === '__new__') {
+        item.isNew = true
+        item.credential = ''
+    }
+    else {
+        item.isNew = false
+        item.credential = props.artifact.id
+    }
+}
+
 // ─── Zone operations ───────────────────────────────────────────────────────────
 function removeFromZone(zone: 'source' | 'target' | 'aggregate', id: string) {
     if (zone === 'source')
@@ -231,7 +242,7 @@ function onPointerUp(e: PointerEvent) {
         id,
         chainLabel: getSourceDef(id).chainLabel,
         credential: id === 'usagicard' ? props.artifact.id : '',
-        isNew: true,
+        isNew: id !== 'usagicard',
     }
     initItemCredential(item)
     if (zone === 'source')
@@ -251,19 +262,19 @@ function loadSavedLayout() {
         const saved = JSON.parse(raw)
         if (saved.mode === 'adhoc') {
             sourceSources.value = (saved.sourceIds ?? []).map((sid: string) => {
-                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: '', isNew: true }
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? props.artifact.id : '', isNew: sid !== 'usagicard' }
                 initItemCredential(item)
                 return item
             })
             targetSources.value = (saved.targetIds ?? []).map((sid: string) => {
-                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: '', isNew: true }
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? props.artifact.id : '', isNew: sid !== 'usagicard' }
                 initItemCredential(item)
                 return item
             })
         }
         else {
             aggregateSources.value = (saved.aggregateIds ?? []).map((sid: string) => {
-                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: '', isNew: true }
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? props.artifact.id : '', isNew: sid !== 'usagicard' }
                 initItemCredential(item)
                 return item
             })
@@ -294,6 +305,11 @@ function clearSavedLayout() {
     localStorage.removeItem(STORAGE_KEY)
     savedLayoutLoaded.value = false
     rememberLayout.value = false
+    updateResult.value = null
+    submitError.value = null
+    sourceSources.value = []
+    targetSources.value = []
+    aggregateSources.value = []
 }
 
 onMounted(loadSavedLayout)
@@ -340,11 +356,6 @@ function validate(): string | null {
     return null
 }
 
-function resetForNewUpdate() {
-    updateResult.value = null
-    submitError.value = null
-}
-
 async function submit() {
     submitError.value = null
     updateResult.value = null
@@ -356,7 +367,6 @@ async function submit() {
     submitting.value = true
     try {
         const rule = buildRule()
-        // TODO: 确认更新 API 路径
         const res = await useNuxtApp().$leporid<UpdatesChainResult>(`/api/otoge/maimai/updates_chain`, {
             method: 'POST',
             body: rule,
@@ -380,12 +390,12 @@ async function submit() {
 <template>
     <div class="w-full space-y-2">
         <!-- 已加载布局提示 -->
-        <div v-if="savedLayoutLoaded && !updateResult" role="alert" class="alert alert-warning">
+        <div v-if="savedLayoutLoaded && !updateResult" role="alert" class="alert alert-success">
             <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
-            <span class="text-sm">已加载上次保存的布局，请重新填写所有凭据</span>
-            <button class="btn btn-ghost btn-xs" @click="clearSavedLayout">
+            <span class="text-sm">已加载上次保存的布局</span>
+            <button class="btn btn-primary btn-xs" @click="clearSavedLayout">
                 清除布局
             </button>
         </div>
@@ -394,7 +404,7 @@ async function submit() {
         <div>
             <p class="flex justify-between items-center text-sm font-medium mb-2">
                 <span>数据源<b class="text-xs text-base-content/50 font-normal">（拖拽到下方区域）</b></span>
-                <button class="text-xs text-primary underline mt-1 text-left w-fit cursor-pointer" type="button" @click="goToPrefs">
+                <button v-if="fromDialog" class="text-xs text-primary underline mt-1 text-left w-fit cursor-pointer" type="button" @click="goToPrefs">
                     前往账号设置 →
                 </button>
             </p>
@@ -467,6 +477,27 @@ async function submit() {
                                     :placeholder="getSourceDef(item.id).credentialLabel"
                                 >
                             </template>
+                            <template v-else-if="item.id === 'usagicard'">
+                                <select
+                                    class="select select-bordered select-sm w-full"
+                                    :value="item.isNew ? '__new__' : '__current__'"
+                                    @change="(e) => onSelectCardOption(item, (e.target as HTMLSelectElement).value)"
+                                >
+                                    <option value="__current__">
+                                        当前卡片
+                                    </option>
+                                    <option value="__new__">
+                                        其他卡片（输入 UUID）
+                                    </option>
+                                </select>
+                                <input
+                                    v-if="item.isNew"
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    placeholder="卡片 UUID"
+                                >
+                            </template>
                             <template v-else>
                                 <input
                                     v-model="item.credential"
@@ -528,6 +559,27 @@ async function submit() {
                                     class="input input-bordered input-sm w-full"
                                     type="text"
                                     :placeholder="getSourceDef(item.id).credentialLabel"
+                                >
+                            </template>
+                            <template v-else-if="item.id === 'usagicard'">
+                                <select
+                                    class="select select-bordered select-sm w-full"
+                                    :value="item.isNew ? '__new__' : '__current__'"
+                                    @change="(e) => onSelectCardOption(item, (e.target as HTMLSelectElement).value)"
+                                >
+                                    <option value="__current__">
+                                        当前卡片
+                                    </option>
+                                    <option value="__new__">
+                                        其他卡片（输入 UUID）
+                                    </option>
+                                </select>
+                                <input
+                                    v-if="item.isNew"
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    placeholder="卡片 UUID"
                                 >
                             </template>
                             <template v-else>
@@ -594,6 +646,27 @@ async function submit() {
                                     class="input input-bordered input-sm w-full"
                                     type="text"
                                     :placeholder="getSourceDef(item.id).credentialLabel"
+                                >
+                            </template>
+                            <template v-else-if="item.id === 'usagicard'">
+                                <select
+                                    class="select select-bordered select-sm w-full"
+                                    :value="item.isNew ? '__new__' : '__current__'"
+                                    @change="(e) => onSelectCardOption(item, (e.target as HTMLSelectElement).value)"
+                                >
+                                    <option value="__current__">
+                                        当前卡片
+                                    </option>
+                                    <option value="__new__">
+                                        其他卡片（输入 UUID）
+                                    </option>
+                                </select>
+                                <input
+                                    v-if="item.isNew"
+                                    v-model="item.credential"
+                                    class="input input-bordered input-sm w-full"
+                                    type="text"
+                                    placeholder="卡片 UUID"
                                 >
                             </template>
                             <template v-else>
@@ -711,7 +784,7 @@ async function submit() {
 
         <!-- 底部操作 -->
         <div class="flex flex-wrap items-center justify-between gap-3 pb-3">
-            <div class="flex items-center gap-3">
+            <div v-if="!updateResult" class="flex items-center gap-3">
                 <label class="flex items-center gap-2 cursor-pointer select-none">
                     <input v-model="rememberLayout" class="checkbox checkbox-sm checkbox-primary" type="checkbox">
                     <span class="text-sm">记住本次布局</span>
@@ -720,10 +793,6 @@ async function submit() {
             <button v-if="!updateResult" class="btn btn-primary" :disabled="submitting" @click="submit">
                 <span v-if="submitting" class="loading loading-spinner loading-sm" />
                 执行更新
-            </button>
-            <button v-if="updateResult" class="btn btn-accent" :disabled="submitting" @click="resetForNewUpdate">
-                <span v-if="submitting" class="loading loading-spinner loading-sm" />
-                再次更新
             </button>
         </div>
     </div>

@@ -244,7 +244,7 @@ async function submit() {
                                 placeholder="描述这张图片（可选）" rows="3"
                             />
                         </div>
-                        <div>
+                        <!-- <div>
                             <label class="label">
                                 <span class="label-text">可见性</span>
                             </label>
@@ -256,7 +256,7 @@ async function submit() {
                                     公开
                                 </option>
                             </select>
-                        </div>
+                        </div> -->
                         <div>
                             <label class="label label-text">标签</label>
                             <div class="flex gap-2 mb-2">

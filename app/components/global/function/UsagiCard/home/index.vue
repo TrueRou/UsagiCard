@@ -6,7 +6,7 @@ const props = defineProps<{
 }>()
 
 const { storageSave, storageSaving } = await useArtifact(props.artifact.id)
-const { loggedIn } = useUserSession()
+const { loggedIn, user } = useUserSession()
 const { img } = useUtils()
 
 const storage = ref<UsagiCardStorage>({
@@ -64,7 +64,17 @@ async function saveProfile() {
     await storageSave(storage.value)
 }
 
-const showEditButton = computed(() => loggedIn.value)
+const showEditButton = computed(() => {
+    const cardStorage = props.artifact.storage as UsagiCardStorage
+    if (cardStorage.secondary_auth_enabled && cardStorage.secondary_auth_policy) {
+        if (cardStorage.secondary_auth_policy === 'private' || cardStorage.secondary_auth_policy === 'public_read') {
+            const isAuthorized = loggedIn.value && (cardStorage.secondary_auth_users ?? []).includes(user.value?.id ?? 'UNKNOWN')
+            if (!isAuthorized)
+                return false
+        }
+    }
+    return true
+})
 const { copy, copied } = useClipboard()
 </script>
 
