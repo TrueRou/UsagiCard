@@ -36,7 +36,7 @@ function goBack() {
     <div class="w-full h-full flex flex-col lg:flex-row overflow-hidden">
         <!-- 移动端顶部菜单栏 -->
         <div class="lg:hidden w-full bg-base-200 border-b">
-            <ul class="menu menu-horizontal bg-base-200">
+            <ul class="menu menu-horizontal bg-base-200 w-full">
                 <li>
                     <button @click="goBack">
                         <svg data-v-1c88b26a="" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path data-v-1c88b26a="" fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
@@ -48,7 +48,7 @@ function goBack() {
                             <span v-if="item.icon">{{ item.icon }}</span>
                             {{ item.label }}
                         </summary>
-                        <ul class="dropdown-content bg-base-100 shadow-lg rounded-box w-56 z-50">
+                        <ul class="dropdown-content bg-base-100 shadow-lg rounded-box z-50 mt-4">
                             <template v-for="val, key in item.items" :key="key">
                                 <li v-if="!val.hidden">
                                     <a
@@ -64,16 +64,17 @@ function goBack() {
                         </ul>
                     </details>
                 </li>
+                <NavbarUserMenu class="ml-auto" />
             </ul>
         </div>
 
         <!-- 桌面端侧边菜单栏 -->
-        <aside class="hidden lg:block w-64 min-h-full bg-base-200 border-r overflow-y-auto">
-            <div class="p-2">
+        <aside class="hidden lg:flex lg:flex-col w-64 min-h-full bg-base-200 border-r">
+            <div class="flex-1 overflow-y-auto p-2">
                 <ul class="menu menu-compact rounded-box w-full">
                     <li class="w-full">
                         <button class="w-full justify-start" @click="goBack">
-                            <svg data-v-1c88b26a="" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path data-v-1c88b26a="" fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>Back
+                            <svg data-v-1c88b26a="" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path data-v-1c88b26a="" fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>返回
                         </button>
                     </li>
                     <li v-for="item in tabConfigs" :key="item.label" class="w-full">
@@ -100,6 +101,7 @@ function goBack() {
                     </li>
                 </ul>
             </div>
+            <NavbarSidebarUser />
         </aside>
 
         <!-- 主内容区域 -->
