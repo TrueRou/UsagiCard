@@ -13,8 +13,8 @@ export interface UseImageSelectorCtx {
 }
 
 export interface UseDesignCtx {
-    productId: Ref<string>
-    artifactId: Ref<string | undefined> // 如果尚处于产品设计阶段，artifactId 将为 undefined
+    fromProduct: Ref<ProductSimpleResponse>
+    fromArtifact: Ref<ArtifactUserResponse | undefined> // 如果尚处于产品设计阶段，artifact 将为 undefined
     rawDesign: Ref<Record<string, any>>
     sketchpadScale: Ref<number>
     displayMode: Ref<ArtifactDisplayMode>

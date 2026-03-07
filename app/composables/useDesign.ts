@@ -7,13 +7,11 @@ export async function useDesign(
     const rawDesignRef = ref(rawDesign)
     const sketchpadScaleRef = ref(1.0)
     const displayModeRef = ref(ArtifactDisplayMode.SKETCHPAD_FRONT)
-    const productIdRef = computed(() => fromProduct.value.id)
-    const artifactIdRef = computed(() => fromArtifact.value?.id)
     const designTypeLiteral = computed(() => ProductTypeDesign[designType.value])
 
     return {
-        productId: productIdRef,
-        artifactId: artifactIdRef,
+        fromProduct,
+        fromArtifact,
         rawDesign: rawDesignRef,
         sketchpadScale: sketchpadScaleRef,
         displayMode: displayModeRef,
