@@ -30,7 +30,7 @@ const storage = ref<UsagiCardStorage>({
 const authPolicies = [
     {
         value: 'private' as const,
-        label: '仅授权用户',
+        label: '私有',
         description: '只有授权用户可以访问此卡片',
     },
     {
@@ -65,6 +65,14 @@ const showAddUserDialog = ref(false)
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function openUserDialog() {
+    const notificationStore = useNotificationsStore()
+    if (!loggedIn.value) {
+        notificationStore.addNotification({
+            type: 'warning',
+            message: '请先登录再进行此操作',
+        })
+        return
+    }
     showAddUserDialog.value = true
 }
 
@@ -308,17 +316,17 @@ function removeUser(id: string) {
 
             <!-- 表单内容 -->
             <div class="space-y-4">
-                <!-- 手动输入用户 UUID -->
+                <!-- 手动输入用户 ID -->
                 <div>
                     <label class="block text-sm font-medium mb-2">
-                        用户 UUID
+                        用户 ID
                     </label>
                     <input
                         v-model="newUserId"
                         class="input input-bordered w-full"
                         :class="{ 'input-error': addUserError }"
                         type="text"
-                        placeholder="输入用户的 UUID"
+                        placeholder="输入用户的 ID"
                         @keydown.enter.prevent="addUser()"
                     >
                     <p v-if="addUserError" class="text-error text-sm mt-1">

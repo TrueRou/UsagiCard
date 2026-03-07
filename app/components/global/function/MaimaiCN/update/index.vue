@@ -6,6 +6,8 @@ const props = defineProps<{
 
 const router = useRouter()
 
+const { storageSave } = await useArtifact(props.artifact.id)
+
 function goToPrefs() {
     router.push({ path: `/artifacts/${props.artifact.id}/functions`, query: { tab: 'maicn-pref' } })
 }
@@ -73,6 +75,7 @@ interface UpdatesChainEntryResult {
 interface UpdatesChainResult {
     source: Record<string, UpdatesChainEntryResult>
     target: Record<string, UpdatesChainEntryResult>
+    player: { name: string, rating: number, friend_code?: string } | null
 }
 
 const STORAGE_KEY = `maimai_update_rule_${props.artifact.id}`
@@ -356,6 +359,17 @@ function validate(): string | null {
     return null
 }
 
+async function writeToPref(result: UpdatesChainResult) {
+    if (result.player?.name)
+        storage.value.player_name = result.player?.name
+    if (result.player?.rating)
+        storage.value.player_rating = result.player?.rating
+    if (result.player?.friend_code)
+        storage.value.friend_code = result.player?.friend_code
+    storage.value.updating_at = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+    await storageSave(storage.value)
+}
+
 async function submit() {
     submitError.value = null
     updateResult.value = null
@@ -372,6 +386,7 @@ async function submit() {
             body: rule,
         })
         updateResult.value = res
+        await writeToPref(res)
         if (rememberLayout.value)
             saveLayout()
         sourceSources.value = []
