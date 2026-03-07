@@ -22,8 +22,8 @@ const qrUrl = computed(() => {
     if (props.currentDesign.override_qrcode) {
         return props.currentDesign.override_qrcode
     }
-    if (props.useDesignCtx.artifactId.value) {
-        return joinURL(useRuntimeConfig().public.baseURL, 'artifacts', props.useDesignCtx.artifactId.value)
+    if (props.useDesignCtx.fromArtifact.value?.id) {
+        return joinURL(useRuntimeConfig().public.baseURL, 'artifacts', props.useDesignCtx.fromArtifact.value.id)
     }
     return useRuntimeConfig().public.baseURL
 })

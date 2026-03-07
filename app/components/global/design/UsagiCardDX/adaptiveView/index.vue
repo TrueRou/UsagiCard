@@ -14,10 +14,22 @@ const { img } = useUtils()
 const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
 
 const useQButtonCtx = asyncComputed(async () => {
-    if (props.useDesignCtx.artifactId.value) {
-        const { artifact } = await useArtifact(props.useDesignCtx.artifactId.value)
+    const artifact = props.useDesignCtx.fromArtifact
+    if (artifact.value) {
         const storageDefaultTab = (artifact.value.storage as UsagiCardStorage)?.default_qbutton_tab ?? undefined
-        return useQButton(artifact, tabKey || storageDefaultTab)
+        return useQButton(artifact as Ref<ArtifactUserResponse>, tabKey || storageDefaultTab)
+    }
+})
+
+watch(() => props.useDesignCtx.fromArtifact.value, () => {
+    if (props.useDesignCtx.fromArtifact.value) {
+        const storage = props.useDesignCtx.fromArtifact.value?.storage as MaimaiStorage
+        if (storage.player_rating)
+            currentDesign.value.dx_rating = String(storage.player_rating)
+        if (storage.friend_code)
+            currentDesign.value.friend_code = String(storage.friend_code)
+        if (storage.player_name)
+            currentDesign.value.display_name = String(storage.player_name)
     }
 })
 </script>
@@ -70,7 +82,7 @@ const useQButtonCtx = asyncComputed(async () => {
                             {{ currentDesign.game_version }}
                         </p>
                     </div>
-                    <NuxtLink :to="`/artifacts/${useDesignCtx.artifactId.value}/functions`">
+                    <NuxtLink :to="`/artifacts/${useDesignCtx.fromArtifact.value?.id}/functions`">
                         <div class="p-1 rounded-full bg-white" aria-label="settings" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="0 0 24 24"
