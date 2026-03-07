@@ -6,8 +6,6 @@ const props = defineProps<{
 
 const router = useRouter()
 
-const { storageSave } = await useArtifact(props.artifact.id)
-
 function goToPrefs() {
     router.push({ path: `/artifacts/${props.artifact.id}/functions`, query: { tab: 'maicn-pref' } })
 }
@@ -366,8 +364,11 @@ async function writeToPref(result: UpdatesChainResult) {
         storage.value.player_rating = result.player?.rating
     if (result.player?.friend_code)
         storage.value.friend_code = result.player?.friend_code
-    storage.value.updating_at = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
-    await storageSave(storage.value)
+    storage.value.updating_at = new Date().toISOString()
+    await useNuxtApp().$leporid<ArtifactUserResponse>(`/api/artifacts/${props.artifact.id}/storage`, {
+        method: 'PATCH',
+        body: { storage: storage.value },
+    })
 }
 
 async function submit() {

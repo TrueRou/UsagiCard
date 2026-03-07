@@ -173,7 +173,7 @@ function serverName(identifier: string) {
                     </p>
                 </label>
                 <input
-                    :value="storage.updating_at ?? ''"
+                    :value="storage.updating_at ? new Date(storage.updating_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) : ''"
                     class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"

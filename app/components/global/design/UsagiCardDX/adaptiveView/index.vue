@@ -31,7 +31,7 @@ watch(() => props.useDesignCtx.fromArtifact.value, () => {
         if (storage.player_name)
             currentDesign.value.display_name = String(storage.player_name)
     }
-})
+}, { immediate: true })
 </script>
 
 <template>
