@@ -32,10 +32,27 @@ watch(() => props.useDesignCtx.fromArtifact.value, () => {
             currentDesign.value.display_name = String(storage.player_name)
     }
 }, { immediate: true })
+
+const cardContainer = useTemplateRef<HTMLElement>('card-container')
+const { lengthX, lengthY } = useSwipe(cardContainer, {
+    threshold: 50,
+    onSwipeEnd(_e, direction) {
+        if (Math.abs(lengthX.value) < Math.abs(lengthY.value) * 1.5)
+            return
+        if (direction === 'left') {
+            const artifactId = props.useDesignCtx.fromArtifact.value?.id
+            if (artifactId)
+                navigateTo(`/artifacts/${artifactId}/functions`)
+        }
+        else if (direction === 'right') {
+            useQButtonCtx.value?.qDialogOpen(true)
+        }
+    },
+})
 </script>
 
 <template>
-    <div class="isolate h-dvh dark:bg-gray-800">
+    <div ref="card-container" class="isolate h-dvh dark:bg-gray-800">
         <DialogQButton v-if="useQButtonCtx" :ctx="useQButtonCtx" />
 
         <div class="relative h-full w-fit mx-auto" data-theme="light">
