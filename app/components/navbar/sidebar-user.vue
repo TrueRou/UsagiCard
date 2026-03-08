@@ -8,6 +8,8 @@ const panelRef = ref<HTMLElement | null>(null)
 const loginPath = computed(() => ({ path: '/auth/login', query: { redirect: route.fullPath } }))
 const registerPath = computed(() => ({ path: '/auth/register', query: { redirect: route.fullPath } }))
 
+const isAdmin = computed(() => user.value?.permissions?.some((p: string) => p.endsWith(':admin')))
+
 onClickOutside(panelRef, () => {
     open.value = false
 })
@@ -55,6 +57,11 @@ async function handleLogout() {
                 @click="open = false"
             >
                 <template v-if="loggedIn">
+                    <li v-if="isAdmin">
+                        <NuxtLink to="/admin">
+                            管理面板
+                        </NuxtLink>
+                    </li>
                     <li>
                         <NuxtLink to="/orders">
                             我的订单

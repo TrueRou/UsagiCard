@@ -1,11 +1,13 @@
 <script setup lang="ts">
 const route = useRoute()
-const { loggedIn, clear } = useUserSession()
+const { loggedIn, user, clear } = useUserSession()
 
 const userSw = ref<HTMLElement | null>(null)
 
 const loginPath = computed(() => ({ path: '/auth/login', query: { redirect: route.fullPath } }))
 const registerPath = computed(() => ({ path: '/auth/register', query: { redirect: route.fullPath } }))
+
+const isAdmin = computed(() => user.value?.permissions?.some((p: string) => p.endsWith(':admin')))
 
 async function handleLogout() {
     await clear()
@@ -29,6 +31,11 @@ async function handleLogout() {
                 @click="userSw?.toggleAttribute('open', false)"
             >
                 <template v-if="loggedIn">
+                    <li v-if="isAdmin">
+                        <NuxtLink to="/admin">
+                            管理面板
+                        </NuxtLink>
+                    </li>
                     <li><a>购物车</a></li>
                     <li>
                         <NuxtLink to="/orders">

@@ -43,3 +43,35 @@ export enum ArtifactDisplayMode {
     SKETCHPAD_BACK = 1,
     ADAPTIVE_VIEW = 2,
 }
+
+/**
+ * 工件状态枚举
+ */
+export enum ArtifactStatus {
+    FAILED = -1,
+    PENDING = 0,
+    IN_PRODUCTION = 1,
+    COMPLETED = 2,
+    ACTIVATED = 3,
+}
+
+/**
+ * 批次状态枚举
+ */
+export enum BatchStatus {
+    FAILED = -1,
+    PENDING = 0,
+    IN_PRODUCTION = 1,
+    COMPLETED = 2,
+}
+
+/**
+ * 用户权限枚举
+ */
+export enum UserPermission {
+    USERS_ADMIN = 'users:admin',
+    IMAGES_ADMIN = 'images:admin',
+    ARTIFACTS_ADMIN = 'artifacts:admin',
+    ORDERS_ADMIN = 'orders:admin',
+    PLATFORM_ADMIN = 'platform:admin',
+}
