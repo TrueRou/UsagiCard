@@ -30,10 +30,19 @@ function handleTabKeySwap(tabKey: string) {
 function goBack() {
     router.push({ path: `/artifacts/${artifactId}` })
 }
+
+const pageContainer = useTemplateRef<HTMLElement>('page-container')
+const { lengthX, lengthY } = useSwipe(pageContainer, {
+    threshold: 50,
+    onSwipeEnd(_e, direction) {
+        if (Math.abs(lengthX.value) < Math.abs(lengthY.value) * 1.5) return
+        if (direction === 'right') goBack()
+    },
+})
 </script>
 
 <template>
-    <div class="w-full h-full flex flex-col lg:flex-row overflow-hidden">
+    <div ref="page-container" class="w-full h-full flex flex-col lg:flex-row overflow-hidden">
         <!-- 移动端顶部菜单栏 -->
         <div class="lg:hidden w-full bg-base-200 border-b">
             <ul class="menu menu-horizontal bg-base-200 w-full">
