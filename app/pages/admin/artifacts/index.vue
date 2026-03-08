@@ -7,7 +7,9 @@ const searchParams = reactive({
     page_size: 20,
 })
 
-const { data: artifacts, refresh } = await useAdminArtifacts(toRef(() => searchParams))
+const { data: artifacts, refresh } = await useLeporid<PageArtifactManufacturerResponse>('/api/artifacts', {
+    params: searchParams,
+})
 
 const isProcessing = ref(false)
 
@@ -45,7 +47,12 @@ async function handleSaveStatus() {
         return
     isProcessing.value = true
     try {
-        await adminUpdateArtifactStatus(editingArtifact.value.id, newStatus.value)
+        await useNuxtApp().$leporid(`/api/artifacts/${editingArtifact.value.id}/status`, {
+            method: 'PATCH',
+            body: { status: newStatus.value },
+            showSuccessToast: true,
+            successMessage: '工件状态已更新',
+        })
         showModal.value = false
         await refresh()
     }

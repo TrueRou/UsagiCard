@@ -5,7 +5,9 @@ const searchParams = reactive({
     page_size: 20,
 })
 
-const { data: users, refresh } = await useAdminUsers(toRef(() => searchParams))
+const { data: users, refresh } = await useLeporid<PageAdminUserPublic>('/api/admin/users', {
+    params: searchParams,
+})
 
 // Permission editing
 const editingUser = ref<{ id: string, username: string, permissions: string[] } | null>(null)
@@ -53,7 +55,12 @@ async function handleSavePermissions() {
         return
     isSaving.value = true
     try {
-        await adminUpdateUserPermissions(editingUser.value.id, editPermissions.value)
+        await useNuxtApp().$leporid(`/api/admin/users/${editingUser.value.id}/permissions`, {
+            method: 'PATCH',
+            body: { permissions: editPermissions.value },
+            showSuccessToast: true,
+            successMessage: '权限已更新',
+        })
         showModal.value = false
         await refresh()
     }

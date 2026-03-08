@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const dialogStore = useDialogStore()
+
 const searchParams = reactive({
     keyword: '',
     status: undefined as number | undefined,
@@ -7,7 +9,9 @@ const searchParams = reactive({
     page_size: 20,
 })
 
-const { data: orders, refresh } = await useAdminOrders(toRef(() => searchParams))
+const { data: orders, refresh } = await useLeporid<PageOrderPublic>('/api/admin/orders', {
+    params: searchParams,
+})
 
 const isProcessing = ref(false)
 
@@ -26,12 +30,17 @@ function formatDateTime(iso: string) {
 }
 
 async function handleShip(orderId: string) {
-    const sn = prompt('请输入快递单号：')
+    const sn = await dialogStore.prompt('请输入快递单号：')
     if (!sn)
         return
     isProcessing.value = true
     try {
-        await adminShipOrder(orderId, sn)
+        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}/ship`, {
+            method: 'POST',
+            body: { shipping_sn: sn },
+            showSuccessToast: true,
+            successMessage: '订单已发货',
+        })
         await refresh()
     }
     finally {
@@ -40,11 +49,15 @@ async function handleShip(orderId: string) {
 }
 
 async function handleCancel(orderId: string) {
-    if (!confirm('确定取消此订单？'))
+    if (!await dialogStore.confirm('确定取消此订单？', { danger: true }))
         return
     isProcessing.value = true
     try {
-        await adminCancelOrder(orderId)
+        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}/cancel`, {
+            method: 'POST',
+            showSuccessToast: true,
+            successMessage: '订单已取消',
+        })
         await refresh()
     }
     finally {

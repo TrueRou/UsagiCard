@@ -6,7 +6,9 @@ const searchParams = reactive({
     page_size: 20,
 })
 
-const { data: redemptions, refresh } = await useAdminRedemptions(toRef(() => searchParams))
+const { data: redemptions, refresh } = await useLeporid<PageAdminRedemptionPublic>('/api/admin/platform/redemptions', {
+    params: searchParams,
+})
 
 function handleSearch() {
     searchParams.page_number = 1

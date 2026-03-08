@@ -1,7 +1,12 @@
 <script setup lang="ts">
+const notificationsStore = useNotificationsStore()
+const dialogStore = useDialogStore()
+
 // === Presets ===
 const presetParams = reactive({ page_number: 1, page_size: 20 })
-const { data: presets, refresh: refreshPresets } = await useAdminPresets(toRef(() => presetParams))
+const { data: presets, refresh: refreshPresets } = await useLeporid<PageAdminPlatformPresetDetailPublic>('/api/admin/platform/presets', {
+    params: presetParams,
+})
 
 const showPresetModal = ref(false)
 const presetEditing = ref<string | null>(null) // null = create, string = update
@@ -50,17 +55,27 @@ async function handleSavePreset() {
             product_type_id: presetForm.product_type_id,
         }
         if (presetEditing.value) {
-            await adminUpdatePreset(presetEditing.value, body)
+            await useNuxtApp().$leporid(`/api/admin/platform/presets/${presetEditing.value}`, {
+                method: 'PATCH',
+                body,
+                showSuccessToast: true,
+                successMessage: '预设已更新',
+            })
         }
         else {
-            await adminCreatePreset(body)
+            await useNuxtApp().$leporid('/api/admin/platform/presets', {
+                method: 'POST',
+                body,
+                showSuccessToast: true,
+                successMessage: '预设已创建',
+            })
         }
         showPresetModal.value = false
         await refreshPresets()
     }
     catch (e: any) {
-        if (e?.message?.includes('JSON')) {
-            alert('商品设计模板 JSON 格式错误')
+        if (e?.message?.includes('JSON') || e instanceof SyntaxError) {
+            notificationsStore.addNotification({ type: 'warning', message: '商品设计模板 JSON 格式错误' })
         }
     }
     finally {
@@ -69,11 +84,15 @@ async function handleSavePreset() {
 }
 
 async function handleDeletePreset(id: string) {
-    if (!confirm('确定删除此预设？关联的SKU和兑换码可能受影响。'))
+    if (!await dialogStore.confirm('确定删除此预设？关联的SKU和兑换码可能受影响。', { danger: true }))
         return
     isProcessing.value = true
     try {
-        await adminDeletePreset(id)
+        await useNuxtApp().$leporid(`/api/admin/platform/presets/${id}`, {
+            method: 'DELETE',
+            showSuccessToast: true,
+            successMessage: '预设已删除',
+        })
         await refreshPresets()
     }
     finally {
@@ -83,7 +102,9 @@ async function handleDeletePreset(id: string) {
 
 // === SKUs ===
 const skuParams = reactive({ page_number: 1, page_size: 20 })
-const { data: skus, refresh: refreshSkus } = await useAdminSkus(toRef(() => skuParams))
+const { data: skus, refresh: refreshSkus } = await useLeporid<PageAdminPlatformSkuPublic>('/api/admin/platform/skus', {
+    params: skuParams,
+})
 
 const showSkuModal = ref(false)
 const skuEditing = ref<string | null>(null)
@@ -124,10 +145,20 @@ async function handleSaveSku() {
             preset_id: skuForm.preset_id,
         }
         if (skuEditing.value) {
-            await adminUpdateSku(skuEditing.value, body)
+            await useNuxtApp().$leporid(`/api/admin/platform/skus/${skuEditing.value}`, {
+                method: 'PATCH',
+                body,
+                showSuccessToast: true,
+                successMessage: 'SKU已更新',
+            })
         }
         else {
-            await adminCreateSku(body)
+            await useNuxtApp().$leporid('/api/admin/platform/skus', {
+                method: 'POST',
+                body,
+                showSuccessToast: true,
+                successMessage: 'SKU已创建',
+            })
         }
         showSkuModal.value = false
         await refreshSkus()
@@ -138,11 +169,15 @@ async function handleSaveSku() {
 }
 
 async function handleDeleteSku(id: string) {
-    if (!confirm('确定删除此SKU？'))
+    if (!await dialogStore.confirm('确定删除此 SKU？', { danger: true }))
         return
     isProcessing.value = true
     try {
-        await adminDeleteSku(id)
+        await useNuxtApp().$leporid(`/api/admin/platform/skus/${id}`, {
+            method: 'DELETE',
+            showSuccessToast: true,
+            successMessage: 'SKU已删除',
+        })
         await refreshSkus()
     }
     finally {

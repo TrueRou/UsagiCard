@@ -116,6 +116,7 @@ function isActive(to: string) {
         <ClientOnly>
             <NuxtLoadingIndicator />
             <BannerNotification />
+            <DialogConfirm />
         </ClientOnly>
     </div>
 </template>

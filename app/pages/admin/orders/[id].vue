@@ -2,7 +2,8 @@
 const route = useRoute()
 const orderId = route.params.id as string
 
-const { data: order, refresh } = await useAdminOrder(orderId)
+const dialogStore = useDialogStore()
+const { data: order, refresh } = await useLeporid<OrderPublic>(`/api/admin/orders/${orderId}`)
 const isProcessing = ref(false)
 
 const editForm = reactive({
@@ -24,7 +25,12 @@ const isEditing = ref(false)
 async function handleSave() {
     isProcessing.value = true
     try {
-        await adminUpdateOrder(orderId, editForm)
+        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}`, {
+            method: 'PATCH',
+            body: editForm,
+            showSuccessToast: true,
+            successMessage: '订单已更新',
+        })
         isEditing.value = false
         await refresh()
     }
@@ -34,12 +40,17 @@ async function handleSave() {
 }
 
 async function handleShip() {
-    const sn = prompt('请输入快递单号：')
+    const sn = await dialogStore.prompt('请输入快递单号：')
     if (!sn)
         return
     isProcessing.value = true
     try {
-        await adminShipOrder(orderId, sn)
+        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}/ship`, {
+            method: 'POST',
+            body: { shipping_sn: sn },
+            showSuccessToast: true,
+            successMessage: '订单已发货',
+        })
         await refresh()
     }
     finally {
@@ -48,11 +59,15 @@ async function handleShip() {
 }
 
 async function handleCancel() {
-    if (!confirm('确定取消此订单？此操作不可逆。'))
+    if (!await dialogStore.confirm('确定取消此订单？此操作不可逆。'))
         return
     isProcessing.value = true
     try {
-        await adminCancelOrder(orderId)
+        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}/cancel`, {
+            method: 'POST',
+            showSuccessToast: true,
+            successMessage: '订单已取消',
+        })
         await refresh()
     }
     finally {

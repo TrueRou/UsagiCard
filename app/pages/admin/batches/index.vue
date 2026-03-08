@@ -5,7 +5,9 @@ const searchParams = reactive({
     page_size: 20,
 })
 
-const { data: batches, refresh } = await useAdminBatches(toRef(() => searchParams))
+const { data: batches, refresh } = await useLeporid<PageBatchPublic>('/api/batches', {
+    params: searchParams,
+})
 
 const isProcessing = ref(false)
 
@@ -45,7 +47,12 @@ async function handleAdvance() {
         return
     isProcessing.value = true
     try {
-        await adminAdvanceBatch(advanceBatch.value.id, advanceTarget.value)
+        await useNuxtApp().$leporid(`/api/batches/${advanceBatch.value.id}/advance`, {
+            method: 'POST',
+            body: { target_status: advanceTarget.value },
+            showSuccessToast: true,
+            successMessage: '工件状态已批量推进',
+        })
         showAdvanceModal.value = false
         await refresh()
     }
@@ -67,7 +74,12 @@ async function handleCreateBatch() {
         return
     isProcessing.value = true
     try {
-        await adminCreateBatch(ids)
+        await useNuxtApp().$leporid('/api/batches', {
+            method: 'POST',
+            body: { artifact_ids: ids },
+            showSuccessToast: true,
+            successMessage: '批次已创建',
+        })
         showCreateModal.value = false
         newArtifactIds.value = ''
         await refresh()

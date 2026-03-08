@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { data: stats, refresh } = await useAdminStats()
+const { data: stats, refresh } = await useLeporid<AdminStatsResponse>('/api/admin/stats')
 
 function formatMoney(val: string | number) {
     return Number.parseFloat(String(val)).toFixed(2)
