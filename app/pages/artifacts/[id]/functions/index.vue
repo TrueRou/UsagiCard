@@ -35,8 +35,10 @@ const pageContainer = useTemplateRef<HTMLElement>('page-container')
 const { lengthX, lengthY } = useSwipe(pageContainer, {
     threshold: 50,
     onSwipeEnd(_e, direction) {
-        if (Math.abs(lengthX.value) < Math.abs(lengthY.value) * 1.5) return
-        if (direction === 'right') goBack()
+        if (Math.abs(lengthX.value) < Math.abs(lengthY.value) * 1.5)
+            return
+        if (direction === 'right')
+            goBack()
     },
 })
 </script>
