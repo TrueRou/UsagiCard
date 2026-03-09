@@ -36,6 +36,7 @@
         "vue-cropper": "^1.1.4",
         "vue-router": "^4.6.4",
         "wanakana": "^5.3.1",
+        "xlsx": "^0.18.5",
         "zod": "^4.3.5"
     },
     "devDependencies": {

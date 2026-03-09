@@ -12,6 +12,9 @@ const { useDesignCtx } = await useArtifact(artifactId)
 const sketchpadComponent = computed(() => useDesignCtx.sketchpadComponent.value)
 
 watchEffect(() => {
+    if (route.query.back === '1') {
+        useDesignCtx.displayMode.value = ArtifactDisplayMode.SKETCHPAD_BACK
+    }
     if (sketchpadRef.value?.$el) {
         const cardWidth: number = sketchpadRef.value.$el.clientWidth
         const cardHeight: number = sketchpadRef.value.$el.clientHeight

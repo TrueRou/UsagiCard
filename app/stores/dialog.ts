@@ -41,11 +41,11 @@ export const useDialogStore = defineStore('dialog', () => {
     }
 
     return {
-        visible: readonly(visible),
-        type: readonly(type),
-        message: readonly(message),
-        placeholder: readonly(placeholder),
-        danger: readonly(danger),
+        visible,
+        type,
+        message,
+        placeholder,
+        danger,
         confirm,
         prompt,
         respond,
