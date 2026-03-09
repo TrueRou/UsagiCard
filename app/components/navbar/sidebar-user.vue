@@ -8,7 +8,7 @@ const panelRef = ref<HTMLElement | null>(null)
 const loginPath = computed(() => ({ path: '/auth/login', query: { redirect: route.fullPath } }))
 const registerPath = computed(() => ({ path: '/auth/register', query: { redirect: route.fullPath } }))
 
-const isAdmin = computed(() => user.value?.permissions?.some((p: string) => p.endsWith(':admin')))
+const isAdmin = computed(() => user.value?.permissions?.includes(UserPermission.ANY_ADMIN))
 
 onClickOutside(panelRef, () => {
     open.value = false

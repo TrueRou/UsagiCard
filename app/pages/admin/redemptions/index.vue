@@ -24,6 +24,42 @@ function formatDateTime(iso: string | null) {
     return iso ? new Date(iso).toLocaleString() : '-'
 }
 
+// Create redemptions modal
+const showCreateModal = ref(false)
+const skuPickerRef = ref<any>()
+const selectedSku = ref<any | null>(null)
+const redemptionCount = ref(1)
+const isCreating = ref(false)
+const createdCodes = ref<string[]>([])
+
+function openCreateModal() {
+    selectedSku.value = null
+    redemptionCount.value = 10
+    createdCodes.value = []
+    showCreateModal.value = true
+}
+
+async function handleCreateRedemptions() {
+    if (!selectedSku.value)
+        return
+    isCreating.value = true
+    try {
+        const result = await useNuxtApp().$leporid<{ codes: string[], count: number }>('/api/admin/platform/redemptions', {
+            method: 'POST',
+            body: { sku_id: selectedSku.value.id, count: redemptionCount.value },
+        })
+        createdCodes.value = result.codes ?? []
+        await refresh()
+    }
+    finally {
+        isCreating.value = false
+    }
+}
+
+function copyAllCodes() {
+    navigator.clipboard.writeText(createdCodes.value.join('\n'))
+}
+
 useHead({ title: '兑换码管理' })
 
 definePageMeta({
@@ -34,9 +70,15 @@ definePageMeta({
 
 <template>
     <div>
-        <h1 class="text-2xl font-bold mb-6">
-            兑换码管理
-        </h1>
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">
+                兑换码管理
+            </h1>
+            <button class="btn btn-primary btn-sm" @click="openCreateModal">
+                <Icon name="mdi:plus" class="w-4 h-4" />
+                创建兑换码
+            </button>
+        </div>
 
         <div class="flex flex-col sm:flex-row gap-3 w-full mb-4">
             <select
@@ -117,6 +159,101 @@ definePageMeta({
             :total-pages="redemptions.total_page"
             :current-page="searchParams.page_number"
             @update:current-page="handlePageChange"
+        />
+
+        <!-- Create redemptions modal -->
+        <dialog class="modal" :class="{ 'modal-open': showCreateModal }">
+            <div class="modal-box max-w-lg">
+                <h3 class="text-lg font-bold">
+                    创建兑换码
+                </h3>
+
+                <!-- Result state -->
+                <div v-if="createdCodes.length" class="mt-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-success">
+                            成功生成 {{ createdCodes.length }} 个兑换码
+                        </span>
+                        <button class="btn btn-ghost btn-xs" @click="copyAllCodes">
+                            <Icon name="mdi:content-copy" class="w-3.5 h-3.5" />
+                            复制全部
+                        </button>
+                    </div>
+                    <div class="bg-base-200 rounded-lg p-3 max-h-52 overflow-y-auto">
+                        <p v-for="code in createdCodes" :key="code" class="font-mono text-xs py-0.5">
+                            {{ code }}
+                        </p>
+                    </div>
+                    <div class="modal-action pt-0">
+                        <button class="btn btn-primary btn-sm" @click="showCreateModal = false">
+                            关闭
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Create form -->
+                <div v-else class="mt-4 space-y-4">
+                    <p class="text-sm text-base-content/70">
+                        选择关联的 SKU 并指定生成数量，系统将自动随机生成兑换码。
+                    </p>
+                    <div>
+                        <fieldset class="fieldset">
+                            <legend class="fieldset-legend">
+                                关联 SKU
+                            </legend>
+                            <div class="flex items-center gap-3">
+                                <button
+                                    class="btn btn-outline btn-sm"
+                                    type="button"
+                                    @click="skuPickerRef?.open(selectedSku ? [selectedSku] : [])"
+                                >
+                                    <Icon name="mdi:package-variant" class="w-4 h-4" />
+                                    选择 SKU
+                                </button>
+                                <span v-if="selectedSku" class="text-sm">
+                                    {{ selectedSku.plan_id }}
+                                    <span class="text-base-content/50 text-xs ml-1">{{ selectedSku.platform }}</span>
+                                </span>
+                                <span v-else class="text-sm text-base-content/40">未选择</span>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset">
+                            <legend class="fieldset-legend">
+                                生成数量
+                            </legend>
+                            <input v-model.number="redemptionCount" type="text" class="input">
+                        </fieldset>
+                    </div>
+
+                    <div class="modal-action pt-0">
+                        <button class="btn btn-outline btn-sm" @click="showCreateModal = false">
+                            取消
+                        </button>
+                        <button
+                            class="btn btn-primary btn-sm"
+                            :disabled="isCreating || !selectedSku"
+                            @click="handleCreateRedemptions"
+                        >
+                            <span v-if="isCreating" class="loading loading-spinner loading-xs" />
+                            生成兑换码
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button @click="showCreateModal = false">
+                    close
+                </button>
+            </form>
+        </dialog>
+
+        <!-- SKU picker -->
+        <AdminResourcePicker
+            ref="skuPickerRef"
+            resource-type="sku"
+            :multiple="false"
+            title="选择 SKU"
+            @confirm="items => { if (items[0]) selectedSku = items[0] }"
         />
     </div>
 </template>

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-const dialogStore = useDialogStore()
-
 const searchParams = reactive({
     keyword: '',
     status: undefined as number | undefined,
@@ -29,35 +27,73 @@ function formatDateTime(iso: string) {
     return new Date(iso).toLocaleString()
 }
 
-async function handleShip(orderId: string) {
-    const sn = await dialogStore.prompt('请输入快递单号：')
-    if (!sn)
-        return
-    isProcessing.value = true
-    try {
-        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}/ship`, {
-            method: 'POST',
-            body: { shipping_sn: sn },
-            showSuccessToast: true,
-            successMessage: '订单已发货',
-        })
-        await refresh()
-    }
-    finally {
-        isProcessing.value = false
+// ── Create / Derive order modal ──────────────────────────────
+const showOrderModal = ref(false)
+const isDeriving = ref(false)
+
+const orderForm = reactive({
+    owner_id: '',
+    owner_name: '',
+    shipping_name: '',
+    shipping_phone: '',
+    shipping_address: '',
+    override_amount: '',
+})
+
+const userPickerRef = ref<{ open: () => void } | null>(null)
+
+function openCreateOrder() {
+    isDeriving.value = false
+    Object.assign(orderForm, {
+        owner_id: '',
+        owner_name: '',
+        shipping_name: '',
+        shipping_phone: '',
+        shipping_address: '',
+        override_amount: '',
+    })
+    showOrderModal.value = true
+}
+
+function openDeriveOrder(order: any) {
+    isDeriving.value = true
+    Object.assign(orderForm, {
+        owner_id: order.user_id,
+        owner_name: order.rel_user?.username || `用户 ${order.user_id.slice(-8)}`,
+        shipping_name: order.shipping_name,
+        shipping_phone: order.shipping_phone,
+        shipping_address: order.shipping_address,
+        override_amount: '',
+    })
+    showOrderModal.value = true
+}
+
+function onUserSelected(items: any[]) {
+    if (items[0]) {
+        orderForm.owner_id = items[0].id
+        orderForm.owner_name = items[0].username
     }
 }
 
-async function handleCancel(orderId: string) {
-    if (!await dialogStore.confirm('确定取消此订单？', { danger: true }))
-        return
+async function handleSubmitOrder() {
     isProcessing.value = true
     try {
-        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}/cancel`, {
+        const body: Record<string, any> = {
+            owner_id: orderForm.owner_id,
+            shipping_name: orderForm.shipping_name,
+            shipping_phone: orderForm.shipping_phone,
+            shipping_address: orderForm.shipping_address,
+        }
+        if (orderForm.override_amount !== '') {
+            body.override_amount = Number.parseFloat(orderForm.override_amount)
+        }
+        await useNuxtApp().$leporid('/api/admin/orders', {
             method: 'POST',
+            body,
             showSuccessToast: true,
-            successMessage: '订单已取消',
+            successMessage: '订单已创建',
         })
+        showOrderModal.value = false
         await refresh()
     }
     finally {
@@ -75,9 +111,15 @@ definePageMeta({
 
 <template>
     <div>
-        <h1 class="text-2xl font-bold mb-6">
-            订单管理
-        </h1>
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">
+                订单管理
+            </h1>
+            <button class="btn btn-primary btn-sm" @click="openCreateOrder">
+                <Icon name="mdi:plus" class="w-4 h-4" />
+                新建订单
+            </button>
+        </div>
 
         <!-- Filter bar -->
         <AdminFilterBar
@@ -157,24 +199,11 @@ definePageMeta({
                         </td>
                         <td>
                             <div class="flex gap-1">
-                                <NuxtLink :to="`/admin/orders/${order.id}`" class="btn btn-ghost btn-xs">
+                                <NuxtLink :to="`/admin/orders/${order.id}`" class="btn btn-accent btn-xs">
                                     详情
                                 </NuxtLink>
-                                <button
-                                    v-if="order.status === OrderStatus.PAID"
-                                    class="btn btn-primary btn-xs"
-                                    :disabled="isProcessing"
-                                    @click="handleShip(order.id)"
-                                >
-                                    发货
-                                </button>
-                                <button
-                                    v-if="[OrderStatus.UNPAID, OrderStatus.PAID].includes(order.status)"
-                                    class="btn btn-error btn-xs btn-outline"
-                                    :disabled="isProcessing"
-                                    @click="handleCancel(order.id)"
-                                >
-                                    取消
+                                <button class="btn btn-outline btn-xs" @click="openDeriveOrder(order)">
+                                    派生
                                 </button>
                             </div>
                         </td>
@@ -192,6 +221,99 @@ definePageMeta({
             :total-pages="orders.total_page"
             :current-page="searchParams.page_number"
             @update:current-page="handlePageChange"
+        />
+
+        <!-- Create / Derive order modal -->
+        <dialog class="modal" :class="{ 'modal-open': showOrderModal }">
+            <div class="modal-box max-w-lg max-h-[85dvh] flex flex-col">
+                <h3 class="text-lg font-bold shrink-0">
+                    {{ isDeriving ? '派生订单' : '新建订单' }}
+                </h3>
+
+                <div class="mt-4 space-y-2 overflow-y-auto flex-1 pr-1">
+                    <!-- Owner -->
+                    <div class="form-control">
+                        <div class="label">
+                            <span class="label-text">归属用户</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input
+                                :value="orderForm.owner_name || orderForm.owner_id"
+                                readonly
+                                class="input input-bordered input-sm flex-1 text-xs"
+                                :placeholder="orderForm.owner_id ? '' : '点击右侧选择用户'"
+                            >
+                            <button class="btn btn-accent btn-sm" @click="userPickerRef?.open()">
+                                选择
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Shipping -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="form-control">
+                            <div class="label">
+                                <span class="label-text">收件人</span>
+                            </div>
+                            <input v-model="orderForm.shipping_name" class="input input-bordered input-sm w-full">
+                        </label>
+                        <label class="form-control">
+                            <div class="label">
+                                <span class="label-text">电话</span>
+                            </div>
+                            <input v-model="orderForm.shipping_phone" class="input input-bordered input-sm w-full">
+                        </label>
+                    </div>
+                    <label class="form-control">
+                        <div class="label">
+                            <span class="label-text">收件地址</span>
+                        </div>
+                        <input v-model="orderForm.shipping_address" class="input input-bordered input-sm w-full">
+                    </label>
+
+                    <!-- Amount override -->
+                    <label class="form-control">
+                        <div class="label">
+                            <span class="label-text">自定义金额</span>
+                            <span class="label-text-alt text-base-content/50">可选，留空则为 ¥0.00</span>
+                        </div>
+                        <input
+                            v-model="orderForm.override_amount"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="input input-bordered input-sm w-full"
+                            placeholder="留空则金额为 ¥0.00"
+                        >
+                    </label>
+                </div>
+
+                <div class="modal-action shrink-0">
+                    <button class="btn btn-ghost btn-sm" @click="showOrderModal = false">
+                        取消
+                    </button>
+                    <button
+                        class="btn btn-primary btn-sm"
+                        :disabled="isProcessing || !orderForm.owner_id"
+                        @click="handleSubmitOrder"
+                    >
+                        创建
+                    </button>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button @click="showOrderModal = false">
+                    close
+                </button>
+            </form>
+        </dialog>
+
+        <!-- Resource pickers (teleported outside modal stack) -->
+        <AdminResourcePicker
+            ref="userPickerRef"
+            resource-type="user"
+            title="选择归属用户"
+            @confirm="onUserSelected"
         />
     </div>
 </template>

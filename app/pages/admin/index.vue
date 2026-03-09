@@ -9,7 +9,7 @@ useHead({ title: '管理面板' })
 
 definePageMeta({
     layout: 'admin',
-    middleware: ['require-admin'],
+    middleware: ['require-login'],
 })
 </script>
 

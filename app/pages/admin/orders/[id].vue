@@ -191,7 +191,7 @@ definePageMeta({
                     </h2>
                     <button
                         v-if="!isEditing"
-                        class="btn btn-ghost btn-xs"
+                        class="btn btn-accent btn-xs"
                         @click="isEditing = true"
                     >
                         编辑
@@ -220,25 +220,29 @@ definePageMeta({
                 </template>
 
                 <template v-else>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <label class="form-control">
-                            <span class="label-text text-sm">收件人</span>
-                            <input v-model="editForm.shipping_name" class="input input-bordered input-sm">
-                        </label>
-                        <label class="form-control">
-                            <span class="label-text text-sm">电话</span>
-                            <input v-model="editForm.shipping_phone" class="input input-bordered input-sm">
-                        </label>
-                    </div>
-                    <label class="form-control mt-3">
-                        <span class="label-text text-sm">地址</span>
-                        <input v-model="editForm.shipping_address" class="input input-bordered input-sm">
-                    </label>
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">
+                            收件人
+                        </legend>
+                        <input v-model="editForm.shipping_name" type="text" class="input">
+                    </fieldset>
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">
+                            电话
+                        </legend>
+                        <input v-model="editForm.shipping_phone" type="text" class="input">
+                    </fieldset>
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">
+                            地址
+                        </legend>
+                        <input v-model="editForm.shipping_address" type="text" class="input">
+                    </fieldset>
                     <div class="flex gap-2 mt-3">
                         <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleSave">
                             保存
                         </button>
-                        <button class="btn btn-ghost btn-sm" @click="isEditing = false">
+                        <button class="btn btn-outline btn-sm" @click="isEditing = false">
                             取消
                         </button>
                     </div>
@@ -247,9 +251,11 @@ definePageMeta({
 
             <!-- 订单商品 -->
             <div class="bg-base-100 rounded-lg shadow-sm p-4">
-                <h2 class="text-lg font-semibold mb-3">
-                    订单商品
-                </h2>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-lg font-semibold">
+                        订单商品
+                    </h2>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="table table-sm">
                         <thead>

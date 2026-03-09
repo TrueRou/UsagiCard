@@ -14,7 +14,7 @@ export default defineNuxtRouteMiddleware(async (_to, _from) => {
 
     // 检查用户是否持有任意管理权限
     const permissions = user.value?.permissions || []
-    const hasAdminPermission = permissions.some(p => p.endsWith(':admin'))
+    const hasAdminPermission = permissions.includes(UserPermission.ANY_ADMIN)
 
     if (!hasAdminPermission) {
         if (import.meta.client) {

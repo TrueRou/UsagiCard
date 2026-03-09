@@ -40,7 +40,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     }
 
     return {
-        notifications: readonly(notifications),
+        notifications,
         addNotification,
         removeNotification,
         clearAll,

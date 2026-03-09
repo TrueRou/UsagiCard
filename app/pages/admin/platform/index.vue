@@ -2,6 +2,16 @@
 const notificationsStore = useNotificationsStore()
 const dialogStore = useDialogStore()
 
+// Picker refs
+const materialPickerRef = ref<any>()
+const typePickerRef = ref<any>()
+const presetPickerRef = ref<any>()
+
+// Picker selections for forms
+const selectedMaterial = ref<any | null>(null)
+const selectedType = ref<any | null>(null)
+const selectedPresetForSku = ref<any | null>(null)
+
 // === Presets ===
 const presetParams = reactive({ page_number: 1, page_size: 20 })
 const { data: presets, refresh: refreshPresets } = await useLeporid<PageAdminPlatformPresetDetailPublic>('/api/admin/platform/presets', {
@@ -20,6 +30,8 @@ const presetForm = reactive({
 
 function openPresetCreate() {
     presetEditing.value = null
+    selectedMaterial.value = null
+    selectedType.value = null
     Object.assign(presetForm, {
         product_name: '',
         product_description: '',
@@ -32,6 +44,9 @@ function openPresetCreate() {
 
 function openPresetEdit(preset: any) {
     presetEditing.value = preset.id
+    // Placeholder objects so picker can mark them as selected
+    selectedMaterial.value = preset.product_material_id ? { id: preset.product_material_id, name: preset.product_material?.name || preset.product_material_id.slice(-8) } : null
+    selectedType.value = preset.product_type_id ? { id: preset.product_type_id, name: preset.product_type?.name || preset.product_type_id.slice(-8) } : null
     Object.assign(presetForm, {
         product_name: preset.product_name,
         product_description: preset.product_description,
@@ -51,8 +66,8 @@ async function handleSavePreset() {
             product_name: presetForm.product_name,
             product_description: presetForm.product_description,
             product_design: JSON.parse(presetForm.product_design),
-            product_material_id: presetForm.product_material_id,
-            product_type_id: presetForm.product_type_id,
+            product_material_id: selectedMaterial.value?.id || presetForm.product_material_id,
+            product_type_id: selectedType.value?.id || presetForm.product_type_id,
         }
         if (presetEditing.value) {
             await useNuxtApp().$leporid(`/api/admin/platform/presets/${presetEditing.value}`, {
@@ -118,12 +133,14 @@ const skuForm = reactive({
 
 function openSkuCreate() {
     skuEditing.value = null
+    selectedPresetForSku.value = null
     Object.assign(skuForm, { platform: '', plan_id: '', sku_id: '', quantity: 1, preset_id: '' })
     showSkuModal.value = true
 }
 
 function openSkuEdit(sku: any) {
     skuEditing.value = sku.id
+    selectedPresetForSku.value = sku.preset_id ? { id: sku.preset_id, product_name: sku.preset?.product_name || sku.preset_id.slice(-8) } : null
     Object.assign(skuForm, {
         platform: sku.platform,
         plan_id: sku.plan_id,
@@ -142,7 +159,7 @@ async function handleSaveSku() {
             plan_id: skuForm.plan_id,
             sku_id: skuForm.sku_id || null,
             quantity: skuForm.quantity,
-            preset_id: skuForm.preset_id,
+            preset_id: selectedPresetForSku.value?.id || skuForm.preset_id,
         }
         if (skuEditing.value) {
             await useNuxtApp().$leporid(`/api/admin/platform/skus/${skuEditing.value}`, {
@@ -195,6 +212,155 @@ definePageMeta({
     layout: 'admin',
     middleware: ['require-admin'],
 })
+
+// === Product Materials ===
+const materialParams = reactive({ page_number: 1, page_size: 20 })
+const { data: materials, refresh: refreshMaterials } = await useLeporid<any>('/api/admin/platform/product-materials', {
+    params: materialParams,
+})
+
+const showMaterialModal = ref(false)
+const materialEditing = ref<string | null>(null)
+const materialForm = reactive({
+    name: '',
+    description: '',
+    price_modifier: '0.00',
+})
+
+function openMaterialCreate() {
+    materialEditing.value = null
+    Object.assign(materialForm, { name: '', description: '', price_modifier: '0.00' })
+    showMaterialModal.value = true
+}
+
+function openMaterialEdit(material: any) {
+    materialEditing.value = material.id
+    Object.assign(materialForm, {
+        name: material.name,
+        description: material.description,
+        price_modifier: String(material.price_modifier),
+    })
+    showMaterialModal.value = true
+}
+
+async function handleSaveMaterial() {
+    isProcessing.value = true
+    try {
+        const body = {
+            name: materialForm.name,
+            description: materialForm.description,
+            price_modifier: Number.parseFloat(materialForm.price_modifier || '0'),
+        }
+        if (materialEditing.value) {
+            await useNuxtApp().$leporid(`/api/admin/platform/product-materials/${materialEditing.value}`, {
+                method: 'PATCH',
+                body,
+                showSuccessToast: true,
+                successMessage: '材料已更新',
+            })
+        }
+        else {
+            await useNuxtApp().$leporid('/api/admin/platform/product-materials', {
+                method: 'POST',
+                body,
+                showSuccessToast: true,
+                successMessage: '材料已创建',
+            })
+        }
+        showMaterialModal.value = false
+        await refreshMaterials()
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
+
+async function handleDeleteMaterial(id: string) {
+    if (!await dialogStore.confirm('确定删除此材料？关联的预设和商品可能受影响。', { danger: true }))
+        return
+    isProcessing.value = true
+    try {
+        await useNuxtApp().$leporid(`/api/admin/platform/product-materials/${id}`, {
+            method: 'DELETE',
+            showSuccessToast: true,
+            successMessage: '材料已删除',
+        })
+        await refreshMaterials()
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
+
+// === Product Types ===
+const typeParams = reactive({ page_number: 1, page_size: 20 })
+const { data: types, refresh: refreshTypes } = await useLeporid<any>('/api/admin/platform/product-types', {
+    params: typeParams,
+})
+
+const showTypeModal = ref(false)
+const typeEditing = ref<string | null>(null)
+const typeForm = reactive({
+    name: '',
+    description: '',
+})
+
+function openTypeCreate() {
+    typeEditing.value = null
+    Object.assign(typeForm, { name: '', description: '' })
+    showTypeModal.value = true
+}
+
+function openTypeEdit(type: any) {
+    typeEditing.value = type.id
+    Object.assign(typeForm, { name: type.name, description: type.description })
+    showTypeModal.value = true
+}
+
+async function handleSaveType() {
+    isProcessing.value = true
+    try {
+        const body = { name: typeForm.name, description: typeForm.description }
+        if (typeEditing.value) {
+            await useNuxtApp().$leporid(`/api/admin/platform/product-types/${typeEditing.value}`, {
+                method: 'PATCH',
+                body,
+                showSuccessToast: true,
+                successMessage: '类型已更新',
+            })
+        }
+        else {
+            await useNuxtApp().$leporid('/api/admin/platform/product-types', {
+                method: 'POST',
+                body,
+                showSuccessToast: true,
+                successMessage: '类型已创建',
+            })
+        }
+        showTypeModal.value = false
+        await refreshTypes()
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
+
+async function handleDeleteType(id: string) {
+    if (!await dialogStore.confirm('确定删除此商品类型？关联的预设和商品可能受影响。', { danger: true }))
+        return
+    isProcessing.value = true
+    try {
+        await useNuxtApp().$leporid(`/api/admin/platform/product-types/${id}`, {
+            method: 'DELETE',
+            showSuccessToast: true,
+            successMessage: '类型已删除',
+        })
+        await refreshTypes()
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
 </script>
 
 <template>
@@ -242,7 +408,7 @@ definePageMeta({
                             </td>
                             <td>
                                 <div class="flex gap-1">
-                                    <button class="btn btn-ghost btn-xs" @click="openPresetEdit(preset)">
+                                    <button class="btn btn-accent btn-xs" @click="openPresetEdit(preset)">
                                         编辑
                                     </button>
                                     <button
@@ -317,7 +483,7 @@ definePageMeta({
                             </td>
                             <td>
                                 <div class="flex gap-1">
-                                    <button class="btn btn-ghost btn-xs" @click="openSkuEdit(sku)">
+                                    <button class="btn btn-accent btn-xs" @click="openSkuEdit(sku)">
                                         编辑
                                     </button>
                                     <button
@@ -353,39 +519,59 @@ definePageMeta({
                 </h3>
                 <div class="mt-4 space-y-3">
                     <label class="form-control">
-                        <span class="label-text text-sm">商品名称</span>
-                        <input v-model="presetForm.product_name" class="input input-bordered input-sm">
+                        <span class="label-text text-sm mb-1">商品名称</span>
+                        <input v-model="presetForm.product_name" class="input input-bordered input-sm w-full">
                     </label>
                     <label class="form-control">
-                        <span class="label-text text-sm">描述</span>
-                        <input v-model="presetForm.product_description" class="input input-bordered input-sm">
+                        <span class="label-text text-sm mb-1">描述</span>
+                        <input v-model="presetForm.product_description" class="input input-bordered input-sm w-full">
                     </label>
-                    <label class="form-control">
-                        <span class="label-text text-sm">商品设计模板 (JSON)</span>
+                    <label class="form-control flex flex-col">
+                        <span class="label-text text-sm mb-1">商品设计模板 (JSON)</span>
                         <textarea
                             v-model="presetForm.product_design"
-                            class="textarea textarea-bordered h-24 font-mono text-xs"
+                            class="textarea textarea-bordered h-48 font-mono text-xs resize-y w-full"
                         />
                     </label>
-                    <label class="form-control">
-                        <span class="label-text text-sm">材料 ID</span>
-                        <input
-                            v-model="presetForm.product_material_id"
-                            class="input input-bordered input-sm font-mono text-xs"
-                            placeholder="UUID"
-                        >
-                    </label>
-                    <label class="form-control">
-                        <span class="label-text text-sm">类型 ID</span>
-                        <input
-                            v-model="presetForm.product_type_id"
-                            class="input input-bordered input-sm font-mono text-xs"
-                            placeholder="UUID"
-                        >
-                    </label>
+                    <div class="form-control">
+                        <span class="label-text text-sm mb-1">材料</span>
+                        <div class="flex gap-2">
+                            <input
+                                :value="selectedMaterial ? selectedMaterial.name : ''"
+                                readonly
+                                class="input input-bordered input-sm flex-1 text-xs"
+                                placeholder="点击右侧选择材料"
+                            >
+                            <button
+                                class="btn btn-accent btn-sm"
+                                type="button"
+                                @click="materialPickerRef?.open(selectedMaterial ? [selectedMaterial] : [])"
+                            >
+                                {{ selectedMaterial ? '重选' : '选择' }}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-control">
+                        <span class="label-text text-sm mb-1">商品类型</span>
+                        <div class="flex gap-2">
+                            <input
+                                :value="selectedType ? selectedType.name : ''"
+                                readonly
+                                class="input input-bordered input-sm flex-1 text-xs"
+                                placeholder="点击右侧选择类型"
+                            >
+                            <button
+                                class="btn btn-accent btn-sm"
+                                type="button"
+                                @click="typePickerRef?.open(selectedType ? [selectedType] : [])"
+                            >
+                                {{ selectedType ? '重选' : '选择' }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-action">
-                    <button class="btn btn-ghost btn-sm" @click="showPresetModal = false">
+                    <button class="btn btn-outline btn-sm" @click="showPresetModal = false">
                         取消
                     </button>
                     <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleSavePreset">
@@ -400,6 +586,29 @@ definePageMeta({
             </form>
         </dialog>
 
+        <!-- Material / Type / Preset pickers -->
+        <AdminResourcePicker
+            ref="materialPickerRef"
+            resource-type="material"
+            :multiple="false"
+            title="选择材料"
+            @confirm="items => { if (items[0]) { selectedMaterial = items[0]; presetForm.product_material_id = items[0].id } }"
+        />
+        <AdminResourcePicker
+            ref="typePickerRef"
+            resource-type="type"
+            :multiple="false"
+            title="选择商品类型"
+            @confirm="items => { if (items[0]) { selectedType = items[0]; presetForm.product_type_id = items[0].id } }"
+        />
+        <AdminResourcePicker
+            ref="presetPickerRef"
+            resource-type="preset"
+            :multiple="false"
+            title="选择预设"
+            @confirm="items => { if (items[0]) { selectedPresetForSku = items[0]; skuForm.preset_id = items[0].id } }"
+        />
+
         <!-- SKU modal -->
         <dialog class="modal" :class="{ 'modal-open': showSkuModal }">
             <div class="modal-box max-w-lg">
@@ -408,28 +617,42 @@ definePageMeta({
                 </h3>
                 <div class="mt-4 space-y-3">
                     <label class="form-control">
-                        <span class="label-text text-sm">平台标识</span>
-                        <input v-model="skuForm.platform" class="input input-bordered input-sm" placeholder="如 afdian">
+                        <span class="label-text text-sm mb-1">平台标识</span>
+                        <input v-model="skuForm.platform" class="input input-bordered input-sm w-full" placeholder="如 afdian">
                     </label>
                     <label class="form-control">
-                        <span class="label-text text-sm">方案 ID</span>
-                        <input v-model="skuForm.plan_id" class="input input-bordered input-sm font-mono text-xs">
+                        <span class="label-text text-sm mb-1">方案 ID</span>
+                        <input v-model="skuForm.plan_id" class="input input-bordered input-sm w-full font-mono text-xs">
                     </label>
                     <label class="form-control">
-                        <span class="label-text text-sm">SKU ID（可选）</span>
-                        <input v-model="skuForm.sku_id" class="input input-bordered input-sm font-mono text-xs">
+                        <span class="label-text text-sm mb-1">SKU ID（可选）</span>
+                        <input v-model="skuForm.sku_id" class="input input-bordered input-sm w-full font-mono text-xs">
                     </label>
                     <label class="form-control">
-                        <span class="label-text text-sm">数量</span>
-                        <input v-model.number="skuForm.quantity" type="number" min="1" class="input input-bordered input-sm">
+                        <span class="label-text text-sm mb-1">数量</span>
+                        <input v-model.number="skuForm.quantity" type="number" min="1" class="input input-bordered input-sm w-full">
                     </label>
-                    <label class="form-control">
-                        <span class="label-text text-sm">关联预设 ID</span>
-                        <input v-model="skuForm.preset_id" class="input input-bordered input-sm font-mono text-xs" placeholder="UUID">
-                    </label>
+                    <div class="form-control">
+                        <span class="label-text text-sm mb-1">关联预设</span>
+                        <div class="flex gap-2">
+                            <input
+                                :value="selectedPresetForSku ? selectedPresetForSku.product_name : ''"
+                                readonly
+                                class="input input-bordered input-sm flex-1 text-xs"
+                                placeholder="点击右侧选择预设"
+                            >
+                            <button
+                                class="btn btn-accent btn-sm"
+                                type="button"
+                                @click="presetPickerRef?.open(selectedPresetForSku ? [selectedPresetForSku] : [])"
+                            >
+                                {{ selectedPresetForSku ? '重选' : '选择' }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-action">
-                    <button class="btn btn-ghost btn-sm" @click="showSkuModal = false">
+                    <button class="btn btn-outline btn-sm" @click="showSkuModal = false">
                         取消
                     </button>
                     <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleSaveSku">
@@ -439,6 +662,214 @@ definePageMeta({
             </div>
             <form method="dialog" class="modal-backdrop">
                 <button @click="showSkuModal = false">
+                    close
+                </button>
+            </form>
+        </dialog>
+
+        <div class="divider" />
+
+        <!-- Materials section -->
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold">
+                    商品材料
+                </h2>
+                <button class="btn btn-primary btn-sm" @click="openMaterialCreate">
+                    <Icon name="mdi:plus" class="w-4 h-4" />
+                    新增材料
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>描述</th>
+                            <th>价格修正</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="material in materials?.records" :key="material.id">
+                            <td class="font-medium">
+                                {{ material.name }}
+                            </td>
+                            <td class="text-sm max-w-48 truncate">
+                                {{ material.description }}
+                            </td>
+                            <td class="font-semibold">
+                                +¥{{ Number.parseFloat(material.price_modifier).toFixed(2) }}
+                            </td>
+                            <td class="text-xs text-base-content/60">
+                                {{ formatDateTime(material.created_at) }}
+                            </td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <button class="btn btn-accent btn-xs" @click="openMaterialEdit(material)">
+                                        编辑
+                                    </button>
+                                    <button
+                                        class="btn btn-error btn-xs btn-outline"
+                                        :disabled="isProcessing"
+                                        @click="handleDeleteMaterial(material.id)"
+                                    >
+                                        删除
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div v-if="!materials?.records?.length" class="text-center py-8 text-base-content/50">
+                    暂无材料数据
+                </div>
+            </div>
+
+            <AdminPagination
+                v-if="materials"
+                :total-pages="materials.total_page"
+                :current-page="materialParams.page_number"
+                @update:current-page="(p: number) => { materialParams.page_number = p; refreshMaterials() }"
+            />
+        </section>
+
+        <div class="divider" />
+
+        <!-- Types section -->
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold">
+                    商品类型
+                </h2>
+                <button class="btn btn-primary btn-sm" @click="openTypeCreate">
+                    <Icon name="mdi:plus" class="w-4 h-4" />
+                    新增类型
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>描述</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="type in types?.records" :key="type.id">
+                            <td class="font-medium">
+                                {{ type.name }}
+                            </td>
+                            <td class="text-sm max-w-48 truncate">
+                                {{ type.description }}
+                            </td>
+                            <td class="text-xs text-base-content/60">
+                                {{ formatDateTime(type.created_at) }}
+                            </td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <button class="btn btn-accent btn-xs" @click="openTypeEdit(type)">
+                                        编辑
+                                    </button>
+                                    <button
+                                        class="btn btn-error btn-xs btn-outline"
+                                        :disabled="isProcessing"
+                                        @click="handleDeleteType(type.id)"
+                                    >
+                                        删除
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div v-if="!types?.records?.length" class="text-center py-8 text-base-content/50">
+                    暂无类型数据
+                </div>
+            </div>
+
+            <AdminPagination
+                v-if="types"
+                :total-pages="types.total_page"
+                :current-page="typeParams.page_number"
+                @update:current-page="(p: number) => { typeParams.page_number = p; refreshTypes() }"
+            />
+        </section>
+
+        <!-- Material modal -->
+        <dialog class="modal" :class="{ 'modal-open': showMaterialModal }">
+            <div class="modal-box max-w-md">
+                <h3 class="text-lg font-bold">
+                    {{ materialEditing ? '编辑材料' : '新增材料' }}
+                </h3>
+                <div class="mt-4 space-y-3">
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">名称</span>
+                        <input v-model="materialForm.name" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">描述</span>
+                        <input v-model="materialForm.description" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">价格修正（元）</span>
+                        <input
+                            v-model="materialForm.price_modifier"
+                            type="number"
+                            step="0.01"
+                            class="input input-bordered input-sm w-full"
+                            placeholder="0.00"
+                        >
+                    </label>
+                </div>
+                <div class="modal-action">
+                    <button class="btn btn-outline btn-sm" @click="showMaterialModal = false">
+                        取消
+                    </button>
+                    <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleSaveMaterial">
+                        保存
+                    </button>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button @click="showMaterialModal = false">
+                    close
+                </button>
+            </form>
+        </dialog>
+
+        <!-- Type modal -->
+        <dialog class="modal" :class="{ 'modal-open': showTypeModal }">
+            <div class="modal-box max-w-md">
+                <h3 class="text-lg font-bold">
+                    {{ typeEditing ? '编辑商品类型' : '新增商品类型' }}
+                </h3>
+                <div class="mt-4 space-y-3">
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">名称</span>
+                        <input v-model="typeForm.name" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">描述</span>
+                        <input v-model="typeForm.description" class="input input-bordered input-sm w-full">
+                    </label>
+                </div>
+                <div class="modal-action">
+                    <button class="btn btn-outline btn-sm" @click="showTypeModal = false">
+                        取消
+                    </button>
+                    <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleSaveType">
+                        保存
+                    </button>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button @click="showTypeModal = false">
                     close
                 </button>
             </form>

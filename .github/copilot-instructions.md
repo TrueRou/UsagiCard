@@ -56,3 +56,7 @@ Also, the project matainers own their personal styles and conventions, we will m
 - Bunny 使用 SSR，请考虑到服务端渲染的特性，避免出现水合错误，以及多次请求等问题。
 
 - Bunny 使用 TypeScript 进行类型检查，所有的组件和模块都应该有明确的类型定义，避免使用 `any` 类型，类型定义文件放在 `types/def` 目录下。
+
+- 当后端 Schema 修改后，执行 `uv run openapi` 来生成新的类型定义文件，然后使用 `scalar registry publish --namespace usagilab --slug leporidae openapi.json --force` 来发布更新。
+
+- 发布后，前端执行 `pnpm openapi-ts` 来生成新的类型定义文件。

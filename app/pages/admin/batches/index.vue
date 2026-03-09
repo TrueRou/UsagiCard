@@ -25,63 +25,37 @@ function formatDateTime(iso: string) {
     return new Date(iso).toLocaleString()
 }
 
-// Advance modal
-const showAdvanceModal = ref(false)
-const advanceBatch = ref<{ id: string, status: number } | null>(null)
-const advanceTarget = ref<number>(ArtifactStatus.IN_PRODUCTION)
-
-const advanceOptions = [
-    { value: ArtifactStatus.IN_PRODUCTION, label: '制作中' },
-    { value: ArtifactStatus.COMPLETED, label: '已完成' },
-    { value: ArtifactStatus.ACTIVATED, label: '已激活' },
-]
-
-function openAdvance(batch: { id: string, status: number }) {
-    advanceBatch.value = batch
-    advanceTarget.value = ArtifactStatus.IN_PRODUCTION
-    showAdvanceModal.value = true
-}
-
-async function handleAdvance() {
-    if (!advanceBatch.value)
-        return
-    isProcessing.value = true
-    try {
-        await useNuxtApp().$leporid(`/api/batches/${advanceBatch.value.id}/advance`, {
-            method: 'POST',
-            body: { target_status: advanceTarget.value },
-            showSuccessToast: true,
-            successMessage: '工件状态已批量推进',
-        })
-        showAdvanceModal.value = false
-        await refresh()
-    }
-    finally {
-        isProcessing.value = false
-    }
+function defaultBatchName() {
+    const d = new Date()
+    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
 }
 
 // Create batch modal
 const showCreateModal = ref(false)
-const newArtifactIds = ref('')
+const selectedArtifacts = ref<any[]>([])
+const batchName = ref('')
+const artifactPickerRef = ref<any>()
+
+function openCreateBatch() {
+    selectedArtifacts.value = []
+    batchName.value = defaultBatchName()
+    showCreateModal.value = true
+}
 
 async function handleCreateBatch() {
-    const ids = newArtifactIds.value
-        .split(/[\n,;]+/)
-        .map(s => s.trim())
-        .filter(Boolean)
+    const ids = selectedArtifacts.value.map(a => a.id)
     if (!ids.length)
         return
     isProcessing.value = true
     try {
         await useNuxtApp().$leporid('/api/batches', {
             method: 'POST',
-            body: { artifact_ids: ids },
+            body: { artifact_ids: ids, name: batchName.value.trim() || defaultBatchName() },
             showSuccessToast: true,
             successMessage: '批次已创建',
         })
         showCreateModal.value = false
-        newArtifactIds.value = ''
+        selectedArtifacts.value = []
         await refresh()
     }
     finally {
@@ -103,7 +77,7 @@ definePageMeta({
             <h1 class="text-2xl font-bold">
                 批次管理
             </h1>
-            <button class="btn btn-primary btn-sm" @click="showCreateModal = true">
+            <button class="btn btn-primary btn-sm" @click="openCreateBatch">
                 <Icon name="mdi:plus" class="w-4 h-4" />
                 创建批次
             </button>
@@ -140,18 +114,18 @@ definePageMeta({
             <table class="table table-sm">
                 <thead>
                     <tr>
-                        <th>批次ID</th>
+                        <th>批次名称</th>
                         <th>状态</th>
                         <th>工件数量</th>
-                        <th>创建者</th>
                         <th>创建时间</th>
                         <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="batch in batches?.records" :key="batch.id">
-                        <td class="font-mono text-xs">
-                            {{ batch.id.slice(-8) }}
+                        <td>
+                            <span class="font-medium">{{ batch.name }}</span>
+                            <span class="text-xs text-base-content/40 font-mono ml-2">{{ batch.id.slice(-6) }}</span>
                         </td>
                         <td>
                             <AdminStatusBadge :status="batch.status" type="batch" />
@@ -159,18 +133,13 @@ definePageMeta({
                         <td>
                             {{ batch.artifacts?.length ?? '-' }}
                         </td>
-                        <td class="font-mono text-xs">
-                            {{ batch.user_id.slice(-8) }}
-                        </td>
                         <td class="text-xs text-base-content/60">
                             {{ formatDateTime(batch.created_at) }}
                         </td>
                         <td>
-                            <div class="flex gap-1">
-                                <button class="btn btn-ghost btn-xs" @click="openAdvance(batch)">
-                                    推进状态
-                                </button>
-                            </div>
+                            <NuxtLink :to="`/admin/batches/${batch.id}`" class="btn btn-accent btn-xs">
+                                详情
+                            </NuxtLink>
                         </td>
                     </tr>
                 </tbody>
@@ -188,44 +157,6 @@ definePageMeta({
             @update:current-page="handlePageChange"
         />
 
-        <!-- Advance modal -->
-        <dialog class="modal" :class="{ 'modal-open': showAdvanceModal }">
-            <div class="modal-box">
-                <h3 class="text-lg font-bold">
-                    批量推进工件状态
-                </h3>
-                <p v-if="advanceBatch" class="text-xs text-base-content/50 font-mono mt-1">
-                    批次 {{ advanceBatch.id.slice(-8) }}
-                </p>
-                <p class="text-sm text-base-content/70 mt-3">
-                    将此批次内所有低于目标状态的工件推进至目标状态。
-                </p>
-                <div class="mt-4">
-                    <label class="form-control">
-                        <span class="label-text text-sm">目标状态</span>
-                        <select v-model.number="advanceTarget" class="select select-bordered select-sm w-full mt-1">
-                            <option v-for="opt in advanceOptions" :key="opt.value" :value="opt.value">
-                                {{ opt.label }}
-                            </option>
-                        </select>
-                    </label>
-                </div>
-                <div class="modal-action">
-                    <button class="btn btn-ghost btn-sm" @click="showAdvanceModal = false">
-                        取消
-                    </button>
-                    <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleAdvance">
-                        确认推进
-                    </button>
-                </div>
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button @click="showAdvanceModal = false">
-                    close
-                </button>
-            </form>
-        </dialog>
-
         <!-- Create batch modal -->
         <dialog class="modal" :class="{ 'modal-open': showCreateModal }">
             <div class="modal-box">
@@ -233,20 +164,60 @@ definePageMeta({
                     创建批次
                 </h3>
                 <p class="text-sm text-base-content/70 mt-2">
-                    输入要加入批次的工件ID，每行一个或用逗号分隔。
+                    填写批次名称并选择要加入批次的工件。
                 </p>
-                <div class="mt-4">
-                    <textarea
-                        v-model="newArtifactIds"
-                        class="textarea textarea-bordered w-full h-32 font-mono text-xs"
-                        placeholder="粘贴工件ID，每行一个..."
-                    />
+                <div class="mt-4 space-y-3">
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">
+                            批次名称
+                        </legend>
+                        <input v-model="batchName" type="text" class="input" placeholder="如：2026.03.10">
+                    </fieldset>
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">
+                            关联工件
+                        </legend>
+                        <div class="flex items-center gap-3">
+                            <button
+                                class="btn btn-outline btn-sm"
+                                type="button"
+                                @click="artifactPickerRef?.open(selectedArtifacts)"
+                            >
+                                <Icon name="mdi:package-variant" class="w-4 h-4" />
+                                选择工件
+                            </button>
+                            <span class="text-sm text-base-content/60">
+                                {{ selectedArtifacts.length ? `已选择 ${selectedArtifacts.length} 个工件` : '未选择工件' }}
+                            </span>
+                        </div>
+                    </fieldset>
+
+                    <div
+                        v-if="selectedArtifacts.length"
+                        class="flex flex-wrap gap-1 max-h-24 overflow-y-auto p-2 bg-base-200 rounded-lg"
+                    >
+                        <span
+                            v-for="a in selectedArtifacts"
+                            :key="a.id"
+                            class="badge badge-sm gap-1 font-mono cursor-pointer hover:badge-error transition-colors"
+                            @click="selectedArtifacts = selectedArtifacts.filter(x => x.id !== a.id)"
+                        >
+                            {{ a.id.slice(-8) }}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 6 6 18M6 6l12 12" />
+                            </svg>
+                        </span>
+                    </div>
                 </div>
                 <div class="modal-action">
-                    <button class="btn btn-ghost btn-sm" @click="showCreateModal = false">
+                    <button class="btn btn-outline btn-sm" @click="showCreateModal = false">
                         取消
                     </button>
-                    <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleCreateBatch">
+                    <button
+                        class="btn btn-primary btn-sm"
+                        :disabled="isProcessing || !selectedArtifacts.length"
+                        @click="handleCreateBatch"
+                    >
                         创建
                     </button>
                 </div>
@@ -257,5 +228,14 @@ definePageMeta({
                 </button>
             </form>
         </dialog>
+
+        <!-- Artifact picker -->
+        <AdminResourcePicker
+            ref="artifactPickerRef"
+            resource-type="artifact"
+            :multiple="true"
+            title="选择工件"
+            @confirm="items => selectedArtifacts = items"
+        />
     </div>
 </template>

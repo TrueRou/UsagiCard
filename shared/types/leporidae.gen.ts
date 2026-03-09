@@ -5,6 +5,90 @@ export interface ClientOptions {
 }
 
 /**
+ * AdminOrderAddItemRequest
+ *
+ * 管理端向已有订单追加商品请求
+ */
+export interface AdminOrderAddItemRequest {
+    /**
+     * Product Id
+     *
+     * 商品ID
+     */
+    product_id: string
+    /**
+     * Quantity
+     *
+     * 数量
+     */
+    quantity?: number
+}
+
+/**
+ * AdminOrderCreateRequest
+ *
+ * 管理端手动创建订单请求
+ */
+export interface AdminOrderCreateRequest {
+    /**
+     * Owner Id
+     *
+     * 订单归属用户ID
+     */
+    owner_id: string
+    /**
+     * Items
+     *
+     * 订单商品列表
+     */
+    items?: Array<AdminOrderItemRequest>
+    /**
+     * Shipping Name
+     *
+     * 收件人姓名
+     */
+    shipping_name: string
+    /**
+     * Shipping Phone
+     *
+     * 收件人电话
+     */
+    shipping_phone: string
+    /**
+     * Shipping Address
+     *
+     * 收件人地址
+     */
+    shipping_address: string
+    /**
+     * Override Amount
+     *
+     * 自定义支付金额，覆盖自动计算结果
+     */
+    override_amount?: number | string | null
+}
+
+/**
+ * AdminOrderItemRequest
+ *
+ * 管理端创建订单时的商品项
+ */
+export interface AdminOrderItemRequest {
+    /**
+     * Product Id
+     *
+     * 商品ID
+     */
+    product_id: string
+    /**
+     * Quantity
+     *
+     * 数量
+     */
+    quantity?: number
+}
+
+/**
  * AdminOrderShipRequest
  *
  * 管理端订单发货请求
@@ -325,6 +409,190 @@ export interface AdminPlatformSkuUpdateRequest {
 }
 
 /**
+ * AdminProductMaterialCreateRequest
+ *
+ * 管理端商品材料创建请求
+ */
+export interface AdminProductMaterialCreateRequest {
+    /**
+     * Name
+     *
+     * 材料名称
+     */
+    name: string
+    /**
+     * Description
+     *
+     * 材料描述
+     */
+    description?: string
+    /**
+     * Price Modifier
+     *
+     * 价格修正值
+     */
+    price_modifier?: number | string
+}
+
+/**
+ * AdminProductMaterialPublic
+ *
+ * 管理端商品材料信息
+ */
+export interface AdminProductMaterialPublic {
+    /**
+     * Id
+     */
+    id: string
+    /**
+     * Name
+     */
+    name: string
+    /**
+     * Description
+     */
+    description: string
+    /**
+     * Price Modifier
+     */
+    price_modifier: string
+    /**
+     * Created At
+     */
+    created_at: string
+}
+
+/**
+ * AdminProductMaterialUpdateRequest
+ *
+ * 管理端商品材料更新请求
+ */
+export interface AdminProductMaterialUpdateRequest {
+    /**
+     * Name
+     *
+     * 材料名称
+     */
+    name?: string | null
+    /**
+     * Description
+     *
+     * 材料描述
+     */
+    description?: string | null
+    /**
+     * Price Modifier
+     *
+     * 价格修正值
+     */
+    price_modifier?: number | string | null
+}
+
+/**
+ * AdminProductTypeCreateRequest
+ *
+ * 管理端商品类型创建请求
+ */
+export interface AdminProductTypeCreateRequest {
+    /**
+     * Name
+     *
+     * 类型名称
+     */
+    name: string
+    /**
+     * Description
+     *
+     * 类型描述
+     */
+    description?: string
+}
+
+/**
+ * AdminProductTypePublic
+ *
+ * 管理端商品类型信息
+ */
+export interface AdminProductTypePublic {
+    /**
+     * Id
+     */
+    id: string
+    /**
+     * Name
+     */
+    name: string
+    /**
+     * Description
+     */
+    description: string
+    /**
+     * Created At
+     */
+    created_at: string
+}
+
+/**
+ * AdminProductTypeUpdateRequest
+ *
+ * 管理端商品类型更新请求
+ */
+export interface AdminProductTypeUpdateRequest {
+    /**
+     * Name
+     *
+     * 类型名称
+     */
+    name?: string | null
+    /**
+     * Description
+     *
+     * 类型描述
+     */
+    description?: string | null
+}
+
+/**
+ * AdminRedemptionCreateRequest
+ *
+ * 管理端批量创建兑换码请求
+ */
+export interface AdminRedemptionCreateRequest {
+    /**
+     * Sku Id
+     *
+     * 关联平台 SKU ID
+     */
+    sku_id: string
+    /**
+     * Count
+     *
+     * 生成数量（最多 500 条）
+     */
+    count: number
+}
+
+/**
+ * AdminRedemptionListPublic
+ *
+ * 管理端批量创建兑换码后返回的简要信息
+ */
+export interface AdminRedemptionListPublic {
+    /**
+     * Codes
+     *
+     * 生成的兑换码列表
+     */
+    codes: Array<string>
+    /**
+     * Count
+     *
+     * 实际生成数量
+     */
+    count: number
+}
+
+/**
  * AdminRedemptionPublic
  *
  * 管理端兑换码信息
@@ -543,6 +811,20 @@ export interface AdminStatsResponse {
 }
 
 /**
+ * AdminUserPasswordUpdateRequest
+ *
+ * 管理端设置/重置用户密码请求（password 为 None 时清空密码）
+ */
+export interface AdminUserPasswordUpdateRequest {
+    /**
+     * Password
+     *
+     * 新密码，为 None 时重置为空
+     */
+    password?: string | null
+}
+
+/**
  * AdminUserPermissionUpdateRequest
  *
  * 管理端用户权限更新请求
@@ -639,6 +921,63 @@ export interface AppResponseAdminPlatformSkuPublic {
 }
 
 /**
+ * AppResponse[AdminProductMaterialPublic]
+ */
+export interface AppResponseAdminProductMaterialPublic {
+    data?: AdminProductMaterialPublic | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
+ * AppResponse[AdminProductTypePublic]
+ */
+export interface AppResponseAdminProductTypePublic {
+    data?: AdminProductTypePublic | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
+ * AppResponse[AdminRedemptionListPublic]
+ */
+export interface AppResponseAdminRedemptionListPublic {
+    data?: AdminRedemptionListPublic | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
  * AppResponse[AdminStatsResponse]
  */
 export interface AppResponseAdminStatsResponse {
@@ -680,7 +1019,7 @@ export interface AppResponseAdminUserPublic {
  * AppResponse[ArtifactManufacturerResponse]
  */
 export interface AppResponseArtifactManufacturerResponse {
-    data?: LeporidaeApiSchemaArtifactArtifactManufacturerResponse | null
+    data?: ArtifactManufacturerResponse | null
     /**
      * Code
      */
@@ -718,7 +1057,7 @@ export interface AppResponseArtifactUserResponse {
  * AppResponse[BatchPublic]
  */
 export interface AppResponseBatchPublic {
-    data?: LeporidaeApiSchemaArtifactBatchPublic2 | null
+    data?: BatchPublic | null
     /**
      * Code
      */
@@ -908,6 +1247,44 @@ export interface AppResponsePageAdminPlatformSkuPublic {
 }
 
 /**
+ * AppResponse[Page[AdminProductMaterialPublic]]
+ */
+export interface AppResponsePageAdminProductMaterialPublic {
+    data?: PageAdminProductMaterialPublic | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
+ * AppResponse[Page[AdminProductTypePublic]]
+ */
+export interface AppResponsePageAdminProductTypePublic {
+    data?: PageAdminProductTypePublic | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
  * AppResponse[Page[AdminRedemptionPublic]]
  */
 export interface AppResponsePageAdminRedemptionPublic {
@@ -1063,7 +1440,7 @@ export interface AppResponseProductConsultResponse {
  * AppResponse[ProductPublic]
  */
 export interface AppResponseProductPublic {
-    data?: LeporidaeApiSchemaProductProductPublic | null
+    data?: ProductPublic | null
     /**
      * Code
      */
@@ -1095,6 +1472,116 @@ export interface AppResponseUserPublic {
      * Timestamp
      */
     timestamp?: string
+}
+
+/**
+ * AppResponse[list[BatchBulkShipResult]]
+ */
+export interface AppResponseListBatchBulkShipResult {
+    /**
+     * Data
+     */
+    data?: Array<BatchBulkShipResult> | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
+ * AppResponse[list[BatchShippingItem]]
+ */
+export interface AppResponseListBatchShippingItem {
+    /**
+     * Data
+     */
+    data?: Array<BatchShippingItem> | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
+ * ArtifactManufacturerResponse
+ *
+ * 工件制造商信息（为管理员提供完整工件信息）
+ */
+export interface ArtifactManufacturerResponse {
+    /**
+     * Id
+     *
+     * 工件ID
+     */
+    id: string
+    /**
+     * Status
+     *
+     * 工件状态
+     */
+    status: number
+    /**
+     * Storage
+     *
+     * 工件内部存储
+     */
+    storage: {
+        [key: string]: unknown
+    }
+    /**
+     * Batch No
+     *
+     * 批次内编号
+     */
+    batch_no: number | null
+    /**
+     * Batch Id
+     *
+     * 所属批次ID
+     */
+    batch_id: string | null
+    /**
+     * Product Id
+     *
+     * 所属商品ID
+     */
+    product_id: string
+    /**
+     * 关联商品
+     */
+    product: ProductPublic
+    /**
+     * 关联批次
+     */
+    batch?: BatchPublic | null
+    /**
+     * Created At
+     *
+     * 创建时间
+     */
+    created_at: string
+    /**
+     * Updated At
+     *
+     * 更新时间
+     */
+    updated_at: string
 }
 
 /**
@@ -1174,17 +1661,63 @@ export interface ArtifactUserResponse {
 export type AuthStrategy = 0 | 1 | 2
 
 /**
- * BatchAdvanceRequest
+ * BatchBulkShipItem
  *
- * 批次工件批量推进请求
+ * 批量发货单项
  */
-export interface BatchAdvanceRequest {
+export interface BatchBulkShipItem {
     /**
-     * Target Status
+     * Order Id
      *
-     * 目标工件状态
+     * 订单ID
      */
-    target_status: number
+    order_id: string
+    /**
+     * Shipping Sn
+     *
+     * 快递单号
+     */
+    shipping_sn: string
+}
+
+/**
+ * BatchBulkShipRequest
+ *
+ * 批次批量发货请求
+ */
+export interface BatchBulkShipRequest {
+    /**
+     * Items
+     *
+     * 发货项列表（订单ID + 快递单号）
+     */
+    items: Array<BatchBulkShipItem>
+}
+
+/**
+ * BatchBulkShipResult
+ *
+ * 批量发货结果项
+ */
+export interface BatchBulkShipResult {
+    /**
+     * Order Id
+     *
+     * 订单ID
+     */
+    order_id: string
+    /**
+     * Success
+     *
+     * 是否成功
+     */
+    success: boolean
+    /**
+     * Error
+     *
+     * 失败原因
+     */
+    error?: string | null
 }
 
 /**
@@ -1194,6 +1727,12 @@ export interface BatchAdvanceRequest {
  */
 export interface BatchCreateRequest {
     /**
+     * Name
+     *
+     * 批次名称，为空时使用当天日期
+     */
+    name?: string | null
+    /**
      * Artifact Ids
      *
      * 工件ID列表
@@ -1202,11 +1741,141 @@ export interface BatchCreateRequest {
 }
 
 /**
+ * BatchPublic
+ *
+ * 批次公共信息
+ */
+export interface BatchPublic {
+    /**
+     * Id
+     *
+     * 批次ID
+     */
+    id: string
+    /**
+     * Name
+     *
+     * 批次名称
+     */
+    name: string
+    /**
+     * Status
+     *
+     * 批次状态
+     */
+    status: number
+    /**
+     * User Id
+     *
+     * 创建者用户ID
+     */
+    user_id: string
+    /**
+     * Artifacts
+     *
+     * 工件列表
+     */
+    artifacts: Array<ArtifactManufacturerResponse>
+    /**
+     * Created At
+     *
+     * 创建时间
+     */
+    created_at: string
+    /**
+     * Updated At
+     *
+     * 更新时间
+     */
+    updated_at: string
+}
+
+/**
+ * BatchShippingItem
+ *
+ * 发货数据项（工件 + 关联订单信息）
+ */
+export interface BatchShippingItem {
+    /**
+     * Artifact Id
+     *
+     * 工件ID
+     */
+    artifact_id: string
+    /**
+     * Batch No
+     *
+     * 批次内编号
+     */
+    batch_no: number | null
+    /**
+     * Artifact Status
+     *
+     * 工件状态
+     */
+    artifact_status: number
+    /**
+     * Product Name
+     *
+     * 商品名称
+     */
+    product_name: string
+    /**
+     * Product Type
+     *
+     * 商品类型名称
+     */
+    product_type: string
+    /**
+     * Product Material
+     *
+     * 商品材料名称
+     */
+    product_material: string
+    /**
+     * Order Id
+     *
+     * 关联订单ID
+     */
+    order_id: string | null
+    /**
+     * Order Status
+     *
+     * 订单状态
+     */
+    order_status: number | null
+    /**
+     * Shipping Name
+     *
+     * 收件人姓名
+     */
+    shipping_name: string | null
+    /**
+     * Shipping Phone
+     *
+     * 收件人电话
+     */
+    shipping_phone: string | null
+    /**
+     * Shipping Address
+     *
+     * 收件人地址
+     */
+    shipping_address: string | null
+}
+
+/**
  * BatchUpdateRequest
  *
  * 批次更新请求
  */
 export interface BatchUpdateRequest {
+    /**
+     * Name
+     *
+     * 批次名称
+     */
+    name?: string | null
     /**
      * Status
      *
@@ -1553,7 +2222,7 @@ export interface OrderItemPublic {
     /**
      * 商品信息
      */
-    product: LeporidaeApiSchemaProductProductPublic
+    product: ProductPublic
 }
 
 /**
@@ -1838,6 +2507,58 @@ export interface PageAdminPlatformSkuPublic {
 }
 
 /**
+ * Page[AdminProductMaterialPublic]
+ */
+export interface PageAdminProductMaterialPublic {
+    /**
+     * Records
+     */
+    records: Array<AdminProductMaterialPublic>
+    /**
+     * Total Row
+     */
+    total_row: number
+    /**
+     * Total Page
+     */
+    total_page: number
+    /**
+     * Page Number
+     */
+    page_number: number
+    /**
+     * Page Size
+     */
+    page_size: number
+}
+
+/**
+ * Page[AdminProductTypePublic]
+ */
+export interface PageAdminProductTypePublic {
+    /**
+     * Records
+     */
+    records: Array<AdminProductTypePublic>
+    /**
+     * Total Row
+     */
+    total_row: number
+    /**
+     * Total Page
+     */
+    total_page: number
+    /**
+     * Page Number
+     */
+    page_number: number
+    /**
+     * Page Size
+     */
+    page_size: number
+}
+
+/**
  * Page[AdminRedemptionPublic]
  */
 export interface PageAdminRedemptionPublic {
@@ -1896,7 +2617,7 @@ export interface PageArtifactManufacturerResponse {
     /**
      * Records
      */
-    records: Array<LeporidaeApiSchemaArtifactArtifactManufacturerResponse>
+    records: Array<ArtifactManufacturerResponse>
     /**
      * Total Row
      */
@@ -1922,7 +2643,7 @@ export interface PageBatchPublic {
     /**
      * Records
      */
-    records: Array<LeporidaeApiSchemaArtifactBatchPublic2>
+    records: Array<BatchPublic>
     /**
      * Total Row
      */
@@ -2000,7 +2721,7 @@ export interface PageProductPublic {
     /**
      * Records
      */
-    records: Array<LeporidaeApiSchemaProductProductPublic>
+    records: Array<ProductPublic>
     /**
      * Total Row
      */
@@ -2206,6 +2927,104 @@ export interface ProductCreateRequest {
 }
 
 /**
+ * ProductMaterialPublic
+ *
+ * 材料公共信息
+ */
+export interface ProductMaterialPublic {
+    /**
+     * Id
+     *
+     * 材料ID
+     */
+    id: string
+    /**
+     * Name
+     *
+     * 材料名称
+     */
+    name: string
+    /**
+     * Description
+     *
+     * 材料描述
+     */
+    description: string
+}
+
+/**
+ * ProductPublic
+ *
+ * 商品公共信息
+ */
+export interface ProductPublic {
+    /**
+     * Id
+     *
+     * 商品ID
+     */
+    id: string
+    /**
+     * Name
+     *
+     * 商品名称
+     */
+    name: string
+    /**
+     * Description
+     *
+     * 商品描述
+     */
+    description: string
+    /**
+     * Price
+     *
+     * 商品价格
+     */
+    price: string
+    /**
+     * Design
+     *
+     * 商品设计JSON
+     */
+    design: {
+        [key: string]: unknown
+    }
+    /**
+     * Is Modify Allowed
+     *
+     * 是否允许修改设计
+     */
+    is_modify_allowed: boolean
+    /**
+     * User Id
+     *
+     * 所属用户ID
+     */
+    user_id: string
+    /**
+     * 材料信息
+     */
+    material: ProductMaterialPublic
+    /**
+     * 类型信息
+     */
+    type: ProductTypePublic
+    /**
+     * Created At
+     *
+     * 创建时间
+     */
+    created_at: string
+    /**
+     * Updated At
+     *
+     * 更新时间
+     */
+    updated_at: string
+}
+
+/**
  * ProductSimpleResponse
  *
  * 商品简要信息
@@ -2228,7 +3047,53 @@ export interface ProductSimpleResponse {
     /**
      * 商品类型信息
      */
-    type: LeporidaeApiSchemaProductProductTypePublic
+    type: ProductTypePublic
+}
+
+/**
+ * ProductTypeDesign
+ */
+export type ProductTypeDesign = 0 | 1
+
+/**
+ * ProductTypeFunction
+ */
+export type ProductTypeFunction = 0 | 1
+
+/**
+ * ProductTypePublic
+ *
+ * 类型公共信息
+ */
+export interface ProductTypePublic {
+    /**
+     * Id
+     *
+     * 类型ID
+     */
+    id: string
+    /**
+     * Name
+     *
+     * 类型名称
+     */
+    name: string
+    /**
+     * Description
+     *
+     * 类型描述
+     */
+    description: string
+    /**
+     * 商品设计类型
+     */
+    design_type: ProductTypeDesign
+    /**
+     * Function Types
+     *
+     * 商品功能类型列表
+     */
+    function_types: Array<ProductTypeFunction>
 }
 
 /**
@@ -2388,7 +3253,7 @@ export interface UserMergeRequest {
 /**
  * UserPermission
  */
-export type UserPermission = 'users:admin' | 'images:admin' | 'artifacts:admin' | 'orders:admin' | 'platform:admin'
+export type UserPermission = 0 | 1 | 2 | 3 | 4 | 5
 
 /**
  * UserPublic
@@ -2465,430 +3330,6 @@ export interface ValidationError {
      */
     type: string
 }
-
-/**
- * ArtifactManufacturerResponse
- *
- * 工件制造商信息（为管理员提供完整工件信息）
- */
-export interface LeporidaeApiSchemaArtifactArtifactManufacturerResponse {
-    /**
-     * Id
-     *
-     * 工件ID
-     */
-    id: string
-    /**
-     * Status
-     *
-     * 工件状态
-     */
-    status: number
-    /**
-     * Storage
-     *
-     * 工件内部存储
-     */
-    storage: {
-        [key: string]: unknown
-    }
-    /**
-     * Batch Id
-     *
-     * 所属批次ID
-     */
-    batch_id: string | null
-    /**
-     * Product Id
-     *
-     * 所属商品ID
-     */
-    product_id: string
-    /**
-     * 关联商品
-     */
-    product: LeporidaeApiSchemaProductProductPublic2
-    /**
-     * 关联批次
-     */
-    batch?: LeporidaeApiSchemaArtifactBatchPublic | null
-    /**
-     * Created At
-     *
-     * 创建时间
-     */
-    created_at: string
-    /**
-     * Updated At
-     *
-     * 更新时间
-     */
-    updated_at: string
-}
-
-/**
- * ArtifactManufacturerResponse
- *
- * 工件制造商信息（为管理员提供完整工件信息）
- */
-export interface LeporidaeApiSchemaArtifactArtifactManufacturerResponse2 {
-    /**
-     * Id
-     *
-     * 工件ID
-     */
-    id: string
-    /**
-     * Status
-     *
-     * 工件状态
-     */
-    status: number
-    /**
-     * Storage
-     *
-     * 工件内部存储
-     */
-    storage: {
-        [key: string]: unknown
-    }
-    /**
-     * Batch Id
-     *
-     * 所属批次ID
-     */
-    batch_id: string | null
-    /**
-     * Product Id
-     *
-     * 所属商品ID
-     */
-    product_id: string
-    /**
-     * 关联商品
-     */
-    product: LeporidaeApiSchemaProductProductPublic
-    /**
-     * 关联批次
-     */
-    batch?: LeporidaeApiSchemaArtifactBatchPublic | null
-    /**
-     * Created At
-     *
-     * 创建时间
-     */
-    created_at: string
-    /**
-     * Updated At
-     *
-     * 更新时间
-     */
-    updated_at: string
-}
-
-/**
- * BatchPublic
- *
- * 批次公共信息
- */
-export interface LeporidaeApiSchemaArtifactBatchPublic {
-    /**
-     * Id
-     *
-     * 批次ID
-     */
-    id: string
-    /**
-     * Status
-     *
-     * 批次状态
-     */
-    status: number
-    /**
-     * User Id
-     *
-     * 创建者用户ID
-     */
-    user_id: string
-    /**
-     * Artifacts
-     *
-     * 工件列表
-     */
-    artifacts: Array<LeporidaeApiSchemaArtifactArtifactManufacturerResponse>
-    /**
-     * Created At
-     *
-     * 创建时间
-     */
-    created_at: string
-    /**
-     * Updated At
-     *
-     * 更新时间
-     */
-    updated_at: string
-}
-
-/**
- * BatchPublic
- *
- * 批次公共信息
- */
-export interface LeporidaeApiSchemaArtifactBatchPublic2 {
-    /**
-     * Id
-     *
-     * 批次ID
-     */
-    id: string
-    /**
-     * Status
-     *
-     * 批次状态
-     */
-    status: number
-    /**
-     * User Id
-     *
-     * 创建者用户ID
-     */
-    user_id: string
-    /**
-     * Artifacts
-     *
-     * 工件列表
-     */
-    artifacts: Array<LeporidaeApiSchemaArtifactArtifactManufacturerResponse2>
-    /**
-     * Created At
-     *
-     * 创建时间
-     */
-    created_at: string
-    /**
-     * Updated At
-     *
-     * 更新时间
-     */
-    updated_at: string
-}
-
-/**
- * ProductMaterialPublic
- *
- * 材料公共信息
- */
-export interface LeporidaeApiSchemaProductProductMaterialPublic {
-    /**
-     * Id
-     *
-     * 材料ID
-     */
-    id: string
-    /**
-     * Name
-     *
-     * 材料名称
-     */
-    name: string
-    /**
-     * Description
-     *
-     * 材料描述
-     */
-    description: string
-}
-
-/**
- * ProductPublic
- *
- * 商品公共信息
- */
-export interface LeporidaeApiSchemaProductProductPublic {
-    /**
-     * Id
-     *
-     * 商品ID
-     */
-    id: string
-    /**
-     * Name
-     *
-     * 商品名称
-     */
-    name: string
-    /**
-     * Description
-     *
-     * 商品描述
-     */
-    description: string
-    /**
-     * Price
-     *
-     * 商品价格
-     */
-    price: string
-    /**
-     * Design
-     *
-     * 商品设计JSON
-     */
-    design: {
-        [key: string]: unknown
-    }
-    /**
-     * Is Modify Allowed
-     *
-     * 是否允许修改设计
-     */
-    is_modify_allowed: boolean
-    /**
-     * User Id
-     *
-     * 所属用户ID
-     */
-    user_id: string
-    /**
-     * 材料信息
-     */
-    material: LeporidaeApiSchemaProductProductMaterialPublic
-    /**
-     * 类型信息
-     */
-    type: LeporidaeApiSchemaProductProductTypePublic
-    /**
-     * Created At
-     *
-     * 创建时间
-     */
-    created_at: string
-    /**
-     * Updated At
-     *
-     * 更新时间
-     */
-    updated_at: string
-}
-
-/**
- * ProductPublic
- *
- * 商品公共信息
- */
-export interface LeporidaeApiSchemaProductProductPublic2 {
-    /**
-     * Id
-     *
-     * 商品ID
-     */
-    id: string
-    /**
-     * Name
-     *
-     * 商品名称
-     */
-    name: string
-    /**
-     * Description
-     *
-     * 商品描述
-     */
-    description: string
-    /**
-     * Price
-     *
-     * 商品价格
-     */
-    price: string
-    /**
-     * Design
-     *
-     * 商品设计JSON
-     */
-    design: {
-        [key: string]: unknown
-    }
-    /**
-     * Is Modify Allowed
-     *
-     * 是否允许修改设计
-     */
-    is_modify_allowed: boolean
-    /**
-     * User Id
-     *
-     * 所属用户ID
-     */
-    user_id: string
-    /**
-     * 材料信息
-     */
-    material: LeporidaeApiSchemaProductProductMaterialPublic
-    /**
-     * 类型信息
-     */
-    type: LeporidaeApiSchemaProductProductTypePublic
-    /**
-     * Created At
-     *
-     * 创建时间
-     */
-    created_at: string
-    /**
-     * Updated At
-     *
-     * 更新时间
-     */
-    updated_at: string
-}
-
-/**
- * ProductTypePublic
- *
- * 类型公共信息
- */
-export interface LeporidaeApiSchemaProductProductTypePublic {
-    /**
-     * Id
-     *
-     * 类型ID
-     */
-    id: string
-    /**
-     * Name
-     *
-     * 类型名称
-     */
-    name: string
-    /**
-     * Description
-     *
-     * 类型描述
-     */
-    description: string
-    /**
-     * 商品设计类型
-     */
-    design_type: LeporidaeInfraModelsProductTypeDesign
-    /**
-     * Function Types
-     *
-     * 商品功能类型列表
-     */
-    function_types: Array<LeporidaeInfraModelsProductTypeFunction>
-}
-
-/**
- * ProductTypeDesign
- */
-export type LeporidaeInfraModelsProductTypeDesign = 0 | 1
-
-/**
- * ProductTypeFunction
- */
-export type LeporidaeInfraModelsProductTypeFunction = 0 | 1
 
 /**
  * UsagiCardDXDesign
@@ -3247,6 +3688,66 @@ export interface RootGetResponses {
     200: unknown
 }
 
+export interface AdminGetArtifactAdminArtifactsArtifactIdGetData {
+    body?: never
+    path: {
+        /**
+         * Artifact Id
+         */
+        artifact_id: string
+    }
+    query?: never
+    url: '/admin/artifacts/{artifact_id}'
+}
+
+export interface AdminGetArtifactAdminArtifactsArtifactIdGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminGetArtifactAdminArtifactsArtifactIdGetError = AdminGetArtifactAdminArtifactsArtifactIdGetErrors[keyof AdminGetArtifactAdminArtifactsArtifactIdGetErrors]
+
+export interface AdminGetArtifactAdminArtifactsArtifactIdGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseArtifactManufacturerResponse
+}
+
+export type AdminGetArtifactAdminArtifactsArtifactIdGetResponse = AdminGetArtifactAdminArtifactsArtifactIdGetResponses[keyof AdminGetArtifactAdminArtifactsArtifactIdGetResponses]
+
+export interface AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchData {
+    body: ArtifactStorageUpdateRequest
+    path: {
+        /**
+         * Artifact Id
+         */
+        artifact_id: string
+    }
+    query?: never
+    url: '/admin/artifacts/{artifact_id}/storage'
+}
+
+export interface AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchError = AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchErrors[keyof AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchErrors]
+
+export interface AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseArtifactManufacturerResponse
+}
+
+export type AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchResponse = AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchResponses[keyof AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchResponses]
+
 export interface AdminListOrdersAdminOrdersGetData {
     body?: never
     path?: never
@@ -3302,6 +3803,31 @@ export interface AdminListOrdersAdminOrdersGetResponses {
 }
 
 export type AdminListOrdersAdminOrdersGetResponse = AdminListOrdersAdminOrdersGetResponses[keyof AdminListOrdersAdminOrdersGetResponses]
+
+export interface AdminCreateOrderAdminOrdersPostData {
+    body: AdminOrderCreateRequest
+    path?: never
+    query?: never
+    url: '/admin/orders'
+}
+
+export interface AdminCreateOrderAdminOrdersPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminCreateOrderAdminOrdersPostError = AdminCreateOrderAdminOrdersPostErrors[keyof AdminCreateOrderAdminOrdersPostErrors]
+
+export interface AdminCreateOrderAdminOrdersPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseOrderPublic
+}
+
+export type AdminCreateOrderAdminOrdersPostResponse = AdminCreateOrderAdminOrdersPostResponses[keyof AdminCreateOrderAdminOrdersPostResponses]
 
 export interface AdminGetOrderAdminOrdersOrderIdGetData {
     body?: never
@@ -3362,6 +3888,36 @@ export interface AdminUpdateOrderAdminOrdersOrderIdPatchResponses {
 }
 
 export type AdminUpdateOrderAdminOrdersOrderIdPatchResponse = AdminUpdateOrderAdminOrdersOrderIdPatchResponses[keyof AdminUpdateOrderAdminOrdersOrderIdPatchResponses]
+
+export interface AdminAddOrderItemAdminOrdersOrderIdItemsPostData {
+    body: AdminOrderAddItemRequest
+    path: {
+        /**
+         * Order Id
+         */
+        order_id: string
+    }
+    query?: never
+    url: '/admin/orders/{order_id}/items'
+}
+
+export interface AdminAddOrderItemAdminOrdersOrderIdItemsPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminAddOrderItemAdminOrdersOrderIdItemsPostError = AdminAddOrderItemAdminOrdersOrderIdItemsPostErrors[keyof AdminAddOrderItemAdminOrdersOrderIdItemsPostErrors]
+
+export interface AdminAddOrderItemAdminOrdersOrderIdItemsPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseOrderPublic
+}
+
+export type AdminAddOrderItemAdminOrdersOrderIdItemsPostResponse = AdminAddOrderItemAdminOrdersOrderIdItemsPostResponses[keyof AdminAddOrderItemAdminOrdersOrderIdItemsPostResponses]
 
 export interface AdminShipOrderAdminOrdersOrderIdShipPostData {
     body: AdminOrderShipRequest
@@ -3749,6 +4305,277 @@ export interface AdminListRedemptionsAdminPlatformRedemptionsGetResponses {
 
 export type AdminListRedemptionsAdminPlatformRedemptionsGetResponse = AdminListRedemptionsAdminPlatformRedemptionsGetResponses[keyof AdminListRedemptionsAdminPlatformRedemptionsGetResponses]
 
+export interface AdminCreateRedemptionsAdminPlatformRedemptionsPostData {
+    body: AdminRedemptionCreateRequest
+    path?: never
+    query?: never
+    url: '/admin/platform/redemptions'
+}
+
+export interface AdminCreateRedemptionsAdminPlatformRedemptionsPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminCreateRedemptionsAdminPlatformRedemptionsPostError = AdminCreateRedemptionsAdminPlatformRedemptionsPostErrors[keyof AdminCreateRedemptionsAdminPlatformRedemptionsPostErrors]
+
+export interface AdminCreateRedemptionsAdminPlatformRedemptionsPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseAdminRedemptionListPublic
+}
+
+export type AdminCreateRedemptionsAdminPlatformRedemptionsPostResponse = AdminCreateRedemptionsAdminPlatformRedemptionsPostResponses[keyof AdminCreateRedemptionsAdminPlatformRedemptionsPostResponses]
+
+export interface AdminListProductMaterialsAdminPlatformProductMaterialsGetData {
+    body?: never
+    path?: never
+    query?: {
+        /**
+         * Page Number
+         *
+         * 页码
+         */
+        page_number?: number
+        /**
+         * Page Size
+         *
+         * 每页数量
+         */
+        page_size?: number
+    }
+    url: '/admin/platform/product-materials'
+}
+
+export interface AdminListProductMaterialsAdminPlatformProductMaterialsGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminListProductMaterialsAdminPlatformProductMaterialsGetError = AdminListProductMaterialsAdminPlatformProductMaterialsGetErrors[keyof AdminListProductMaterialsAdminPlatformProductMaterialsGetErrors]
+
+export interface AdminListProductMaterialsAdminPlatformProductMaterialsGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponsePageAdminProductMaterialPublic
+}
+
+export type AdminListProductMaterialsAdminPlatformProductMaterialsGetResponse = AdminListProductMaterialsAdminPlatformProductMaterialsGetResponses[keyof AdminListProductMaterialsAdminPlatformProductMaterialsGetResponses]
+
+export interface AdminCreateProductMaterialAdminPlatformProductMaterialsPostData {
+    body: AdminProductMaterialCreateRequest
+    path?: never
+    query?: never
+    url: '/admin/platform/product-materials'
+}
+
+export interface AdminCreateProductMaterialAdminPlatformProductMaterialsPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminCreateProductMaterialAdminPlatformProductMaterialsPostError = AdminCreateProductMaterialAdminPlatformProductMaterialsPostErrors[keyof AdminCreateProductMaterialAdminPlatformProductMaterialsPostErrors]
+
+export interface AdminCreateProductMaterialAdminPlatformProductMaterialsPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseAdminProductMaterialPublic
+}
+
+export type AdminCreateProductMaterialAdminPlatformProductMaterialsPostResponse = AdminCreateProductMaterialAdminPlatformProductMaterialsPostResponses[keyof AdminCreateProductMaterialAdminPlatformProductMaterialsPostResponses]
+
+export interface AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteData {
+    body?: never
+    path: {
+        /**
+         * Material Id
+         */
+        material_id: string
+    }
+    query?: never
+    url: '/admin/platform/product-materials/{material_id}'
+}
+
+export interface AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteError = AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteErrors[keyof AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteErrors]
+
+export interface AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseNoneType
+}
+
+export type AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteResponse = AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteResponses[keyof AdminDeleteProductMaterialAdminPlatformProductMaterialsMaterialIdDeleteResponses]
+
+export interface AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchData {
+    body: AdminProductMaterialUpdateRequest
+    path: {
+        /**
+         * Material Id
+         */
+        material_id: string
+    }
+    query?: never
+    url: '/admin/platform/product-materials/{material_id}'
+}
+
+export interface AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchError = AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchErrors[keyof AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchErrors]
+
+export interface AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseAdminProductMaterialPublic
+}
+
+export type AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchResponse = AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchResponses[keyof AdminUpdateProductMaterialAdminPlatformProductMaterialsMaterialIdPatchResponses]
+
+export interface AdminListProductTypesAdminPlatformProductTypesGetData {
+    body?: never
+    path?: never
+    query?: {
+        /**
+         * Page Number
+         *
+         * 页码
+         */
+        page_number?: number
+        /**
+         * Page Size
+         *
+         * 每页数量
+         */
+        page_size?: number
+    }
+    url: '/admin/platform/product-types'
+}
+
+export interface AdminListProductTypesAdminPlatformProductTypesGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminListProductTypesAdminPlatformProductTypesGetError = AdminListProductTypesAdminPlatformProductTypesGetErrors[keyof AdminListProductTypesAdminPlatformProductTypesGetErrors]
+
+export interface AdminListProductTypesAdminPlatformProductTypesGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponsePageAdminProductTypePublic
+}
+
+export type AdminListProductTypesAdminPlatformProductTypesGetResponse = AdminListProductTypesAdminPlatformProductTypesGetResponses[keyof AdminListProductTypesAdminPlatformProductTypesGetResponses]
+
+export interface AdminCreateProductTypeAdminPlatformProductTypesPostData {
+    body: AdminProductTypeCreateRequest
+    path?: never
+    query?: never
+    url: '/admin/platform/product-types'
+}
+
+export interface AdminCreateProductTypeAdminPlatformProductTypesPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminCreateProductTypeAdminPlatformProductTypesPostError = AdminCreateProductTypeAdminPlatformProductTypesPostErrors[keyof AdminCreateProductTypeAdminPlatformProductTypesPostErrors]
+
+export interface AdminCreateProductTypeAdminPlatformProductTypesPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseAdminProductTypePublic
+}
+
+export type AdminCreateProductTypeAdminPlatformProductTypesPostResponse = AdminCreateProductTypeAdminPlatformProductTypesPostResponses[keyof AdminCreateProductTypeAdminPlatformProductTypesPostResponses]
+
+export interface AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteData {
+    body?: never
+    path: {
+        /**
+         * Type Id
+         */
+        type_id: string
+    }
+    query?: never
+    url: '/admin/platform/product-types/{type_id}'
+}
+
+export interface AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteError = AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteErrors[keyof AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteErrors]
+
+export interface AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseNoneType
+}
+
+export type AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteResponse = AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteResponses[keyof AdminDeleteProductTypeAdminPlatformProductTypesTypeIdDeleteResponses]
+
+export interface AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchData {
+    body: AdminProductTypeUpdateRequest
+    path: {
+        /**
+         * Type Id
+         */
+        type_id: string
+    }
+    query?: never
+    url: '/admin/platform/product-types/{type_id}'
+}
+
+export interface AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchError = AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchErrors[keyof AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchErrors]
+
+export interface AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseAdminProductTypePublic
+}
+
+export type AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchResponse = AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchResponses[keyof AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchResponses]
+
 export interface AdminGetStatsAdminStatsGetData {
     body?: never
     path?: never
@@ -3868,6 +4695,122 @@ export interface AdminUpdateUserPermissionsAdminUsersUserIdPermissionsPatchRespo
 }
 
 export type AdminUpdateUserPermissionsAdminUsersUserIdPermissionsPatchResponse = AdminUpdateUserPermissionsAdminUsersUserIdPermissionsPatchResponses[keyof AdminUpdateUserPermissionsAdminUsersUserIdPermissionsPatchResponses]
+
+export interface AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchData {
+    body: AdminUserPasswordUpdateRequest
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string
+    }
+    query?: never
+    url: '/admin/users/{user_id}/password'
+}
+
+export interface AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchError = AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchErrors[keyof AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchErrors]
+
+export interface AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseAdminUserPublic
+}
+
+export type AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchResponse = AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchResponses[keyof AdminUpdateUserPasswordAdminUsersUserIdPasswordPatchResponses]
+
+export interface AdminGetUserOrdersAdminUsersUserIdOrdersGetData {
+    body?: never
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string
+    }
+    query?: {
+        /**
+         * Page Number
+         *
+         * 页码
+         */
+        page_number?: number
+        /**
+         * Page Size
+         *
+         * 每页数量
+         */
+        page_size?: number
+    }
+    url: '/admin/users/{user_id}/orders'
+}
+
+export interface AdminGetUserOrdersAdminUsersUserIdOrdersGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminGetUserOrdersAdminUsersUserIdOrdersGetError = AdminGetUserOrdersAdminUsersUserIdOrdersGetErrors[keyof AdminGetUserOrdersAdminUsersUserIdOrdersGetErrors]
+
+export interface AdminGetUserOrdersAdminUsersUserIdOrdersGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponsePageOrderPublic
+}
+
+export type AdminGetUserOrdersAdminUsersUserIdOrdersGetResponse = AdminGetUserOrdersAdminUsersUserIdOrdersGetResponses[keyof AdminGetUserOrdersAdminUsersUserIdOrdersGetResponses]
+
+export interface AdminGetUserArtifactsAdminUsersUserIdArtifactsGetData {
+    body?: never
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string
+    }
+    query?: {
+        /**
+         * Page Number
+         *
+         * 页码
+         */
+        page_number?: number
+        /**
+         * Page Size
+         *
+         * 每页数量
+         */
+        page_size?: number
+    }
+    url: '/admin/users/{user_id}/artifacts'
+}
+
+export interface AdminGetUserArtifactsAdminUsersUserIdArtifactsGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminGetUserArtifactsAdminUsersUserIdArtifactsGetError = AdminGetUserArtifactsAdminUsersUserIdArtifactsGetErrors[keyof AdminGetUserArtifactsAdminUsersUserIdArtifactsGetErrors]
+
+export interface AdminGetUserArtifactsAdminUsersUserIdArtifactsGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponsePageArtifactManufacturerResponse
+}
+
+export type AdminGetUserArtifactsAdminUsersUserIdArtifactsGetResponse = AdminGetUserArtifactsAdminUsersUserIdArtifactsGetResponses[keyof AdminGetUserArtifactsAdminUsersUserIdArtifactsGetResponses]
 
 export interface GetArtifactsArtifactsGetData {
     body?: never
@@ -4266,8 +5209,8 @@ export interface UpdateBatchBatchesBatchIdPatchResponses {
 
 export type UpdateBatchBatchesBatchIdPatchResponse = UpdateBatchBatchesBatchIdPatchResponses[keyof UpdateBatchBatchesBatchIdPatchResponses]
 
-export interface AdvanceBatchArtifactsBatchesBatchIdAdvancePostData {
-    body: BatchAdvanceRequest
+export interface StartProductionBatchesBatchIdProducePostData {
+    body?: never
     path: {
         /**
          * Batch Id
@@ -4275,26 +5218,116 @@ export interface AdvanceBatchArtifactsBatchesBatchIdAdvancePostData {
         batch_id: string
     }
     query?: never
-    url: '/batches/{batch_id}/advance'
+    url: '/batches/{batch_id}/produce'
 }
 
-export interface AdvanceBatchArtifactsBatchesBatchIdAdvancePostErrors {
+export interface StartProductionBatchesBatchIdProducePostErrors {
     /**
      * Validation Error
      */
     422: HttpValidationError
 }
 
-export type AdvanceBatchArtifactsBatchesBatchIdAdvancePostError = AdvanceBatchArtifactsBatchesBatchIdAdvancePostErrors[keyof AdvanceBatchArtifactsBatchesBatchIdAdvancePostErrors]
+export type StartProductionBatchesBatchIdProducePostError = StartProductionBatchesBatchIdProducePostErrors[keyof StartProductionBatchesBatchIdProducePostErrors]
 
-export interface AdvanceBatchArtifactsBatchesBatchIdAdvancePostResponses {
+export interface StartProductionBatchesBatchIdProducePostResponses {
     /**
      * Successful Response
      */
     200: AppResponseBatchPublic
 }
 
-export type AdvanceBatchArtifactsBatchesBatchIdAdvancePostResponse = AdvanceBatchArtifactsBatchesBatchIdAdvancePostResponses[keyof AdvanceBatchArtifactsBatchesBatchIdAdvancePostResponses]
+export type StartProductionBatchesBatchIdProducePostResponse = StartProductionBatchesBatchIdProducePostResponses[keyof StartProductionBatchesBatchIdProducePostResponses]
+
+export interface RestartProductionBatchesBatchIdReproducePostData {
+    body?: never
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/batches/{batch_id}/reproduce'
+}
+
+export interface RestartProductionBatchesBatchIdReproducePostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type RestartProductionBatchesBatchIdReproducePostError = RestartProductionBatchesBatchIdReproducePostErrors[keyof RestartProductionBatchesBatchIdReproducePostErrors]
+
+export interface RestartProductionBatchesBatchIdReproducePostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseBatchPublic
+}
+
+export type RestartProductionBatchesBatchIdReproducePostResponse = RestartProductionBatchesBatchIdReproducePostResponses[keyof RestartProductionBatchesBatchIdReproducePostResponses]
+
+export interface GetBatchShippingDataBatchesBatchIdShippingGetData {
+    body?: never
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/batches/{batch_id}/shipping'
+}
+
+export interface GetBatchShippingDataBatchesBatchIdShippingGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type GetBatchShippingDataBatchesBatchIdShippingGetError = GetBatchShippingDataBatchesBatchIdShippingGetErrors[keyof GetBatchShippingDataBatchesBatchIdShippingGetErrors]
+
+export interface GetBatchShippingDataBatchesBatchIdShippingGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseListBatchShippingItem
+}
+
+export type GetBatchShippingDataBatchesBatchIdShippingGetResponse = GetBatchShippingDataBatchesBatchIdShippingGetResponses[keyof GetBatchShippingDataBatchesBatchIdShippingGetResponses]
+
+export interface BulkShipBatchBatchesBatchIdShipPostData {
+    body: BatchBulkShipRequest
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/batches/{batch_id}/ship'
+}
+
+export interface BulkShipBatchBatchesBatchIdShipPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type BulkShipBatchBatchesBatchIdShipPostError = BulkShipBatchBatchesBatchIdShipPostErrors[keyof BulkShipBatchBatchesBatchIdShipPostErrors]
+
+export interface BulkShipBatchBatchesBatchIdShipPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseListBatchBulkShipResult
+}
+
+export type BulkShipBatchBatchesBatchIdShipPostResponse = BulkShipBatchBatchesBatchIdShipPostResponses[keyof BulkShipBatchBatchesBatchIdShipPostResponses]
 
 export interface GetImagesImagesGetData {
     body?: never

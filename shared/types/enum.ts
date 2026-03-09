@@ -69,9 +69,10 @@ export enum BatchStatus {
  * 用户权限枚举
  */
 export enum UserPermission {
-    USERS_ADMIN = 'users:admin',
-    IMAGES_ADMIN = 'images:admin',
-    ARTIFACTS_ADMIN = 'artifacts:admin',
-    ORDERS_ADMIN = 'orders:admin',
-    PLATFORM_ADMIN = 'platform:admin',
+    ANY_ADMIN = 0,
+    USERS_ADMIN = 1,
+    IMAGES_ADMIN = 2,
+    ARTIFACTS_ADMIN = 3,
+    ORDERS_ADMIN = 4,
+    PLATFORM_ADMIN = 5,
 }

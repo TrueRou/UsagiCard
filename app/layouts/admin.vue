@@ -5,12 +5,12 @@ const sidebarOpen = ref(false)
 
 const permissions = computed(() => user.value?.permissions || [])
 
-function hasPermission(perm: string) {
+function hasPermission(perm: number) {
     return permissions.value.includes(perm)
 }
 
 const navItems = computed(() => [
-    { label: '仪表盘', to: '/admin', icon: 'mdi:view-dashboard-outline', show: true },
+    { label: '仪表盘', to: '/admin', icon: 'mdi:view-dashboard-outline', show: hasPermission(UserPermission.ANY_ADMIN) },
     { label: '订单管理', to: '/admin/orders', icon: 'mdi:receipt-text-outline', show: hasPermission(UserPermission.ORDERS_ADMIN) },
     { label: '用户管理', to: '/admin/users', icon: 'mdi:account-group-outline', show: hasPermission(UserPermission.USERS_ADMIN) },
     { label: '工件管理', to: '/admin/artifacts', icon: 'mdi:cube-outline', show: hasPermission(UserPermission.ARTIFACTS_ADMIN) },
