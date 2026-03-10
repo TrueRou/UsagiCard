@@ -31,7 +31,7 @@ const canPayOrder = computed(() => {
 async function handlePayOrder() {
     isProcessing.value = true
     try {
-        await useLeporid(`/orders/${props.order.id}/pay`, {
+        await useNuxtApp().$leporid(`/api/orders/${props.order.id}/pay`, {
             method: 'POST',
             showSuccessToast: true,
             successMessage: '支付已发起',
@@ -47,7 +47,7 @@ async function handlePayOrder() {
 async function handleCancelOrder() {
     isProcessing.value = true
     try {
-        await useLeporid(`/orders/${props.order.id}/cancel`, {
+        await useNuxtApp().$leporid(`/api/orders/${props.order.id}/cancel`, {
             method: 'POST',
             showSuccessToast: true,
             successMessage: '订单已取消',

@@ -18,6 +18,7 @@ interface Variant {
     emoji: string
     title: string
     description: string
+    designType?: string // 对应 /design?type=xxx
     features: { label: string, supported: boolean }[]
 }
 
@@ -27,6 +28,7 @@ const variants: Variant[] = [
         emoji: '🚀',
         title: '双面定制AIME蓝白卡',
         description: '官方蓝白卡，成本较高。可以通过二维码进入卡片主页，支持完整账号系统。',
+        designType: 'UsagiCardDX',
         features: [
             { label: '卡片主页', supported: true },
             { label: '账号系统', supported: true },
@@ -38,6 +40,7 @@ const variants: Variant[] = [
         emoji: '🚢',
         title: '双面定制AIME兼容卡',
         description: '自制兼容卡，成本较低。只能在手台登录私服。可以通过二维码进入卡片主页。',
+        designType: 'UsagiCardDX',
         features: [
             { label: '卡片主页', supported: true },
             { label: '账号系统', supported: false },
@@ -49,6 +52,7 @@ const variants: Variant[] = [
         emoji: '✨',
         title: '双面定制NFC卡',
         description: '可以进入卡片主页，但无法享受账号系统。',
+        designType: 'UsagiCardDX',
         features: [
             { label: '卡片主页', supported: true },
             { label: '账号系统', supported: false },
@@ -109,9 +113,18 @@ const variants: Variant[] = [
                             :class="f.supported ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-slate-500'"
                         >{{ f.supported ? '✓' : '✗' }} {{ f.label }}</span>
                     </div>
-                    <NuxtLink :to="`/products/${v.slug}`" class="inline-block pt-1 text-sm text-blue-400 hover:text-blue-300">
-                        查看详情 →
-                    </NuxtLink>
+                    <div class="flex gap-3 pt-1">
+                        <NuxtLink :to="`/products/${v.slug}`" class="text-sm text-blue-400 hover:text-blue-300">
+                            查看详情 →
+                        </NuxtLink>
+                        <NuxtLink
+                            v-if="v.designType"
+                            :to="`/design?type=${v.designType}`"
+                            class="text-sm text-emerald-400 hover:text-emerald-300"
+                        >
+                            体验设计器 →
+                        </NuxtLink>
+                    </div>
                 </article>
             </div>
         </section>

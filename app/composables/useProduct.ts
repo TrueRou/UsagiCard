@@ -1,18 +1,9 @@
-export async function useProduct(productId: Ref<string>) {
-    const { data, refresh, error } = await useLeporid<ProductPublic>(`/api/products/${productId}`)
-
-    const product = computed(() => {
-        if (data.value === undefined) {
-            throw createError({ statusCode: 404, statusText: '工件不存在', fatal: true, data: error.value })
-        }
-        return data.value
-    })
-
+export async function useProduct(product: Ref<ProductSimpleResponse>) {
     const productSaving = ref(false)
     const productSave = async (newProduct: Record<string, any>) => {
         productSaving.value = true
         try {
-            data.value = await useNuxtApp().$leporid<ProductPublic>(`/api/products/${productId}`, {
+            product.value = await useNuxtApp().$leporid<ProductPublic>(`/api/products/${product.value.id}`, {
                 method: 'PATCH',
                 body: newProduct,
             })
@@ -27,7 +18,6 @@ export async function useProduct(productId: Ref<string>) {
 
     return {
         product,
-        refresh,
         productSaving,
         productSave,
         productSaveDesign,

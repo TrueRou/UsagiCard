@@ -1618,6 +1618,24 @@ export interface ArtifactStorageUpdateRequest {
 }
 
 /**
+ * ArtifactSummary
+ *
+ * 工件简要信息（嵌入订单商品项）
+ */
+export interface ArtifactSummary {
+    /**
+     * Id
+     *
+     * 工件ID
+     */
+    id: string
+    /**
+     * 工件状态
+     */
+    status: ArtifactStatus
+}
+
+/**
  * ArtifactUserResponse
  *
  * 工件用户信息（为用户提供工件元数据）
@@ -1629,6 +1647,10 @@ export interface ArtifactUserResponse {
      * 工件ID
      */
     id: string
+    /**
+     * 工件状态
+     */
+    status: ArtifactStatus
     /**
      * Storage
      *
@@ -2223,6 +2245,12 @@ export interface OrderItemPublic {
      * 商品信息
      */
     product: ProductPublic
+    /**
+     * Artifacts
+     *
+     * 关联工件列表
+     */
+    artifacts?: Array<ArtifactSummary>
 }
 
 /**
@@ -5239,7 +5267,7 @@ export interface StartProductionBatchesBatchIdProducePostResponses {
 
 export type StartProductionBatchesBatchIdProducePostResponse = StartProductionBatchesBatchIdProducePostResponses[keyof StartProductionBatchesBatchIdProducePostResponses]
 
-export interface RestartProductionBatchesBatchIdReproducePostData {
+export interface DownloadBatchBatchesBatchIdDownloadGetData {
     body?: never
     path: {
         /**
@@ -5248,26 +5276,24 @@ export interface RestartProductionBatchesBatchIdReproducePostData {
         batch_id: string
     }
     query?: never
-    url: '/batches/{batch_id}/reproduce'
+    url: '/batches/{batch_id}/download'
 }
 
-export interface RestartProductionBatchesBatchIdReproducePostErrors {
+export interface DownloadBatchBatchesBatchIdDownloadGetErrors {
     /**
      * Validation Error
      */
     422: HttpValidationError
 }
 
-export type RestartProductionBatchesBatchIdReproducePostError = RestartProductionBatchesBatchIdReproducePostErrors[keyof RestartProductionBatchesBatchIdReproducePostErrors]
+export type DownloadBatchBatchesBatchIdDownloadGetError = DownloadBatchBatchesBatchIdDownloadGetErrors[keyof DownloadBatchBatchesBatchIdDownloadGetErrors]
 
-export interface RestartProductionBatchesBatchIdReproducePostResponses {
+export interface DownloadBatchBatchesBatchIdDownloadGetResponses {
     /**
      * Successful Response
      */
-    200: AppResponseBatchPublic
+    200: unknown
 }
-
-export type RestartProductionBatchesBatchIdReproducePostResponse = RestartProductionBatchesBatchIdReproducePostResponses[keyof RestartProductionBatchesBatchIdReproducePostResponses]
 
 export interface GetBatchShippingDataBatchesBatchIdShippingGetData {
     body?: never
@@ -5736,6 +5762,36 @@ export interface PayOrderOrdersOrderIdPayPostResponses {
 }
 
 export type PayOrderOrdersOrderIdPayPostResponse = PayOrderOrdersOrderIdPayPostResponses[keyof PayOrderOrdersOrderIdPayPostResponses]
+
+export interface ConfirmOrderOrdersOrderIdConfirmPostData {
+    body?: never
+    path: {
+        /**
+         * Order Id
+         */
+        order_id: string
+    }
+    query?: never
+    url: '/orders/{order_id}/confirm'
+}
+
+export interface ConfirmOrderOrdersOrderIdConfirmPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type ConfirmOrderOrdersOrderIdConfirmPostError = ConfirmOrderOrdersOrderIdConfirmPostErrors[keyof ConfirmOrderOrdersOrderIdConfirmPostErrors]
+
+export interface ConfirmOrderOrdersOrderIdConfirmPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseOrderSimplePublic
+}
+
+export type ConfirmOrderOrdersOrderIdConfirmPostResponse = ConfirmOrderOrdersOrderIdConfirmPostResponses[keyof ConfirmOrderOrdersOrderIdConfirmPostResponses]
 
 export interface GetProductsProductsGetData {
     body?: never
