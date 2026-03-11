@@ -7,15 +7,41 @@ export interface ClientOptions {
 /**
  * AdminOrderAddItemRequest
  *
- * 管理端向已有订单追加商品请求
+ * 管理端向已有订单追加商品请求（创建新商品并挂入订单）
  */
 export interface AdminOrderAddItemRequest {
     /**
-     * Product Id
+     * Name
      *
-     * 商品ID
+     * 商品名称（留空则自动根据材料和类型生成）
      */
-    product_id: string
+    name?: string | null
+    /**
+     * Description
+     *
+     * 商品描述（留空则自动生成）
+     */
+    description?: string | null
+    /**
+     * Design
+     *
+     * 商品设计 JSON
+     */
+    design: {
+        [key: string]: unknown
+    }
+    /**
+     * Material Id
+     *
+     * 材料 ID
+     */
+    material_id: string
+    /**
+     * Type Id
+     *
+     * 商品类型 ID
+     */
+    type_id: string
     /**
      * Quantity
      *
@@ -105,7 +131,7 @@ export interface AdminOrderShipRequest {
 /**
  * AdminOrderUpdateRequest
  *
- * 管理端订单更新请求（支持收货信息+快递单号）
+ * 管理端订单更新请求（支持收货信息+快递单号+金额覆盖）
  */
 export interface AdminOrderUpdateRequest {
     /**
@@ -132,6 +158,12 @@ export interface AdminOrderUpdateRequest {
      * 快递单号
      */
     shipping_sn?: string | null
+    /**
+     * Override Amount
+     *
+     * 最终金额（设置后运费归零，product_money 和 payment_money 均取此值）
+     */
+    override_amount?: number | string | null
 }
 
 /**
@@ -614,6 +646,92 @@ export interface AdminRedemptionCreateRequest {
 }
 
 /**
+ * AdminRedemptionDetailPublic
+ *
+ * 管理端兑换码详细信息（含平台用户ID和关联订单收货信息）
+ */
+export interface AdminRedemptionDetailPublic {
+    /**
+     * Id
+     *
+     * 兑换码ID
+     */
+    id: string
+    /**
+     * Code
+     *
+     * 兑换码
+     */
+    code: string
+    /**
+     * Platform
+     *
+     * 平台标识
+     */
+    platform: string
+    /**
+     * Platform Trade Id
+     *
+     * 平台交易ID
+     */
+    platform_trade_id: string
+    /**
+     * Platform User Id
+     *
+     * 平台用户ID
+     */
+    platform_user_id: string
+    /**
+     * Claimed At
+     *
+     * 领取时间
+     */
+    claimed_at: string | null
+    /**
+     * User Id
+     *
+     * 领取用户ID
+     */
+    user_id: string | null
+    /**
+     * Order Id
+     *
+     * 关联订单ID
+     */
+    order_id: string
+    /**
+     * Shipping Name
+     *
+     * 收件人姓名
+     */
+    shipping_name: string
+    /**
+     * Shipping Phone
+     *
+     * 收件人电话
+     */
+    shipping_phone: string
+    /**
+     * Shipping Address
+     *
+     * 收件人地址
+     */
+    shipping_address: string
+    /**
+     * Created At
+     *
+     * 创建时间
+     */
+    created_at: string
+    /**
+     * Updated At
+     *
+     * 更新时间
+     */
+    updated_at: string
+}
+
+/**
  * AdminRedemptionListPublic
  *
  * 管理端批量创建兑换码后返回的简要信息
@@ -664,24 +782,6 @@ export interface AdminRedemptionPublic {
      */
     platform_trade_id: string
     /**
-     * Shipping Name
-     *
-     * 收件人姓名
-     */
-    shipping_name: string
-    /**
-     * Shipping Phone
-     *
-     * 收件人电话
-     */
-    shipping_phone: string
-    /**
-     * Shipping Address
-     *
-     * 收件人地址
-     */
-    shipping_address: string
-    /**
      * Claimed At
      *
      * 领取时间
@@ -705,6 +805,32 @@ export interface AdminRedemptionPublic {
      * 创建时间
      */
     created_at: string
+}
+
+/**
+ * AdminRedemptionUpdateRequest
+ *
+ * 管理端兑换码更新请求
+ */
+export interface AdminRedemptionUpdateRequest {
+    /**
+     * Platform
+     *
+     * 平台标识
+     */
+    platform?: string | null
+    /**
+     * Platform Trade Id
+     *
+     * 平台交易ID
+     */
+    platform_trade_id?: string | null
+    /**
+     * Platform User Id
+     *
+     * 平台用户ID
+     */
+    platform_user_id?: string | null
 }
 
 /**
@@ -957,6 +1083,25 @@ export interface AppResponseAdminProductMaterialPublic {
  */
 export interface AppResponseAdminProductTypePublic {
     data?: AdminProductTypePublic | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
+ * AppResponse[AdminRedemptionDetailPublic]
+ */
+export interface AppResponseAdminRedemptionDetailPublic {
+    data?: AdminRedemptionDetailPublic | null
     /**
      * Code
      */
@@ -3769,6 +3914,62 @@ export interface RootGetResponses {
     200: unknown
 }
 
+export interface AdminGetArtifactsAdminArtifactsGetData {
+    body?: never
+    path?: never
+    query?: {
+        /**
+         * Page Number
+         *
+         * 页码
+         */
+        page_number?: number
+        /**
+         * Page Size
+         *
+         * 每页数量
+         */
+        page_size?: number
+        /**
+         * Status
+         *
+         * 工件状态
+         */
+        status?: number | null
+        /**
+         * Product Id
+         *
+         * 所属商品ID
+         */
+        product_id?: string | null
+        /**
+         * Batch Id
+         *
+         * 所属批次ID
+         */
+        batch_id?: string | null
+    }
+    url: '/admin/artifacts'
+}
+
+export interface AdminGetArtifactsAdminArtifactsGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminGetArtifactsAdminArtifactsGetError = AdminGetArtifactsAdminArtifactsGetErrors[keyof AdminGetArtifactsAdminArtifactsGetErrors]
+
+export interface AdminGetArtifactsAdminArtifactsGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponsePageArtifactManufacturerResponse
+}
+
+export type AdminGetArtifactsAdminArtifactsGetResponse = AdminGetArtifactsAdminArtifactsGetResponses[keyof AdminGetArtifactsAdminArtifactsGetResponses]
+
 export interface AdminGetArtifactAdminArtifactsArtifactIdGetData {
     body?: never
     path: {
@@ -3828,6 +4029,289 @@ export interface AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchR
 }
 
 export type AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchResponse = AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchResponses[keyof AdminUpdateArtifactStorageAdminArtifactsArtifactIdStoragePatchResponses]
+
+export interface UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchData {
+    body: ArtifactStatusUpdateRequest
+    path: {
+        /**
+         * Artifact Id
+         */
+        artifact_id: string
+    }
+    query?: never
+    url: '/admin/artifacts/{artifact_id}/status'
+}
+
+export interface UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchError = UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchErrors[keyof UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchErrors]
+
+export interface UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseArtifactManufacturerResponse
+}
+
+export type UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchResponse = UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchResponses[keyof UpdateArtifactStatusAdminArtifactsArtifactIdStatusPatchResponses]
+
+export interface GetBatchesAdminBatchesGetData {
+    body?: never
+    path?: never
+    query?: {
+        /**
+         * Page Number
+         *
+         * 页码
+         */
+        page_number?: number
+        /**
+         * Page Size
+         *
+         * 每页数量
+         */
+        page_size?: number
+        /**
+         * Status
+         *
+         * 批次状态
+         */
+        status?: number | null
+        /**
+         * User Id
+         *
+         * 创建者用户ID
+         */
+        user_id?: string | null
+    }
+    url: '/admin/batches'
+}
+
+export interface GetBatchesAdminBatchesGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type GetBatchesAdminBatchesGetError = GetBatchesAdminBatchesGetErrors[keyof GetBatchesAdminBatchesGetErrors]
+
+export interface GetBatchesAdminBatchesGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponsePageBatchPublic
+}
+
+export type GetBatchesAdminBatchesGetResponse = GetBatchesAdminBatchesGetResponses[keyof GetBatchesAdminBatchesGetResponses]
+
+export interface CreateBatchAdminBatchesPostData {
+    body: BatchCreateRequest
+    path?: never
+    query?: never
+    url: '/admin/batches'
+}
+
+export interface CreateBatchAdminBatchesPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type CreateBatchAdminBatchesPostError = CreateBatchAdminBatchesPostErrors[keyof CreateBatchAdminBatchesPostErrors]
+
+export interface CreateBatchAdminBatchesPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseBatchPublic
+}
+
+export type CreateBatchAdminBatchesPostResponse = CreateBatchAdminBatchesPostResponses[keyof CreateBatchAdminBatchesPostResponses]
+
+export interface GetBatchAdminBatchesBatchIdGetData {
+    body?: never
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/admin/batches/{batch_id}'
+}
+
+export interface GetBatchAdminBatchesBatchIdGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type GetBatchAdminBatchesBatchIdGetError = GetBatchAdminBatchesBatchIdGetErrors[keyof GetBatchAdminBatchesBatchIdGetErrors]
+
+export interface GetBatchAdminBatchesBatchIdGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseBatchPublic
+}
+
+export type GetBatchAdminBatchesBatchIdGetResponse = GetBatchAdminBatchesBatchIdGetResponses[keyof GetBatchAdminBatchesBatchIdGetResponses]
+
+export interface UpdateBatchAdminBatchesBatchIdPatchData {
+    body: BatchUpdateRequest
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/admin/batches/{batch_id}'
+}
+
+export interface UpdateBatchAdminBatchesBatchIdPatchErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type UpdateBatchAdminBatchesBatchIdPatchError = UpdateBatchAdminBatchesBatchIdPatchErrors[keyof UpdateBatchAdminBatchesBatchIdPatchErrors]
+
+export interface UpdateBatchAdminBatchesBatchIdPatchResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseBatchPublic
+}
+
+export type UpdateBatchAdminBatchesBatchIdPatchResponse = UpdateBatchAdminBatchesBatchIdPatchResponses[keyof UpdateBatchAdminBatchesBatchIdPatchResponses]
+
+export interface StartProductionAdminBatchesBatchIdProducePostData {
+    body?: never
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/admin/batches/{batch_id}/produce'
+}
+
+export interface StartProductionAdminBatchesBatchIdProducePostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type StartProductionAdminBatchesBatchIdProducePostError = StartProductionAdminBatchesBatchIdProducePostErrors[keyof StartProductionAdminBatchesBatchIdProducePostErrors]
+
+export interface StartProductionAdminBatchesBatchIdProducePostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseBatchPublic
+}
+
+export type StartProductionAdminBatchesBatchIdProducePostResponse = StartProductionAdminBatchesBatchIdProducePostResponses[keyof StartProductionAdminBatchesBatchIdProducePostResponses]
+
+export interface DownloadBatchAdminBatchesBatchIdDownloadGetData {
+    body?: never
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/admin/batches/{batch_id}/download'
+}
+
+export interface DownloadBatchAdminBatchesBatchIdDownloadGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type DownloadBatchAdminBatchesBatchIdDownloadGetError = DownloadBatchAdminBatchesBatchIdDownloadGetErrors[keyof DownloadBatchAdminBatchesBatchIdDownloadGetErrors]
+
+export interface DownloadBatchAdminBatchesBatchIdDownloadGetResponses {
+    /**
+     * Successful Response
+     */
+    200: unknown
+}
+
+export interface GetBatchShippingDataAdminBatchesBatchIdShippingGetData {
+    body?: never
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/admin/batches/{batch_id}/shipping'
+}
+
+export interface GetBatchShippingDataAdminBatchesBatchIdShippingGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type GetBatchShippingDataAdminBatchesBatchIdShippingGetError = GetBatchShippingDataAdminBatchesBatchIdShippingGetErrors[keyof GetBatchShippingDataAdminBatchesBatchIdShippingGetErrors]
+
+export interface GetBatchShippingDataAdminBatchesBatchIdShippingGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseListBatchShippingItem
+}
+
+export type GetBatchShippingDataAdminBatchesBatchIdShippingGetResponse = GetBatchShippingDataAdminBatchesBatchIdShippingGetResponses[keyof GetBatchShippingDataAdminBatchesBatchIdShippingGetResponses]
+
+export interface BulkShipBatchAdminBatchesBatchIdShipPostData {
+    body: BatchBulkShipRequest
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string
+    }
+    query?: never
+    url: '/admin/batches/{batch_id}/ship'
+}
+
+export interface BulkShipBatchAdminBatchesBatchIdShipPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type BulkShipBatchAdminBatchesBatchIdShipPostError = BulkShipBatchAdminBatchesBatchIdShipPostErrors[keyof BulkShipBatchAdminBatchesBatchIdShipPostErrors]
+
+export interface BulkShipBatchAdminBatchesBatchIdShipPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseListBatchBulkShipResult
+}
+
+export type BulkShipBatchAdminBatchesBatchIdShipPostResponse = BulkShipBatchAdminBatchesBatchIdShipPostResponses[keyof BulkShipBatchAdminBatchesBatchIdShipPostResponses]
 
 export interface AdminListOrdersAdminOrdersGetData {
     body?: never
@@ -4059,6 +4543,36 @@ export interface AdminCancelOrderAdminOrdersOrderIdCancelPostResponses {
 }
 
 export type AdminCancelOrderAdminOrdersOrderIdCancelPostResponse = AdminCancelOrderAdminOrdersOrderIdCancelPostResponses[keyof AdminCancelOrderAdminOrdersOrderIdCancelPostResponses]
+
+export interface AdminPayOrderAdminOrdersOrderIdPayPostData {
+    body?: never
+    path: {
+        /**
+         * Order Id
+         */
+        order_id: string
+    }
+    query?: never
+    url: '/admin/orders/{order_id}/pay'
+}
+
+export interface AdminPayOrderAdminOrdersOrderIdPayPostErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminPayOrderAdminOrdersOrderIdPayPostError = AdminPayOrderAdminOrdersOrderIdPayPostErrors[keyof AdminPayOrderAdminOrdersOrderIdPayPostErrors]
+
+export interface AdminPayOrderAdminOrdersOrderIdPayPostResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseOrderSimplePublic
+}
+
+export type AdminPayOrderAdminOrdersOrderIdPayPostResponse = AdminPayOrderAdminOrdersOrderIdPayPostResponses[keyof AdminPayOrderAdminOrdersOrderIdPayPostResponses]
 
 export interface AdminListPresetsAdminPlatformPresetsGetData {
     body?: never
@@ -4411,6 +4925,96 @@ export interface AdminCreateRedemptionsAdminPlatformRedemptionsPostResponses {
 
 export type AdminCreateRedemptionsAdminPlatformRedemptionsPostResponse = AdminCreateRedemptionsAdminPlatformRedemptionsPostResponses[keyof AdminCreateRedemptionsAdminPlatformRedemptionsPostResponses]
 
+export interface AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteData {
+    body?: never
+    path: {
+        /**
+         * Redemption Id
+         */
+        redemption_id: string
+    }
+    query?: never
+    url: '/admin/platform/redemptions/{redemption_id}'
+}
+
+export interface AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteError = AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteErrors[keyof AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteErrors]
+
+export interface AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseNoneType
+}
+
+export type AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteResponse = AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteResponses[keyof AdminDeleteRedemptionAdminPlatformRedemptionsRedemptionIdDeleteResponses]
+
+export interface AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetData {
+    body?: never
+    path: {
+        /**
+         * Redemption Id
+         */
+        redemption_id: string
+    }
+    query?: never
+    url: '/admin/platform/redemptions/{redemption_id}'
+}
+
+export interface AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetError = AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetErrors[keyof AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetErrors]
+
+export interface AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseAdminRedemptionDetailPublic
+}
+
+export type AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetResponse = AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetResponses[keyof AdminGetRedemptionAdminPlatformRedemptionsRedemptionIdGetResponses]
+
+export interface AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchData {
+    body: AdminRedemptionUpdateRequest
+    path: {
+        /**
+         * Redemption Id
+         */
+        redemption_id: string
+    }
+    query?: never
+    url: '/admin/platform/redemptions/{redemption_id}'
+}
+
+export interface AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchError = AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchErrors[keyof AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchErrors]
+
+export interface AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseAdminRedemptionDetailPublic
+}
+
+export type AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchResponse = AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchResponses[keyof AdminUpdateRedemptionAdminPlatformRedemptionsRedemptionIdPatchResponses]
+
 export interface AdminListProductMaterialsAdminPlatformProductMaterialsGetData {
     body?: never
     path?: never
@@ -4657,6 +5261,66 @@ export interface AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchRespo
 
 export type AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchResponse = AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchResponses[keyof AdminUpdateProductTypeAdminPlatformProductTypesTypeIdPatchResponses]
 
+export interface AdminGetProductAdminProductsProductIdGetData {
+    body?: never
+    path: {
+        /**
+         * Product Id
+         */
+        product_id: string
+    }
+    query?: never
+    url: '/admin/products/{product_id}'
+}
+
+export interface AdminGetProductAdminProductsProductIdGetErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminGetProductAdminProductsProductIdGetError = AdminGetProductAdminProductsProductIdGetErrors[keyof AdminGetProductAdminProductsProductIdGetErrors]
+
+export interface AdminGetProductAdminProductsProductIdGetResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseProductPublic
+}
+
+export type AdminGetProductAdminProductsProductIdGetResponse = AdminGetProductAdminProductsProductIdGetResponses[keyof AdminGetProductAdminProductsProductIdGetResponses]
+
+export interface AdminUpdateProductAdminProductsProductIdPatchData {
+    body: ProductUpdateRequest
+    path: {
+        /**
+         * Product Id
+         */
+        product_id: string
+    }
+    query?: never
+    url: '/admin/products/{product_id}'
+}
+
+export interface AdminUpdateProductAdminProductsProductIdPatchErrors {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError
+}
+
+export type AdminUpdateProductAdminProductsProductIdPatchError = AdminUpdateProductAdminProductsProductIdPatchErrors[keyof AdminUpdateProductAdminProductsProductIdPatchErrors]
+
+export interface AdminUpdateProductAdminProductsProductIdPatchResponses {
+    /**
+     * Successful Response
+     */
+    200: AppResponseProductPublic
+}
+
+export type AdminUpdateProductAdminProductsProductIdPatchResponse = AdminUpdateProductAdminProductsProductIdPatchResponses[keyof AdminUpdateProductAdminProductsProductIdPatchResponses]
+
 export interface AdminGetStatsAdminStatsGetData {
     body?: never
     path?: never
@@ -4893,62 +5557,6 @@ export interface AdminGetUserArtifactsAdminUsersUserIdArtifactsGetResponses {
 
 export type AdminGetUserArtifactsAdminUsersUserIdArtifactsGetResponse = AdminGetUserArtifactsAdminUsersUserIdArtifactsGetResponses[keyof AdminGetUserArtifactsAdminUsersUserIdArtifactsGetResponses]
 
-export interface GetArtifactsArtifactsGetData {
-    body?: never
-    path?: never
-    query?: {
-        /**
-         * Page Number
-         *
-         * 页码
-         */
-        page_number?: number
-        /**
-         * Page Size
-         *
-         * 每页数量
-         */
-        page_size?: number
-        /**
-         * Status
-         *
-         * 工件状态
-         */
-        status?: number | null
-        /**
-         * Product Id
-         *
-         * 所属商品ID
-         */
-        product_id?: string | null
-        /**
-         * Batch Id
-         *
-         * 所属批次ID
-         */
-        batch_id?: string | null
-    }
-    url: '/artifacts'
-}
-
-export interface GetArtifactsArtifactsGetErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type GetArtifactsArtifactsGetError = GetArtifactsArtifactsGetErrors[keyof GetArtifactsArtifactsGetErrors]
-
-export interface GetArtifactsArtifactsGetResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponsePageArtifactManufacturerResponse
-}
-
-export type GetArtifactsArtifactsGetResponse = GetArtifactsArtifactsGetResponses[keyof GetArtifactsArtifactsGetResponses]
-
 export interface GetArtifactArtifactsArtifactIdGetData {
     body?: never
     path: {
@@ -5008,36 +5616,6 @@ export interface UpdateArtifactStorageArtifactsArtifactIdStoragePatchResponses {
 }
 
 export type UpdateArtifactStorageArtifactsArtifactIdStoragePatchResponse = UpdateArtifactStorageArtifactsArtifactIdStoragePatchResponses[keyof UpdateArtifactStorageArtifactsArtifactIdStoragePatchResponses]
-
-export interface UpdateArtifactStatusArtifactsArtifactIdStatusPatchData {
-    body: ArtifactStatusUpdateRequest
-    path: {
-        /**
-         * Artifact Id
-         */
-        artifact_id: string
-    }
-    query?: never
-    url: '/artifacts/{artifact_id}/status'
-}
-
-export interface UpdateArtifactStatusArtifactsArtifactIdStatusPatchErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type UpdateArtifactStatusArtifactsArtifactIdStatusPatchError = UpdateArtifactStatusArtifactsArtifactIdStatusPatchErrors[keyof UpdateArtifactStatusArtifactsArtifactIdStatusPatchErrors]
-
-export interface UpdateArtifactStatusArtifactsArtifactIdStatusPatchResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponseArtifactManufacturerResponse
-}
-
-export type UpdateArtifactStatusArtifactsArtifactIdStatusPatchResponse = UpdateArtifactStatusArtifactsArtifactIdStatusPatchResponses[keyof UpdateArtifactStatusArtifactsArtifactIdStatusPatchResponses]
 
 export interface RegisterAuthRegisterPostData {
     body: UserCreateRequest
@@ -5154,259 +5732,6 @@ export interface MergeUsersAuthMergePostResponses {
 }
 
 export type MergeUsersAuthMergePostResponse = MergeUsersAuthMergePostResponses[keyof MergeUsersAuthMergePostResponses]
-
-export interface GetBatchesBatchesGetData {
-    body?: never
-    path?: never
-    query?: {
-        /**
-         * Page Number
-         *
-         * 页码
-         */
-        page_number?: number
-        /**
-         * Page Size
-         *
-         * 每页数量
-         */
-        page_size?: number
-        /**
-         * Status
-         *
-         * 批次状态
-         */
-        status?: number | null
-        /**
-         * User Id
-         *
-         * 创建者用户ID
-         */
-        user_id?: string | null
-    }
-    url: '/batches'
-}
-
-export interface GetBatchesBatchesGetErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type GetBatchesBatchesGetError = GetBatchesBatchesGetErrors[keyof GetBatchesBatchesGetErrors]
-
-export interface GetBatchesBatchesGetResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponsePageBatchPublic
-}
-
-export type GetBatchesBatchesGetResponse = GetBatchesBatchesGetResponses[keyof GetBatchesBatchesGetResponses]
-
-export interface CreateBatchBatchesPostData {
-    body: BatchCreateRequest
-    path?: never
-    query?: never
-    url: '/batches'
-}
-
-export interface CreateBatchBatchesPostErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type CreateBatchBatchesPostError = CreateBatchBatchesPostErrors[keyof CreateBatchBatchesPostErrors]
-
-export interface CreateBatchBatchesPostResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponseBatchPublic
-}
-
-export type CreateBatchBatchesPostResponse = CreateBatchBatchesPostResponses[keyof CreateBatchBatchesPostResponses]
-
-export interface GetBatchBatchesBatchIdGetData {
-    body?: never
-    path: {
-        /**
-         * Batch Id
-         */
-        batch_id: string
-    }
-    query?: never
-    url: '/batches/{batch_id}'
-}
-
-export interface GetBatchBatchesBatchIdGetErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type GetBatchBatchesBatchIdGetError = GetBatchBatchesBatchIdGetErrors[keyof GetBatchBatchesBatchIdGetErrors]
-
-export interface GetBatchBatchesBatchIdGetResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponseBatchPublic
-}
-
-export type GetBatchBatchesBatchIdGetResponse = GetBatchBatchesBatchIdGetResponses[keyof GetBatchBatchesBatchIdGetResponses]
-
-export interface UpdateBatchBatchesBatchIdPatchData {
-    body: BatchUpdateRequest
-    path: {
-        /**
-         * Batch Id
-         */
-        batch_id: string
-    }
-    query?: never
-    url: '/batches/{batch_id}'
-}
-
-export interface UpdateBatchBatchesBatchIdPatchErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type UpdateBatchBatchesBatchIdPatchError = UpdateBatchBatchesBatchIdPatchErrors[keyof UpdateBatchBatchesBatchIdPatchErrors]
-
-export interface UpdateBatchBatchesBatchIdPatchResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponseBatchPublic
-}
-
-export type UpdateBatchBatchesBatchIdPatchResponse = UpdateBatchBatchesBatchIdPatchResponses[keyof UpdateBatchBatchesBatchIdPatchResponses]
-
-export interface StartProductionBatchesBatchIdProducePostData {
-    body?: never
-    path: {
-        /**
-         * Batch Id
-         */
-        batch_id: string
-    }
-    query?: never
-    url: '/batches/{batch_id}/produce'
-}
-
-export interface StartProductionBatchesBatchIdProducePostErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type StartProductionBatchesBatchIdProducePostError = StartProductionBatchesBatchIdProducePostErrors[keyof StartProductionBatchesBatchIdProducePostErrors]
-
-export interface StartProductionBatchesBatchIdProducePostResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponseBatchPublic
-}
-
-export type StartProductionBatchesBatchIdProducePostResponse = StartProductionBatchesBatchIdProducePostResponses[keyof StartProductionBatchesBatchIdProducePostResponses]
-
-export interface DownloadBatchBatchesBatchIdDownloadGetData {
-    body?: never
-    path: {
-        /**
-         * Batch Id
-         */
-        batch_id: string
-    }
-    query?: never
-    url: '/batches/{batch_id}/download'
-}
-
-export interface DownloadBatchBatchesBatchIdDownloadGetErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type DownloadBatchBatchesBatchIdDownloadGetError = DownloadBatchBatchesBatchIdDownloadGetErrors[keyof DownloadBatchBatchesBatchIdDownloadGetErrors]
-
-export interface DownloadBatchBatchesBatchIdDownloadGetResponses {
-    /**
-     * Successful Response
-     */
-    200: unknown
-}
-
-export interface GetBatchShippingDataBatchesBatchIdShippingGetData {
-    body?: never
-    path: {
-        /**
-         * Batch Id
-         */
-        batch_id: string
-    }
-    query?: never
-    url: '/batches/{batch_id}/shipping'
-}
-
-export interface GetBatchShippingDataBatchesBatchIdShippingGetErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type GetBatchShippingDataBatchesBatchIdShippingGetError = GetBatchShippingDataBatchesBatchIdShippingGetErrors[keyof GetBatchShippingDataBatchesBatchIdShippingGetErrors]
-
-export interface GetBatchShippingDataBatchesBatchIdShippingGetResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponseListBatchShippingItem
-}
-
-export type GetBatchShippingDataBatchesBatchIdShippingGetResponse = GetBatchShippingDataBatchesBatchIdShippingGetResponses[keyof GetBatchShippingDataBatchesBatchIdShippingGetResponses]
-
-export interface BulkShipBatchBatchesBatchIdShipPostData {
-    body: BatchBulkShipRequest
-    path: {
-        /**
-         * Batch Id
-         */
-        batch_id: string
-    }
-    query?: never
-    url: '/batches/{batch_id}/ship'
-}
-
-export interface BulkShipBatchBatchesBatchIdShipPostErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type BulkShipBatchBatchesBatchIdShipPostError = BulkShipBatchBatchesBatchIdShipPostErrors[keyof BulkShipBatchBatchesBatchIdShipPostErrors]
-
-export interface BulkShipBatchBatchesBatchIdShipPostResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponseListBatchBulkShipResult
-}
-
-export type BulkShipBatchBatchesBatchIdShipPostResponse = BulkShipBatchBatchesBatchIdShipPostResponses[keyof BulkShipBatchBatchesBatchIdShipPostResponses]
 
 export interface GetImagesImagesGetData {
     body?: never

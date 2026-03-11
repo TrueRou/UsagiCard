@@ -10,6 +10,7 @@ const editForm = reactive({
     shipping_name: '',
     shipping_phone: '',
     shipping_address: '',
+    shipping_sn: '' as string | null,
 })
 
 watch(() => order.value, (o) => {
@@ -17,10 +18,53 @@ watch(() => order.value, (o) => {
         editForm.shipping_name = o.shipping_name
         editForm.shipping_phone = o.shipping_phone
         editForm.shipping_address = o.shipping_address
+        editForm.shipping_sn = o.shipping_sn ?? null
     }
 }, { immediate: true })
 
 const isEditing = ref(false)
+const productDetailDialogRef = ref()
+const addProductDialogRef = ref()
+
+async function handleSetPrice() {
+    const input = await dialogStore.prompt('请输入新的最终金额（设置后运费归零）：', '例如 99.00')
+    if (input === null || input === '')
+        return
+    const amount = Number.parseFloat(input)
+    if (Number.isNaN(amount) || amount < 0) {
+        return
+    }
+    isProcessing.value = true
+    try {
+        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}`, {
+            method: 'PATCH',
+            body: { override_amount: amount },
+            showSuccessToast: true,
+            successMessage: `金额已设置为 ￥${amount.toFixed(2)}`,
+        })
+        await refresh()
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
+
+async function handlePay() {
+    if (!await dialogStore.confirm('确定直接支付此订单？支付金额为当前设定金额。'))
+        return
+    isProcessing.value = true
+    try {
+        await useNuxtApp().$leporid(`/api/admin/orders/${orderId}/pay`, {
+            method: 'POST',
+            showSuccessToast: true,
+            successMessage: '订单已支付',
+        })
+        await refresh()
+    }
+    finally {
+        isProcessing.value = false
+    }
+}
 
 async function handleSave() {
     isProcessing.value = true
@@ -108,6 +152,22 @@ definePageMeta({
             </div>
             <div class="flex gap-2">
                 <button
+                    v-if="[OrderStatus.UNPAID, OrderStatus.PAID].includes(order.status)"
+                    class="btn btn-outline btn-sm"
+                    :disabled="isProcessing"
+                    @click="handleSetPrice"
+                >
+                    修改价格
+                </button>
+                <button
+                    v-if="order.status === OrderStatus.UNPAID"
+                    class="btn btn-success btn-sm"
+                    :disabled="isProcessing"
+                    @click="handlePay"
+                >
+                    管理员支付
+                </button>
+                <button
                     v-if="order.status === OrderStatus.PAID"
                     class="btn btn-primary btn-sm"
                     :disabled="isProcessing"
@@ -191,60 +251,68 @@ definePageMeta({
                     </h2>
                     <button
                         v-if="!isEditing"
-                        class="btn btn-accent btn-xs"
+                        class="btn btn-accent btn-sm"
                         @click="isEditing = true"
                     >
                         编辑
                     </button>
+                    <div v-else class="flex gap-2">
+                        <button class="btn btn-outline btn-sm" @click="isEditing = false">
+                            取消
+                        </button>
+                        <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleSave">
+                            保存
+                        </button>
+                    </div>
                 </div>
 
                 <template v-if="!isEditing">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                         <div>
                             <span class="text-base-content/50">收件人</span>
-                            <p>{{ order.shipping_name }}</p>
+                            <p>{{ order.shipping_name || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-base-content/50">电话</span>
-                            <p>{{ order.shipping_phone }}</p>
+                            <p>{{ order.shipping_phone || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-base-content/50">快递单号</span>
                             <p>{{ order.shipping_sn || '-' }}</p>
                         </div>
-                    </div>
-                    <div class="mt-3 text-sm">
-                        <span class="text-base-content/50">地址</span>
-                        <p>{{ order.shipping_address }}</p>
+                        <div>
+                            <span class="text-base-content/50">地址</span>
+                            <p>{{ order.shipping_address || '-' }}</p>
+                        </div>
                     </div>
                 </template>
 
                 <template v-else>
-                    <fieldset class="fieldset">
-                        <legend class="fieldset-legend">
-                            收件人
-                        </legend>
-                        <input v-model="editForm.shipping_name" type="text" class="input">
-                    </fieldset>
-                    <fieldset class="fieldset">
-                        <legend class="fieldset-legend">
-                            电话
-                        </legend>
-                        <input v-model="editForm.shipping_phone" type="text" class="input">
-                    </fieldset>
-                    <fieldset class="fieldset">
-                        <legend class="fieldset-legend">
-                            地址
-                        </legend>
-                        <input v-model="editForm.shipping_address" type="text" class="input">
-                    </fieldset>
-                    <div class="flex gap-2 mt-3">
-                        <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="handleSave">
-                            保存
-                        </button>
-                        <button class="btn btn-outline btn-sm" @click="isEditing = false">
-                            取消
-                        </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <fieldset class="fieldset">
+                            <legend class="fieldset-legend">
+                                收件人
+                            </legend>
+                            <input v-model="editForm.shipping_name" type="text" class="input">
+                        </fieldset>
+                        <fieldset class="fieldset">
+                            <legend class="fieldset-legend">
+                                电话
+                            </legend>
+                            <input v-model="editForm.shipping_phone" type="text" class="input">
+                        </fieldset>
+                        <fieldset class="fieldset">
+                            <legend class="fieldset-legend">
+                                快递单号
+                            </legend>
+                            <input v-model="editForm.shipping_sn" type="text" class="input">
+                        </fieldset>
+                        <fieldset class="fieldset">
+                            <legend class="fieldset-legend">
+                                地址
+                            </legend>
+                            <input v-model="editForm.shipping_address" type="text" class="input">
+                        </fieldset>
                     </div>
                 </template>
             </div>
@@ -255,15 +323,20 @@ definePageMeta({
                     <h2 class="text-lg font-semibold">
                         订单商品
                     </h2>
+                    <button class="btn btn-outline btn-sm" @click="addProductDialogRef?.open()">
+                        <Icon name="mdi:plus" class="w-3.5 h-3.5" />
+                        添加商品
+                    </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>商品ID</th>
+                                <th>商品</th>
                                 <th>数量</th>
                                 <th>单价</th>
                                 <th>小计</th>
+                                <th />
                             </tr>
                         </thead>
                         <tbody>
@@ -276,11 +349,22 @@ definePageMeta({
                                 <td class="font-semibold">
                                     ¥{{ formatMoney(item.total_price) }}
                                 </td>
+                                <td>
+                                    <button
+                                        class="btn btn-ghost btn-xs"
+                                        @click="productDetailDialogRef?.open(item.product_id)"
+                                    >
+                                        详情
+                                    </button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
+        <AdminProductDetail ref="productDetailDialogRef" />
+        <AdminProductAppend ref="addProductDialogRef" :order-id="orderId" @done="refresh" />
     </div>
 </template>

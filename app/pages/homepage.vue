@@ -2,7 +2,7 @@
 import type { Ref } from 'vue'
 
 useHead({
-    title: '月兔礼品 — Bunny Presents',
+    title: 'UsagiLab | 兔兔实验室 — Ciallo～(∠・ω< )⌒★ 一起创造独特的礼物吧！',
 })
 
 type ProductCategory = 'all' | 'bunny'
@@ -65,10 +65,10 @@ const advertisingTiles = [
     <!-- eslint-disable vue/singleline-html-element-content-newline -->
     <div class="bg-slate-950 text-slate-50">
         <section class="max-w-6xl mx-auto px-6 sm:px-10 pt-24 pb-16">
-            <p class="text-xs font-semibold tracking-[0.4em] uppercase text-slate-400 mb-4">月兔礼品 · Bunny Presents</p>
+            <p class="text-xs font-semibold tracking-[0.4em] uppercase text-slate-400 mb-4">兔兔实验室 · UsagiLab</p>
             <h1 class="text-4xl sm:text-5xl font-semibold tracking-tight mb-6">为每一个值得纪念的瞬间<br>带来独特的礼物</h1>
             <p class="text-lg text-slate-300 max-w-3xl">
-                月兔礼品专注于创意定制周边商品，目前推出兔卡系列——可自定义设计的 NFC 卡片，更多产品系列也在筹备中。
+                兔兔实验室专注于创意定制周边商品，目前推出兔卡系列 —— 可自定义设计的 NFC 卡片，更多产品系列也在筹备中。
             </p>
             <div class="mt-12 border border-slate-800 rounded-3xl bg-slate-900/50 p-1 flex flex-wrap gap-2">
                 <button

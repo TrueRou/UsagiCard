@@ -1,13 +1,14 @@
 <script setup lang="ts">
+const route = useRoute()
 const searchParams = reactive({
     status: undefined as number | undefined,
-    product_id: undefined as string | undefined,
-    batch_id: undefined as string | undefined,
+    product_id: route.query.product_id as string | undefined,
+    batch_id: route.query.batch_id as string | undefined,
     page_number: 1,
     page_size: 20,
 })
 
-const { data: artifacts, refresh } = await useLeporid<PageArtifactManufacturerResponse>('/api/artifacts', {
+const { data: artifacts, refresh } = await useLeporid<PageArtifactManufacturerResponse>('/api/admin/artifacts', {
     params: searchParams,
 })
 
@@ -47,7 +48,7 @@ async function handleSaveStatus() {
         return
     isProcessing.value = true
     try {
-        await useNuxtApp().$leporid(`/api/artifacts/${editingArtifact.value.id}/status`, {
+        await useNuxtApp().$leporid(`/api/admin/artifacts/${editingArtifact.value.id}/status`, {
             method: 'PATCH',
             body: { status: newStatus.value },
             showSuccessToast: true,

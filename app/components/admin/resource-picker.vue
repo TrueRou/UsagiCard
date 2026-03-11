@@ -51,7 +51,7 @@ const resourceConfigs: Record<ResourceType, ResourceConfig> = {
         subtitleFn: item => `¥${Number.parseFloat(item.price).toFixed(2)}  ·  ${item.id.slice(-8)}`,
     },
     artifact: {
-        url: '/api/artifacts',
+        url: '/api/admin/artifacts',
         label: '工件',
         displayFn: item => item.id.slice(-8),
         subtitleFn: item => `${item.product?.name || item.product_id?.slice(-8) || ''}  ·  ${artifactStatusText(item.status)}`,

@@ -5,7 +5,7 @@ const searchParams = reactive({
     page_size: 20,
 })
 
-const { data: batches, refresh } = await useLeporid<PageBatchPublic>('/api/batches', {
+const { data: batches, refresh } = await useLeporid<PageBatchPublic>('/api/admin/batches', {
     params: searchParams,
 })
 
@@ -48,7 +48,7 @@ async function handleCreateBatch() {
         return
     isProcessing.value = true
     try {
-        await useNuxtApp().$leporid('/api/batches', {
+        await useNuxtApp().$leporid('/api/admin/batches', {
             method: 'POST',
             body: { artifact_ids: ids, name: batchName.value.trim() || defaultBatchName() },
             showSuccessToast: true,

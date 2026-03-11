@@ -5,7 +5,7 @@ const route = useRoute()
 const batchId = route.params.id as string
 const { addNotification } = useNotificationsStore()
 
-const { data: batchData, refresh } = await useLeporid<BatchPublic>(`/api/batches/${batchId}`)
+const { data: batchData, refresh } = await useLeporid<BatchPublic>(`/api/admin/batches/${batchId}`)
 
 const isProcessing = ref(false)
 const isExporting = ref(false)
@@ -33,10 +33,9 @@ function openPreview(artifactId: string) {
 async function handleStartProduction() {
     isProcessing.value = true
     try {
-        batchData.value = await useNuxtApp().$leporid(`/api/batches/${batchId}/produce`, {
+        batchData.value = await useNuxtApp().$leporid(`/api/admin/batches/${batchId}/produce`, {
             method: 'POST',
             showSuccessToast: true,
-            successMessage: '已开始生产',
         })
     }
     finally {
@@ -51,7 +50,7 @@ async function handleExportShipping() {
     isExporting.value = true
     try {
         const items = (await useNuxtApp().$leporid<BatchShippingItem[]>(
-            `/api/batches/${batchId}/shipping`,
+            `/api/admin/batches/${batchId}/shipping`,
         )) ?? []
 
         if (!items.length) {
@@ -140,7 +139,7 @@ async function handleFileUpload(event: Event) {
     try {
         // 先获取 shipping 数据，建立 phone -> order_id 映射
         const shippingItems = (await useNuxtApp().$leporid<BatchShippingItem[]>(
-            `/api/batches/${batchId}/shipping`,
+            `/api/admin/batches/${batchId}/shipping`,
         )) ?? []
 
         const phoneOrderMap = new Map<string, string>()
@@ -215,7 +214,7 @@ async function handleFileUpload(event: Event) {
 
         // 调用批量发货接口
         const results = (await useNuxtApp().$leporid<BatchBulkShipResult[]>(
-            `/api/batches/${batchId}/ship`,
+            `/api/admin/batches/${batchId}/ship`,
             {
                 method: 'POST',
                 body: { items: shipItems },
@@ -431,7 +430,7 @@ definePageMeta({
 
         <!-- 卡片预览 Modal -->
         <dialog class="modal" :class="{ 'modal-open': showPreviewModal }">
-            <div class="modal-box max-w-3xl p-0 overflow-hidden">
+            <div class="modal-box p-0 overflow-hidden">
                 <div class="flex items-center justify-between px-4 py-3 border-b border-base-200">
                     <h3 class="font-bold text-sm">
                         卡片预览

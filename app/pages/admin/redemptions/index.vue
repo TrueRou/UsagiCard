@@ -69,6 +69,28 @@ function copyAllCodes() {
     navigator.clipboard.writeText(createdCodes.value.join('\n'))
 }
 
+// Detail & Delete
+const dialogStore = useDialogStore()
+const redemptionDetailDialogRef = ref<any>()
+const isDeleting = ref(false)
+
+async function handleDelete(id: string) {
+    if (!await dialogStore.confirm('确定删除此兑换码？同时会取消关联订单，此操作不可逆。'))
+        return
+    isDeleting.value = true
+    try {
+        await useNuxtApp().$leporid(`/api/admin/platform/redemptions/${id}`, {
+            method: 'DELETE',
+            showSuccessToast: true,
+            successMessage: '兑换码已删除',
+        })
+        await refresh()
+    }
+    finally {
+        isDeleting.value = false
+    }
+}
+
 useHead({ title: '兑换码管理' })
 
 definePageMeta({
@@ -124,9 +146,9 @@ definePageMeta({
                         <th>兑换码</th>
                         <th>平台</th>
                         <th>状态</th>
-                        <th>收件人</th>
                         <th>领取时间</th>
                         <th>创建时间</th>
+                        <th />
                     </tr>
                 </thead>
                 <tbody>
@@ -141,14 +163,26 @@ definePageMeta({
                             <span v-if="r.claimed_at" class="badge badge-sm badge-success">已领取</span>
                             <span v-else class="badge badge-sm badge-warning">未领取</span>
                         </td>
-                        <td class="text-sm">
-                            {{ r.shipping_name || '-' }}
-                        </td>
                         <td class="text-xs text-base-content/60">
                             {{ formatDateTime(r.claimed_at) }}
                         </td>
                         <td class="text-xs text-base-content/60">
                             {{ formatDateTime(r.created_at) }}
+                        </td>
+                        <td class="whitespace-nowrap">
+                            <button
+                                class="btn btn-ghost btn-xs"
+                                @click="redemptionDetailDialogRef?.open(r.id)"
+                            >
+                                详情
+                            </button>
+                            <button
+                                class="btn btn-ghost btn-xs text-error"
+                                :disabled="!!r.claimed_at || isDeleting"
+                                @click="handleDelete(r.id)"
+                            >
+                                删除
+                            </button>
                         </td>
                     </tr>
                 </tbody>
@@ -268,5 +302,7 @@ definePageMeta({
             title="选择 SKU"
             @confirm="items => { if (items[0]) selectedSku = items[0] }"
         />
+
+        <AdminRedemptionDetail ref="redemptionDetailDialogRef" @saved="refresh" />
     </div>
 </template>

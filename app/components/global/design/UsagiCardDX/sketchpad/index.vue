@@ -121,6 +121,13 @@ const landscapeCharacterImage = asyncComputed(() => {
 </template>
 
 <style scoped>
+.absolute-center {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: top left;
+}
+
 .card-hw {
     width: 2.125in;
     height: 3.370in;

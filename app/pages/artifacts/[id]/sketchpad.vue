@@ -11,6 +11,8 @@ const artifactId = route.params.id as string // UUID string
 const { useDesignCtx } = await useArtifact(artifactId)
 const sketchpadComponent = computed(() => useDesignCtx.sketchpadComponent.value)
 
+const shouldRender = ref(false)
+
 watchEffect(() => {
     if (route.query.back === '1') {
         useDesignCtx.displayMode.value = ArtifactDisplayMode.SKETCHPAD_BACK
@@ -21,12 +23,14 @@ watchEffect(() => {
         useDesignCtx.sketchpadScale.value = Math.min(width.value / cardWidth, height.value / cardHeight)
     }
 })
+
+onMounted(() => {
+    shouldRender.value = true
+})
 </script>
 
 <template>
     <div class="w-full h-full overflow-hidden relative">
-        <client-only>
-            <component :is="sketchpadComponent" ref="sketchpad" :use-design-ctx="useDesignCtx" />
-        </client-only>
+        <component :is="sketchpadComponent" v-if="shouldRender" ref="sketchpad" :use-design-ctx="useDesignCtx" />
     </div>
 </template>

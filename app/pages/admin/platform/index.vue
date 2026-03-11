@@ -482,7 +482,6 @@ async function handleDeleteType(id: string) {
                             <th>平台</th>
                             <th>方案ID</th>
                             <th>SKU ID</th>
-                            <th>数量</th>
                             <th>关联预设</th>
                             <th>创建时间</th>
                             <th>操作</th>
@@ -499,7 +498,6 @@ async function handleDeleteType(id: string) {
                             <td class="font-mono text-xs">
                                 {{ sku.sku_id || '-' }}
                             </td>
-                            <td>{{ sku.quantity }}</td>
                             <td class="text-sm max-w-32 truncate">
                                 {{ sku.preset?.product_name || sku.preset_id.slice(-8) }}
                             </td>
