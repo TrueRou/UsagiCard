@@ -1,6 +1,6 @@
 export async function useImageSelector(currentDesign: Ref<UsagiCardDxDesign>): Promise<UseImageSelectorCtx> {
-    const { data: ID_1_FF } = await useLeporid<ImageAspectPublic>('/api/images/aspects/id-1-ff')
     const { loggedIn } = useUserSession()
+    const { data: ID_1_FF } = await useLeporid<ImageAspectPublic>('/api/images/aspects/id-1-ff')
 
     const imageFieldMap: Record<string, keyof UsagiCardDxDesign> = {
         character: 'character_id',

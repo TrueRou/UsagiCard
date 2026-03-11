@@ -7,17 +7,10 @@ const props = defineProps<{
     useDesignCtx: UseDesignCtx
 }>()
 
-const { productSaveDesign: save, productSaving: isSaving } = await useProduct(props.useDesignCtx.fromProduct)
+const { productSaveDesign: save, productSaving: isSaving, goToPrev, productAvailable } = await useProductDesigner(props.useDesignCtx.fromProduct)
 const currentDesign = ref<UsagiCardDxDesign>({ ...useDefaultDesign(props.useDesignCtx.rawDesign).currentDesign.value })
 const { matchCharacterMetadata, showMatchCharacterMetadataHelp } = await useCharacterMetadata(currentDesign)
 const imageSelectorCtx = await useImageSelector(currentDesign)
-
-function goToPrev() {
-    watch(() => isSaving.value, (newVal, oldVal) => {
-        if (oldVal === true && newVal === false)
-            useRouter().go(-1)
-    })
-}
 </script>
 
 <template>
@@ -415,7 +408,7 @@ function goToPrev() {
                 </div>
 
                 <footer class="flex justify-end">
-                    <button class="btn btn-primary w-full md:w-auto" type="submit" :disabled="isSaving" @click.stop="goToPrev()">
+                    <button class="btn btn-primary w-full md:w-auto" type="submit" :disabled="isSaving || !productAvailable" @click.stop="goToPrev()">
                         <span v-if="isSaving" class="loading loading-spinner" />
                         <span>保存修改</span>
                     </button>

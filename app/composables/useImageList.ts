@@ -1,7 +1,7 @@
 interface UseImageListOptions {
-    aspectId?: string
-    pageSize?: number
-    initialFilters?: string[] | null
+    aspectId: Ref<string | undefined>
+    pageSize: Ref<number | undefined>
+    activeFilters: Ref<string[] | undefined>
 }
 
 interface ListOptions {
@@ -18,12 +18,9 @@ export function useImageList(options: UseImageListOptions) {
     const loading = ref(false)
     const error = ref<Error | null>(null)
     const pageNumber = ref(1)
-    const pageSize = ref(options.pageSize ?? 20)
     const totalPage = ref(0)
     const totalRow = ref(0)
-    const activeFilters = ref<string[] | null>(options.initialFilters ?? null)
     const availableLabels = ref<string[]>([])
-    const currentAspectId = ref(options.aspectId)
 
     const list = async (listOptions: ListOptions = {}) => {
         loading.value = true
@@ -33,17 +30,17 @@ export function useImageList(options: UseImageListOptions) {
                 pageNumber.value = listOptions.pageNumber
             }
             if (listOptions.pageSize !== undefined) {
-                pageSize.value = listOptions.pageSize
+                options.pageSize.value = listOptions.pageSize
             }
             if (listOptions.filters !== undefined) {
-                activeFilters.value = [...listOptions.filters ?? [], ...options.initialFilters ?? []]
+                options.activeFilters.value = [...listOptions.filters ?? [], ...options.activeFilters.value ?? []]
             }
 
             const query: Record<string, any> = {
-                aspect_id: currentAspectId.value,
+                aspect_id: options.aspectId.value,
                 page_number: pageNumber.value,
-                page_size: pageSize.value,
-                labels: Array.from(new Set(activeFilters.value ?? [])),
+                page_size: options.pageSize.value,
+                labels: Array.from(new Set(options.activeFilters.value ?? [])),
             }
 
             if (listOptions.keyword) {
@@ -99,8 +96,8 @@ export function useImageList(options: UseImageListOptions) {
     }
 
     const representativeLabels = computed(() => {
-        const allLabels = [...availableLabels.value, ...activeFilters.value ?? []]
-        const filteredLabels = allLabels.filter(label => !options.initialFilters?.includes(label))
+        const allLabels = [...availableLabels.value, ...options.activeFilters.value ?? []]
+        const filteredLabels = allLabels.filter(label => !options.activeFilters.value?.includes(label))
         return Array.from(new Set(filteredLabels))
     })
 
@@ -109,10 +106,10 @@ export function useImageList(options: UseImageListOptions) {
         loading,
         error,
         pageNumber,
-        pageSize,
+        pageSize: options.pageSize,
         totalRow,
         totalPage,
-        activeFilters,
+        activeFilters: options.activeFilters,
         list,
         refresh,
         updateImage,

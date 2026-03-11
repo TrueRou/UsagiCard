@@ -3,11 +3,6 @@ const props = defineProps<{
     selectorCtx: UseImageSelectorCtx
 }>()
 
-const emit = defineEmits<{
-    (event: 'update:open', value: boolean): void
-    (event: 'select', payload: ImageSimplePublic): void
-}>()
-
 const { imgPreview } = useUtils()
 
 const {
@@ -23,9 +18,9 @@ const {
     deleteImage,
     refresh,
 } = useImageList({
-    pageSize: props.selectorCtx.selectorDefaultPageSize,
-    aspectId: props.selectorCtx.selectorImageAspect?.value?.id,
-    initialFilters: props.selectorCtx.selectorInitialFilters.value,
+    pageSize: ref(props.selectorCtx.selectorDefaultPageSize),
+    aspectId: ref(props.selectorCtx.selectorImageAspect?.value?.id),
+    activeFilters: ref(props.selectorCtx.selectorInitialFilters),
 })
 
 const activeSecondary = ref<string[]>([])
@@ -50,7 +45,7 @@ function isSelected(image: ImageSimplePublic) {
 function close() {
     openUploader.value = false
     deleteTarget.value = null
-    emit('update:open', false)
+    props.selectorCtx.closeImageSelector()
 }
 
 function updateSelection(image: ImageSimplePublic) {
@@ -88,7 +83,7 @@ async function jumpToPage(event: Event) {
 function confirmSelection() {
     if (!selectedImage.value)
         return
-    emit('select', selectedImage.value)
+    props.selectorCtx.handleImageSelect(selectedImage.value)
     close()
 }
 

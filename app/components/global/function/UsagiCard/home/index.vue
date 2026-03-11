@@ -73,11 +73,7 @@ const { copy, copied } = useClipboard()
 
 <template>
     <div class="space-y-6">
-        <ImageSelector
-            :selector-ctx="imageSelectorCtx"
-            @update:open="val => { if (!val) imageSelectorCtx.closeImageSelector() }"
-            @select="imageSelectorCtx.handleImageSelect"
-        />
+        <ImageSelector :selector-ctx="imageSelectorCtx" />
 
         <!-- 个人简介（含头像、标题、简介） -->
         <div class="space-y-3">
