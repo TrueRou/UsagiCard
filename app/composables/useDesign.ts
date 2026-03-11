@@ -1,7 +1,7 @@
 export async function useDesign(
     designType: Ref<ProductTypeDesign>,
-    rawDesign: Ref<Record<string, any>>,
-    fromProduct: Ref<ProductSimpleResponse>,
+    rawDesign: Ref<Record<string, any>> = ref({}),
+    fromProduct: Ref<ProductSimpleResponse | undefined> = ref(),
     fromArtifact: Ref<ArtifactUserResponse | undefined> = ref(),
 ): Promise<UseDesignCtx> {
     const rawDesignRef = ref(rawDesign)
