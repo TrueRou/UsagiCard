@@ -12,9 +12,17 @@ const router = useRouter()
 const artifactId = route.params.id as string
 const tabKey = route.query.tab as string | undefined
 
-const { artifact } = await useArtifact(artifactId)
+const { artifact, storageSave } = await useArtifact(artifactId)
 const storageDefaultTab = (artifact.value.storage as UsagiCardStorage)?.default_function_tab ?? undefined
 const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabKey || storageDefaultTab)
+
+const { startPhase2 } = useTour(artifact, storageSave)
+
+onMounted(() => {
+    if (route.query.tour === 'continue') {
+        setTimeout(() => startPhase2(key => (activeTabKey.value = key)), 400)
+    }
+})
 
 const mobileDetailsRefs = ref<HTMLDetailsElement[]>([])
 
@@ -80,7 +88,7 @@ const { lengthX, lengthY } = useSwipe(pageContainer, {
         </div>
 
         <!-- 桌面端侧边菜单栏 -->
-        <aside class="hidden lg:flex lg:flex-col w-64 min-h-full bg-base-200 border-r">
+        <aside data-tour="fn-sidebar" class="hidden lg:flex lg:flex-col w-64 min-h-full bg-base-200 border-r">
             <div class="flex-1 overflow-y-auto p-2">
                 <ul class="menu menu-compact rounded-box w-full">
                     <li class="w-full">
@@ -98,6 +106,7 @@ const { lengthX, lengthY } = useSwipe(pageContainer, {
                                 <template v-for="val, key in item.items" :key="key">
                                     <li v-if="!val.hidden" class="w-full">
                                         <a
+                                            :data-tour="`tab-${key}`"
                                             :class="{ active: activeTabKey === key }"
                                             class="w-full justify-start"
                                             @click="handleTabKeySwap(key)"

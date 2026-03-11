@@ -67,20 +67,20 @@ const { lengthX, lengthY } = useSwipe(cardContainer, {
                 <img class="frame-upper h-full absolute" fetchpriority="low" :src="img(currentDesign.frame_id)">
                 <div class="absolute inset-0">
                     <div class="relative space-y-2 w-full">
-                        <DXRating class="pt-4 w-[40%]" :current-design="currentDesign" />
-                        <PlayerInfo :current-design="currentDesign" />
+                        <DXRating data-tour="card-dx-rating" class="pt-4 w-[40%]" :current-design="currentDesign" />
+                        <PlayerInfo data-tour="card-player-info" :current-design="currentDesign" />
                     </div>
                 </div>
 
                 <CharaInfo class="bottom-[18%] absolute" :cuttent-design="currentDesign" />
 
-                <QRCode class="absolute right-0 bottom-[6%] z-10" :use-design-ctx="useDesignCtx" :current-design="currentDesign" />
+                <QRCode data-tour="card-qrcode" class="absolute right-0 bottom-[6%] z-10" :use-design-ctx="useDesignCtx" :current-design="currentDesign" />
 
                 <div
-                    id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
+                    id="c-footer" data-tour="card-footer-bar" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
                     :style="{ '--b-bottom': `url(${img(currentDesign.frame_id)})` }"
                 >
-                    <button v-if="useQButtonCtx" class="cursor-pointer" @click="useQButtonCtx.qDialogOpen(true)">
+                    <button v-if="useQButtonCtx" data-tour="card-rocket-btn" class="cursor-pointer" @click="useQButtonCtx.qDialogOpen(true)">
                         <div class="p-1 rounded-full bg-white" aria-label="rocket" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
@@ -99,7 +99,7 @@ const { lengthX, lengthY } = useSwipe(cardContainer, {
                             {{ currentDesign.game_version }}
                         </p>
                     </div>
-                    <NuxtLink :to="`/artifacts/${useDesignCtx.fromArtifact.value?.id}/functions`">
+                    <NuxtLink data-tour="card-functions-btn" :to="`/artifacts/${useDesignCtx.fromArtifact.value?.id}/functions`">
                         <div class="p-1 rounded-full bg-white" aria-label="settings" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="0 0 24 24"
