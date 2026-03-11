@@ -298,29 +298,54 @@ const { data: types, refresh: refreshTypes } = await useLeporid<any>('/api/admin
     params: typeParams,
 })
 
+const DESIGN_TYPE_LABELS: Record<number, string> = {
+    0: 'UsagiCardDX',
+    1: 'UsagiCardWars',
+}
+
+const FUNCTION_TYPE_LABELS: Record<number, string> = {
+    0: 'UsagiCard',
+    1: 'MaiMaiCN',
+}
+
 const showTypeModal = ref(false)
 const typeEditing = ref<string | null>(null)
 const typeForm = reactive({
     name: '',
     description: '',
+    design_type: 0 as 0 | 1,
+    function_types: [] as (0 | 1)[],
+    price_modifier: '0.00',
 })
 
 function openTypeCreate() {
     typeEditing.value = null
-    Object.assign(typeForm, { name: '', description: '' })
+    Object.assign(typeForm, { name: '', description: '', design_type: 0, function_types: [], price_modifier: '0.00' })
     showTypeModal.value = true
 }
 
 function openTypeEdit(type: any) {
     typeEditing.value = type.id
-    Object.assign(typeForm, { name: type.name, description: type.description })
+    Object.assign(typeForm, {
+        name: type.name,
+        description: type.description,
+        design_type: type.design_type ?? 0,
+        function_types: type.function_types ? [...type.function_types] : [],
+        price_modifier: type.price_modifier ?? '0.00',
+    })
     showTypeModal.value = true
 }
 
 async function handleSaveType() {
     isProcessing.value = true
     try {
-        const body = { name: typeForm.name, description: typeForm.description }
+        const body = {
+            name: typeForm.name,
+            description: typeForm.description,
+            design_type: typeForm.design_type,
+            function_types: typeForm.function_types,
+            price_modifier: typeForm.price_modifier,
+        }
         if (typeEditing.value) {
             await useNuxtApp().$leporid(`/api/admin/platform/product-types/${typeEditing.value}`, {
                 method: 'PATCH',
@@ -756,6 +781,9 @@ async function handleDeleteType(id: string) {
                         <tr>
                             <th>名称</th>
                             <th>描述</th>
+                            <th>设计类型</th>
+                            <th>功能类型</th>
+                            <th>价格修正</th>
                             <th>创建时间</th>
                             <th>操作</th>
                         </tr>
@@ -767,6 +795,15 @@ async function handleDeleteType(id: string) {
                             </td>
                             <td class="text-sm max-w-48 truncate">
                                 {{ type.description }}
+                            </td>
+                            <td class="text-xs">
+                                {{ DESIGN_TYPE_LABELS[type.design_type] ?? type.design_type }}
+                            </td>
+                            <td class="text-xs">
+                                {{ (type.function_types ?? []).map((f: number) => FUNCTION_TYPE_LABELS[f] ?? f).join(', ') || '-' }}
+                            </td>
+                            <td class="text-xs">
+                                ¥{{ type.price_modifier }}
                             </td>
                             <td class="text-xs text-base-content/60">
                                 {{ formatDateTime(type.created_at) }}
@@ -857,6 +894,42 @@ async function handleDeleteType(id: string) {
                     <label class="form-control">
                         <span class="label-text text-sm mb-1">描述</span>
                         <input v-model="typeForm.description" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">设计类型</span>
+                        <select v-model="typeForm.design_type" class="select select-bordered select-sm w-full">
+                            <option v-for="(label, val) in DESIGN_TYPE_LABELS" :key="val" :value="Number(val)">
+                                {{ label }}
+                            </option>
+                        </select>
+                    </label>
+                    <div class="form-control">
+                        <span class="label-text text-sm mb-1">功能类型</span>
+                        <div class="flex gap-4 mt-1">
+                            <label
+                                v-for="(label, val) in FUNCTION_TYPE_LABELS"
+                                :key="val"
+                                class="flex items-center gap-2 cursor-pointer"
+                            >
+                                <input
+                                    type="checkbox"
+                                    class="checkbox checkbox-sm"
+                                    :checked="typeForm.function_types.includes(Number(val) as 0 | 1)"
+                                    @change="(e) => { const v = Number(val) as 0 | 1; const checked = (e.target as HTMLInputElement).checked; typeForm.function_types = checked ? [...typeForm.function_types, v] : typeForm.function_types.filter(f => f !== v) }"
+                                >
+                                <span class="text-sm">{{ label }}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">价格修正（元）</span>
+                        <input
+                            v-model="typeForm.price_modifier"
+                            type="number"
+                            step="0.01"
+                            class="input input-bordered input-sm w-full"
+                            placeholder="0.00"
+                        >
                     </label>
                 </div>
                 <div class="modal-action">

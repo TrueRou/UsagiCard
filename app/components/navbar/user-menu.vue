@@ -27,7 +27,7 @@ async function handleLogout() {
                 </div>
             </summary>
             <ul
-                tabindex="0" class="shadow menu menu-tint right-0 dropdown-content rounded-box w-32"
+                tabindex="0" class="shadow menu menu-tint right-0 dropdown-content rounded-box w-32 z-50"
                 @click="userSw?.toggleAttribute('open', false)"
             >
                 <template v-if="loggedIn">

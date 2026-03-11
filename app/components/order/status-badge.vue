@@ -10,8 +10,6 @@ const statusConfig: Record<OrderStatus, { text: string, className: string }> = {
     [OrderStatus.UNPAID]: { text: '待付款', className: 'badge-warning' },
     [OrderStatus.PAID]: { text: '已付款', className: 'badge-info' },
     [OrderStatus.SHIPPED]: { text: '已发货', className: 'badge-primary' },
-    [OrderStatus.SUCCESS]: { text: '已完成', className: 'badge-success' },
-    [OrderStatus.CLOSED]: { text: '已关闭', className: 'badge-neutral' },
 }
 
 const statusText = computed(() => {

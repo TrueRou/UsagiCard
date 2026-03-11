@@ -145,14 +145,8 @@ definePageMeta({
                 <option :value="OrderStatus.SHIPPED">
                     已发货
                 </option>
-                <option :value="OrderStatus.SUCCESS">
-                    已完成
-                </option>
                 <option :value="OrderStatus.CANCELED">
                     已取消
-                </option>
-                <option :value="OrderStatus.CLOSED">
-                    已关闭
                 </option>
             </select>
         </AdminFilterBar>

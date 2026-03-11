@@ -177,7 +177,7 @@ definePageMeta({
                     <div>
                         <span class="text-base-content/50">用户ID</span>
                         <p class="text-xs font-mono">
-                            {{ order.user_id.slice(-8) }}
+                            {{ order.user_id ? order.user_id.slice(-8) : '-' }}
                         </p>
                     </div>
                 </div>

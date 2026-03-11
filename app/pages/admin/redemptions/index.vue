@@ -31,10 +31,13 @@ const selectedSku = ref<any | null>(null)
 const redemptionCount = ref(1)
 const isCreating = ref(false)
 const createdCodes = ref<string[]>([])
+const shippingName = ref<string>('')
+const shippingPhone = ref<string>('')
+const shippingAddress = ref<string>('')
 
 function openCreateModal() {
     selectedSku.value = null
-    redemptionCount.value = 10
+    redemptionCount.value = 1
     createdCodes.value = []
     showCreateModal.value = true
 }
@@ -46,7 +49,13 @@ async function handleCreateRedemptions() {
     try {
         const result = await useNuxtApp().$leporid<{ codes: string[], count: number }>('/api/admin/platform/redemptions', {
             method: 'POST',
-            body: { sku_id: selectedSku.value.id, count: redemptionCount.value },
+            body: {
+                sku_id: selectedSku.value.id,
+                count: redemptionCount.value,
+                shipping_name: shippingName.value,
+                shipping_phone: shippingPhone.value,
+                shipping_address: shippingAddress.value,
+            },
         })
         createdCodes.value = result.codes ?? []
         await refresh()
@@ -115,7 +124,6 @@ definePageMeta({
                         <th>兑换码</th>
                         <th>平台</th>
                         <th>状态</th>
-                        <th>预设商品</th>
                         <th>收件人</th>
                         <th>领取时间</th>
                         <th>创建时间</th>
@@ -132,9 +140,6 @@ definePageMeta({
                         <td>
                             <span v-if="r.claimed_at" class="badge badge-sm badge-success">已领取</span>
                             <span v-else class="badge badge-sm badge-warning">未领取</span>
-                        </td>
-                        <td class="text-sm max-w-32 truncate">
-                            {{ r.preset?.product_name || '-' }}
                         </td>
                         <td class="text-sm">
                             {{ r.shipping_name || '-' }}
@@ -222,6 +227,14 @@ definePageMeta({
                                 生成数量
                             </legend>
                             <input v-model.number="redemptionCount" type="text" class="input">
+                        </fieldset>
+                        <fieldset class="fieldset">
+                            <legend class="fieldset-legend">
+                                收件人信息（选填）
+                            </legend>
+                            <input v-model="shippingName" type="text" placeholder="收件人姓名" class="input mb-2">
+                            <input v-model="shippingPhone" type="text" placeholder="收件人电话" class="input mb-2">
+                            <textarea v-model="shippingAddress" placeholder="收件人地址" class="textarea" />
                         </fieldset>
                     </div>
 

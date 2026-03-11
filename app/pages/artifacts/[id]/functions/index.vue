@@ -54,7 +54,7 @@ const { lengthX, lengthY } = useSwipe(pageContainer, {
 <template>
     <div ref="page-container" class="w-full h-full flex flex-col lg:flex-row overflow-hidden">
         <!-- 移动端顶部菜单栏 -->
-        <div class="lg:hidden w-full bg-base-200 border-b">
+        <div data-tour="fn-menubar" class="lg:hidden w-full bg-base-200 border-b">
             <ul class="menu menu-horizontal bg-base-200 w-full">
                 <li>
                     <button @click="goBack">
@@ -88,7 +88,7 @@ const { lengthX, lengthY } = useSwipe(pageContainer, {
         </div>
 
         <!-- 桌面端侧边菜单栏 -->
-        <aside data-tour="fn-sidebar" class="hidden lg:flex lg:flex-col w-64 min-h-full bg-base-200 border-r">
+        <aside data-tour="fn-menubar" class="hidden lg:flex lg:flex-col w-64 min-h-full bg-base-200 border-r">
             <div class="flex-1 overflow-y-auto p-2">
                 <ul class="menu menu-compact rounded-box w-full">
                     <li class="w-full">

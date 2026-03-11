@@ -71,11 +71,6 @@ const canPayOrder = computed(() => {
     return order.value && order.value.status === OrderStatus.UNPAID
 })
 
-// 判断是否可以确认收货
-const canConfirmOrder = computed(() => {
-    return order.value && order.value.status === OrderStatus.SHIPPED
-})
-
 // 支付订单
 async function handlePayOrder() {
     if (!order.value)
@@ -104,24 +99,6 @@ async function handleCancelOrder() {
             method: 'POST',
             showSuccessToast: true,
             successMessage: '订单已取消',
-        })
-        await refresh()
-    }
-    finally {
-        isProcessing.value = false
-    }
-}
-
-// 确认收货
-async function handleConfirmOrder() {
-    if (!order.value)
-        return
-    isProcessing.value = true
-    try {
-        await useNuxtApp().$leporid(`/api/orders/${order.value.id}/confirm`, {
-            method: 'POST',
-            showSuccessToast: true,
-            successMessage: '已确认收货，感谢您的支持！',
         })
         await refresh()
     }
@@ -304,7 +281,7 @@ definePageMeta({
             </div>
 
             <!-- 操作按钮 -->
-            <div v-if="canCancelOrder || canPayOrder || canConfirmOrder" class="card bg-base-100 shadow-sm">
+            <div v-if="canCancelOrder || canPayOrder" class="card bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title mb-4">
                         操作
@@ -318,13 +295,6 @@ definePageMeta({
                             立即支付
                         </button>
                         <button
-                            v-if="canConfirmOrder" class="btn btn-success" :disabled="isProcessing"
-                            @click="handleConfirmOrder"
-                        >
-                            <span v-if="isProcessing" class="loading loading-spinner loading-sm" />
-                            确认收货
-                        </button>
-                        <button
                             v-if="canCancelOrder" class="btn btn-error btn-outline" :disabled="isProcessing"
                             @click="handleCancelOrder"
                         >
@@ -332,9 +302,6 @@ definePageMeta({
                             取消订单
                         </button>
                     </div>
-                    <p v-if="canConfirmOrder" class="text-xs text-base-content/50 mt-2">
-                        若您未确认收货，系统将在发货 7 天后自动完成订单。
-                    </p>
                 </div>
             </div>
         </div>

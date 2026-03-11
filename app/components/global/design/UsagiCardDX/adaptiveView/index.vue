@@ -77,7 +77,7 @@ const { lengthX, lengthY } = useSwipe(cardContainer, {
                 <QRCode data-tour="card-qrcode" class="absolute right-0 bottom-[6%] z-10" :use-design-ctx="useDesignCtx" :current-design="currentDesign" />
 
                 <div
-                    id="c-footer" data-tour="card-footer-bar" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
+                    id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
                     :style="{ '--b-bottom': `url(${img(currentDesign.frame_id)})` }"
                 >
                     <button v-if="useQButtonCtx" data-tour="card-rocket-btn" class="cursor-pointer" @click="useQButtonCtx.qDialogOpen(true)">

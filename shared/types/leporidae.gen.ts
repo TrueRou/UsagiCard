@@ -297,12 +297,6 @@ export interface AdminPlatformSkuCreateRequest {
      */
     sku_id?: string | null
     /**
-     * Quantity
-     *
-     * 每次购买生成的兑换码数量
-     */
-    quantity?: number
-    /**
      * Preset Id
      *
      * 关联预设ID
@@ -340,12 +334,6 @@ export interface AdminPlatformSkuPublic {
      * 平台SKU ID
      */
     sku_id: string | null
-    /**
-     * Quantity
-     *
-     * 每次购买生成的兑换码数量
-     */
-    quantity: number
     /**
      * Preset Id
      *
@@ -394,12 +382,6 @@ export interface AdminPlatformSkuUpdateRequest {
      * 平台SKU ID
      */
     sku_id?: string | null
-    /**
-     * Quantity
-     *
-     * 每次购买生成的兑换码数量
-     */
-    quantity?: number | null
     /**
      * Preset Id
      *
@@ -506,6 +488,22 @@ export interface AdminProductTypeCreateRequest {
      * 类型描述
      */
     description?: string
+    /**
+     * 商品设计类型
+     */
+    design_type?: ProductTypeDesign
+    /**
+     * Function Types
+     *
+     * 商品功能类型列表
+     */
+    function_types?: Array<ProductTypeFunction>
+    /**
+     * Price Modifier
+     *
+     * 价格修正值
+     */
+    price_modifier?: number | string
 }
 
 /**
@@ -526,6 +524,15 @@ export interface AdminProductTypePublic {
      * Description
      */
     description: string
+    design_type: ProductTypeDesign
+    /**
+     * Function Types
+     */
+    function_types: Array<ProductTypeFunction>
+    /**
+     * Price Modifier
+     */
+    price_modifier: string
     /**
      * Created At
      */
@@ -550,6 +557,22 @@ export interface AdminProductTypeUpdateRequest {
      * 类型描述
      */
     description?: string | null
+    /**
+     * 商品设计类型
+     */
+    design_type?: ProductTypeDesign | null
+    /**
+     * Function Types
+     *
+     * 商品功能类型列表
+     */
+    function_types?: Array<ProductTypeFunction> | null
+    /**
+     * Price Modifier
+     *
+     * 价格修正值
+     */
+    price_modifier?: number | string | null
 }
 
 /**
@@ -570,6 +593,24 @@ export interface AdminRedemptionCreateRequest {
      * 生成数量（最多 500 条）
      */
     count: number
+    /**
+     * Shipping Name
+     *
+     * 收件人姓名
+     */
+    shipping_name?: string
+    /**
+     * Shipping Phone
+     *
+     * 收件人电话
+     */
+    shipping_phone?: string
+    /**
+     * Shipping Address
+     *
+     * 收件人地址
+     */
+    shipping_address?: string
 }
 
 /**
@@ -657,17 +698,7 @@ export interface AdminRedemptionPublic {
      *
      * 关联订单ID
      */
-    order_id: string | null
-    /**
-     * Product Id
-     *
-     * 关联商品ID
-     */
-    product_id: string | null
-    /**
-     * 预设信息
-     */
-    preset: PlatformPresetPublic
+    order_id: string
     /**
      * Created At
      *
@@ -707,12 +738,6 @@ export interface AdminStatsArtifactBreakdown {
      */
     completed?: number
     /**
-     * Activated
-     *
-     * 已激活
-     */
-    activated?: number
-    /**
      * Unassigned
      *
      * 未分配批次
@@ -750,26 +775,14 @@ export interface AdminStatsOrderBreakdown {
      * 已发货
      */
     shipped?: number
-    /**
-     * Success
-     *
-     * 已完成
-     */
-    success?: number
-    /**
-     * Closed
-     *
-     * 已关闭
-     */
-    closed?: number
 }
 
 /**
- * AdminStatsResponse
+ * AdminStatsPublic
  *
  * 管理端统计信息
  */
-export interface AdminStatsResponse {
+export interface AdminStatsPublic {
     /**
      * Total Users
      *
@@ -978,10 +991,10 @@ export interface AppResponseAdminRedemptionListPublic {
 }
 
 /**
- * AppResponse[AdminStatsResponse]
+ * AppResponse[AdminStatsPublic]
  */
-export interface AppResponseAdminStatsResponse {
-    data?: AdminStatsResponse | null
+export interface AppResponseAdminStatsPublic {
+    data?: AdminStatsPublic | null
     /**
      * Code
      */
@@ -1399,25 +1412,6 @@ export interface AppResponsePageProductPublic {
 }
 
 /**
- * AppResponse[PlatformRedemptionPreviewPublic]
- */
-export interface AppResponsePlatformRedemptionPreviewPublic {
-    data?: PlatformRedemptionPreviewPublic | null
-    /**
-     * Code
-     */
-    code?: number
-    /**
-     * Message
-     */
-    message?: string
-    /**
-     * Timestamp
-     */
-    timestamp?: string
-}
-
-/**
  * AppResponse[ProductConsultResponse]
  */
 export interface AppResponseProductConsultResponse {
@@ -1441,6 +1435,25 @@ export interface AppResponseProductConsultResponse {
  */
 export interface AppResponseProductPublic {
     data?: ProductPublic | null
+    /**
+     * Code
+     */
+    code?: number
+    /**
+     * Message
+     */
+    message?: string
+    /**
+     * Timestamp
+     */
+    timestamp?: string
+}
+
+/**
+ * AppResponse[RedemptionPreviewData]
+ */
+export interface AppResponseRedemptionPreviewData {
+    data?: RedemptionPreviewData | null
     /**
      * Code
      */
@@ -1587,7 +1600,7 @@ export interface ArtifactManufacturerResponse {
 /**
  * ArtifactStatus
  */
-export type ArtifactStatus = -1 | 0 | 1 | 2 | 3
+export type ArtifactStatus = -1 | 0 | 1 | 2
 
 /**
  * ArtifactStatusUpdateRequest
@@ -2316,7 +2329,7 @@ export interface OrderPublic {
      *
      * 所属用户ID
      */
-    user_id: string
+    user_id: string | null
     /**
      * Paid At
      *
@@ -2418,7 +2431,7 @@ export interface OrderSimplePublic {
      *
      * 所属用户ID
      */
-    user_id: string
+    user_id: string | null
     /**
      * Paid At
      *
@@ -2454,7 +2467,7 @@ export interface OrderSimplePublic {
 /**
  * OrderStatus
  */
-export type OrderStatus = -1 | 0 | 1 | 2 | 3 | 4
+export type OrderStatus = -1 | 0 | 1 | 2
 
 /**
  * OrderUpdateRequest
@@ -2771,7 +2784,7 @@ export interface PageProductPublic {
 /**
  * PlatformPresetPublic
  *
- * 预设公共信息（用于激活页展示）
+ * 预设公共信息（管理端使用）
  */
 export interface PlatformPresetPublic {
     /**
@@ -2792,66 +2805,6 @@ export interface PlatformPresetPublic {
      * 商品描述
      */
     product_description: string
-    /**
-     * Created At
-     *
-     * 创建时间
-     */
-    created_at: string
-}
-
-/**
- * PlatformRedemptionPreviewPublic
- *
- * 兑换码预览信息（用于激活页展示，未领取时返回）
- */
-export interface PlatformRedemptionPreviewPublic {
-    /**
-     * Code
-     *
-     * 兑换码
-     */
-    code: string
-    /**
-     * Platform
-     *
-     * 平台标识
-     */
-    platform: string
-    /**
-     * Shipping Name
-     *
-     * 收件人姓名
-     */
-    shipping_name: string
-    /**
-     * Shipping Phone
-     *
-     * 收件人电话
-     */
-    shipping_phone: string
-    /**
-     * Shipping Address
-     *
-     * 收件人地址
-     */
-    shipping_address: string
-    /**
-     * Claimed At
-     *
-     * 领取时间（为空表示未领取）
-     */
-    claimed_at: string | null
-    /**
-     * Order Id
-     *
-     * 关联订单ID（领取后回填）
-     */
-    order_id: string | null
-    /**
-     * 预设信息
-     */
-    preset: PlatformPresetPublic
     /**
      * Created At
      *
@@ -2981,6 +2934,38 @@ export interface ProductMaterialPublic {
 }
 
 /**
+ * ProductPreviewItem
+ *
+ * 商品预览信息（用于激活页展示）
+ */
+export interface ProductPreviewItem {
+    /**
+     * Id
+     *
+     * 商品ID
+     */
+    id: string
+    /**
+     * Name
+     *
+     * 商品名称
+     */
+    name: string
+    /**
+     * Description
+     *
+     * 商品描述
+     */
+    description: string
+    /**
+     * Price
+     *
+     * 商品价格
+     */
+    price: string
+}
+
+/**
  * ProductPublic
  *
  * 商品公共信息
@@ -3019,17 +3004,17 @@ export interface ProductPublic {
         [key: string]: unknown
     }
     /**
-     * Is Modify Allowed
+     * Is Locked
      *
-     * 是否允许修改设计
+     * 是否已锁定
      */
-    is_modify_allowed: boolean
+    is_locked: boolean
     /**
      * User Id
      *
      * 所属用户ID
      */
-    user_id: string
+    user_id: string | null
     /**
      * 材料信息
      */
@@ -3162,6 +3147,74 @@ export interface ProductUpdateRequest {
      * 类型ID
      */
     type_id?: string | null
+}
+
+/**
+ * RedemptionPreviewData
+ *
+ * 兑换码预览数据（返回订单商品信息）
+ */
+export interface RedemptionPreviewData {
+    /**
+     * Code
+     *
+     * 兑换码
+     */
+    code: string
+    /**
+     * Platform
+     *
+     * 平台标识
+     */
+    platform: string
+    /**
+     * Shipping Name
+     *
+     * 收件人姓名
+     */
+    shipping_name: string
+    /**
+     * Shipping Phone
+     *
+     * 收件人电话
+     */
+    shipping_phone: string
+    /**
+     * Shipping Address
+     *
+     * 收件人地址
+     */
+    shipping_address: string
+    /**
+     * Claimed At
+     *
+     * 领取时间（为空表示未领取）
+     */
+    claimed_at: string | null
+    /**
+     * Order Id
+     *
+     * 关联订单ID
+     */
+    order_id: string
+    /**
+     * Payment Money
+     *
+     * 支付金额
+     */
+    payment_money: string
+    /**
+     * Products
+     *
+     * 商品列表
+     */
+    products: Array<ProductPreviewItem>
+    /**
+     * Created At
+     *
+     * 创建时间
+     */
+    created_at: string
 }
 
 /**
@@ -4615,7 +4668,7 @@ export interface AdminGetStatsAdminStatsGetResponses {
     /**
      * Successful Response
      */
-    200: AppResponseAdminStatsResponse
+    200: AppResponseAdminStatsPublic
 }
 
 export type AdminGetStatsAdminStatsGetResponse = AdminGetStatsAdminStatsGetResponses[keyof AdminGetStatsAdminStatsGetResponses]
@@ -5763,36 +5816,6 @@ export interface PayOrderOrdersOrderIdPayPostResponses {
 
 export type PayOrderOrdersOrderIdPayPostResponse = PayOrderOrdersOrderIdPayPostResponses[keyof PayOrderOrdersOrderIdPayPostResponses]
 
-export interface ConfirmOrderOrdersOrderIdConfirmPostData {
-    body?: never
-    path: {
-        /**
-         * Order Id
-         */
-        order_id: string
-    }
-    query?: never
-    url: '/orders/{order_id}/confirm'
-}
-
-export interface ConfirmOrderOrdersOrderIdConfirmPostErrors {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError
-}
-
-export type ConfirmOrderOrdersOrderIdConfirmPostError = ConfirmOrderOrdersOrderIdConfirmPostErrors[keyof ConfirmOrderOrdersOrderIdConfirmPostErrors]
-
-export interface ConfirmOrderOrdersOrderIdConfirmPostResponses {
-    /**
-     * Successful Response
-     */
-    200: AppResponseOrderSimplePublic
-}
-
-export type ConfirmOrderOrdersOrderIdConfirmPostResponse = ConfirmOrderOrdersOrderIdConfirmPostResponses[keyof ConfirmOrderOrdersOrderIdConfirmPostResponses]
-
 export interface GetProductsProductsGetData {
     body?: never
     path?: never
@@ -5992,7 +6015,7 @@ export interface GetRedemptionRedemptionsCodeGetResponses {
     /**
      * Successful Response
      */
-    200: AppResponsePlatformRedemptionPreviewPublic
+    200: AppResponseRedemptionPreviewData
 }
 
 export type GetRedemptionRedemptionsCodeGetResponse = GetRedemptionRedemptionsCodeGetResponses[keyof GetRedemptionRedemptionsCodeGetResponses]

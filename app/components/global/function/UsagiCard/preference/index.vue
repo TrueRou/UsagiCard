@@ -10,6 +10,11 @@ const artifactRef = toRef(props, 'artifact')
 const { tabConfigs } = useFunction(artifactRef)
 const { qButtonTabs } = useQButton(artifactRef)
 
+const functionTypeMap: Record<number, string> = {
+    0: 'UsagiCard',
+    1: 'MaimaiCN',
+}
+
 const allFunctionTabItems = computed(() => {
     const items: Record<string, { from: string, label: string, component: string }> = {}
     for (const tc of tabConfigs.value ?? []) {
@@ -112,6 +117,68 @@ function removeUser(id: string) {
 </script>
 
 <template>
+    <!-- 卡片信息 -->
+    <div class="divider my-2">
+        卡片信息
+    </div>
+    <div class="flex items-start gap-3 px-1">
+        <div class="grid gap-x-6 gap-y-3 flex-1 min-w-0">
+            <!-- 商品类型 -->
+            <div class="min-w-0">
+                <p class="text-xs text-base-content/50 mb-0.5">
+                    卡片类型
+                </p>
+                <p class="text-sm font-medium truncate" :title="artifact.product.type.description">
+                    {{ artifact.product.type.name }}
+                </p>
+            </div>
+            <!-- 卡片状态 -->
+            <div class="min-w-0">
+                <p class="text-xs text-base-content/50 mb-0.5">
+                    卡片介绍
+                </p>
+                <p class="text-sm font-medium truncate" :title="artifact.product.type.description">
+                    {{ artifact.product.type.description }}
+                </p>
+            </div>
+            <!-- 卡片功能 -->
+            <div class="min-w-0">
+                <p class="text-xs text-base-content/50 mb-0.5">
+                    卡片功能
+                </p>
+                <div class="flex flex-wrap gap-1">
+                    <span
+                        v-for="ft in artifact.product.type.function_types"
+                        :key="ft"
+                        class="badge badge-sm badge-outline"
+                    >
+                        {{ functionTypeMap[ft] ?? `类型 ${ft}` }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- 操作菜单 -->
+        <div class="dropdown dropdown-end shrink-0">
+            <button tabindex="0" class="btn btn-ghost btn-sm btn-circle" type="button" aria-label="更多操作">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="5" r="1.5" />
+                    <circle cx="12" cy="12" r="1.5" />
+                    <circle cx="12" cy="19" r="1.5" />
+                </svg>
+            </button>
+            <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-44 p-1 shadow-lg border border-base-200">
+                <li>
+                    <button type="button" @click="restartTour()">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        重新开始引导
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
     <form class="space-y-4" @submit.prevent="storageSave(storage)">
         <!-- 默认标签页 -->
         <div class="divider my-2">
@@ -288,13 +355,7 @@ function removeUser(id: string) {
             </div>
         </template>
 
-        <footer class="flex justify-between">
-            <button class="btn btn-ghost btn-sm" type="button" @click="restartTour()">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                重新开始引导
-            </button>
+        <footer class="flex justify-end">
             <button class="btn btn-primary w-full md:w-auto" type="submit" :disabled="storageSaving">
                 <span v-if="storageSaving" class="loading loading-spinner" />
                 <span>保存修改</span>

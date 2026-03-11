@@ -77,27 +77,11 @@ definePageMeta({
                         </div>
                     </div>
                     <div class="text-center">
-                        <div class="text-xl font-bold text-success">
-                            {{ stats.order_breakdown.success }}
-                        </div>
-                        <div class="text-xs text-base-content/60">
-                            已完成
-                        </div>
-                    </div>
-                    <div class="text-center">
                         <div class="text-xl font-bold text-base-content/40">
                             {{ stats.order_breakdown.canceled }}
                         </div>
                         <div class="text-xs text-base-content/60">
                             已取消
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-xl font-bold text-base-content/40">
-                            {{ stats.order_breakdown.closed }}
-                        </div>
-                        <div class="text-xs text-base-content/60">
-                            已关闭
                         </div>
                     </div>
                 </div>
@@ -109,6 +93,14 @@ definePageMeta({
                     工件状态分布
                 </h2>
                 <div class="grid grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div class="text-center">
+                        <div class="text-xl font-bold text-error">
+                            {{ stats.artifact_breakdown.failed }}
+                        </div>
+                        <div class="text-xs text-base-content/60">
+                            失败
+                        </div>
+                    </div>
                     <div class="text-center">
                         <div class="text-xl font-bold text-warning">
                             {{ stats.artifact_breakdown.pending }}
@@ -141,14 +133,7 @@ definePageMeta({
                             已激活
                         </div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-xl font-bold text-error">
-                            {{ stats.artifact_breakdown.failed }}
-                        </div>
-                        <div class="text-xs text-base-content/60">
-                            失败
-                        </div>
-                    </div>
+
                     <div class="text-center">
                         <div class="text-xl font-bold text-accent">
                             {{ stats.artifact_breakdown.unassigned }}

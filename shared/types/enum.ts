@@ -15,8 +15,6 @@ export enum OrderStatus {
     UNPAID = 0,
     PAID = 1,
     SHIPPED = 2,
-    SUCCESS = 3,
-    CLOSED = 4,
 }
 
 /**

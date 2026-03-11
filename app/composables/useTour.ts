@@ -34,17 +34,12 @@ export function getCommonCardSteps(): TourStepConfig[] {
         },
         {
             element: '[data-tour="card-rocket-btn"]',
-            intro: '点击火箭按钮可以快速进行常用操作（例如更新成绩）。向右滑动卡片也可以打开此菜单。',
+            intro: '点击火箭按钮可以打开快捷菜单，可以快速进行常用操作（例如更新成绩）。向右滑动卡片也可以打开此菜单。',
             title: '🚀 快捷操作',
         },
         {
-            element: '[data-tour="card-footer-bar"]',
-            intro: '底部栏显示您的简化代码和游戏版本信息。',
-            title: '📋 底部信息栏',
-        },
-        {
             element: '[data-tour="card-functions-btn"]',
-            intro: '点击此箭头按钮，或向左滑动卡片，即可进入功能面板，管理您的卡片数据。',
+            intro: '点击此箭头按钮，或向左滑动卡片，即可进入功能面板，管理您的卡片功能。',
             title: '➡️ 进入功能面板',
         },
     ]
@@ -57,8 +52,8 @@ export function getCommonCardSteps(): TourStepConfig[] {
 export function getCommonFunctionSteps(): TourStepConfig[] {
     return [
         {
-            element: '[data-tour="fn-sidebar"]',
-            intro: '这是功能面板，左侧菜单可以切换不同功能模块。让我们逐一了解各个功能。',
+            element: '[data-tour="fn-menubar"]',
+            intro: '这是功能面板，这里的菜单可以切换不同功能模块。让我们逐一了解各个功能。',
             title: '🗂️ 功能面板',
         },
     ]
