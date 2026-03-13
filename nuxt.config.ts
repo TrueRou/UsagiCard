@@ -31,7 +31,7 @@ export default defineNuxtConfig({
             developerToken: '',
         },
         public: {
-            baseURL: 'http://localhost:7100',
+            URL: 'http://localhost:3000',
             imageURL: 'https://assets.turou.fun/leporid/images',
             imagePreviewURL: 'https://assets.turou.fun/leporid/thumbnails',
         },
