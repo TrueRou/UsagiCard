@@ -144,7 +144,7 @@ async function handleSaveDesign() {
         return
     isSavingDesign.value = true
     try {
-        await useNuxtApp().$leporid(`/api/products/${detailArtifact.value.product_id}`, {
+        await useNuxtApp().$leporid(`/api/admin/products/${detailArtifact.value.product_id}`, {
             method: 'PATCH',
             body: { design: JSON.parse(designJson.value) },
             showSuccessToast: true,
