@@ -5,29 +5,25 @@ useHead({
     title: '登录 - UsagiLab',
 })
 
-const { loggedIn, fetch: fetchUser, user } = useUserSession()
+const { loggedIn, fetch: fetchUser } = useUserSession()
 const route = useRoute()
-
-const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
 
 // 登录后的跳转目标：优先使用 ?redirect= 参数，否则按资料完整性决定
 const redirectTarget = computed(() => {
     const r = route.query.redirect as string
     if (r && r.startsWith('/'))
         return r
-    return shouldCompleteProfile.value ? '/auth/reset' : '/'
+    return '/'
 })
 
 const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, passwordLabel: string, usernameLabel?: string }> = [
-    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名 / 邮箱' },
+    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名' },
 ]
 
-// Redirect if already logged in
-watchEffect(() => {
-    if (!loggedIn.value)
-        return
-
-    navigateTo(redirectTarget.value)
+watch(loggedIn, async () => {
+    if (loggedIn.value) {
+        await navigateTo(redirectTarget.value, { external: true })
+    }
 })
 
 // Zod schema for validation
@@ -69,7 +65,6 @@ async function handleLogin() {
     })
 
     await fetchUser()
-    await navigateTo(redirectTarget.value)
 }
 </script>
 
