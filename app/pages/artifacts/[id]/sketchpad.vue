@@ -11,6 +11,10 @@ const artifactId = route.params.id as string // UUID string
 const { useDesignCtx } = await useArtifact(artifactId)
 const sketchpadComponent = computed(() => useDesignCtx.sketchpadComponent.value)
 
+useHead({
+    title: '工件详情 - 兔兔实验室',
+})
+
 const shouldRender = ref(false)
 
 watchEffect(() => {

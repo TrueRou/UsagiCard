@@ -12,6 +12,10 @@ const artifactId = route.params.id as string // UUID string
 const { artifact, useDesignCtx, storageSave } = await useArtifact(artifactId)
 const adaptiveComponent = computed(() => useDesignCtx.adaptiveViewComponent.value)
 
+useHead({
+    title: `${artifact.value.product.type.name} - 兔兔实验室`,
+})
+
 const { startPhase1 } = useTour(artifact, storageSave)
 
 onMounted(() => {

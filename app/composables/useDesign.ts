@@ -12,6 +12,7 @@ export async function useDesign(
     return {
         fromProduct,
         fromArtifact,
+        designTypeLiteral,
         rawDesign: rawDesignRef,
         sketchpadScale: sketchpadScaleRef,
         displayMode: displayModeRef,
