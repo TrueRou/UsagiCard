@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { data: stats, refresh } = await useLeporid<AdminStatsResponse>('/api/admin/stats')
+const { data: stats, refresh } = await useLeporid<AdminStatsPublic>('/api/admin/stats')
 
 function formatMoney(val: string | number) {
     return Number.parseFloat(String(val)).toFixed(2)
@@ -123,14 +123,6 @@ definePageMeta({
                         </div>
                         <div class="text-xs text-base-content/60">
                             已完成
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-xl font-bold text-primary">
-                            {{ stats.artifact_breakdown.activated }}
-                        </div>
-                        <div class="text-xs text-base-content/60">
-                            已激活
                         </div>
                     </div>
 

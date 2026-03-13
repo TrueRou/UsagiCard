@@ -13,6 +13,11 @@ const artifactId = route.params.id as string
 const tabKey = route.query.tab as string | undefined
 
 const { artifact, storageSave } = await useArtifact(artifactId)
+
+useHead({
+    title: `${artifact.value.product.type.name} - 兔兔实验室`,
+})
+
 const storageDefaultTab = (artifact.value.storage as UsagiCardStorage)?.default_function_tab ?? undefined
 const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabKey || storageDefaultTab)
 

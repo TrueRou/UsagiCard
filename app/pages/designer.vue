@@ -23,6 +23,10 @@ const useDesignCtx = await useDesign(computed(() => {
     return AVAILABLE_TYPES[type ?? '0'] ?? ProductTypeDesign.UsagiCardDX
 }))
 
+useHead({
+    title: '开始设计 - 兔兔实验室',
+})
+
 const designerComponent = computed(() => useDesignCtx.designerComponent.value)
 </script>
 

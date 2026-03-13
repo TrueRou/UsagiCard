@@ -17,11 +17,15 @@ const useDesignCtx = await useDesign(
     computed(() => product.value),
 )
 
+useHead({
+    title: `设计 ${useDesignCtx.designTypeLiteral.value} - 兔兔实验室`,
+})
+
 const designerComponent = computed(() => useDesignCtx.designerComponent.value)
 </script>
 
 <template>
-    <div class="w-full  relative">
+    <div class="w-full relative">
         <component :is="designerComponent" :use-design-ctx="useDesignCtx" />
     </div>
 </template>
