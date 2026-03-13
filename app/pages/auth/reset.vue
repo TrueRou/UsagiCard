@@ -1,24 +1,12 @@
 <script setup lang="ts">
 import { z } from 'zod'
 
-definePageMeta({ middleware: 'require-login' })
 useHead({
-    title: '完善账户信息 - UsagiLab',
+    title: '重置密码 - 兔兔实验室',
 })
 
 const nuxtApp = useNuxtApp()
-const { user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
-
-const shouldRedirectHome = computed(() => {
-    const email = user.value?.email?.trim() ?? ''
-    return email.length > 0
-})
-
-watchEffect(() => {
-    if (shouldRedirectHome.value)
-        navigateTo('/', { replace: true })
-})
 
 const form = reactive({
     username: '',
@@ -37,16 +25,8 @@ const schema = z.object({
     path: ['confirmPassword'],
 })
 
-const { validate, ve, clearErrors } = useFormValidation(schema, form)
+const { validate, ve } = useFormValidation(schema, form)
 const isSubmitting = ref(false)
-
-watch(user, (val) => {
-    form.username = val?.username ?? ''
-    form.email = ''
-    form.password = ''
-    form.confirmPassword = ''
-    clearErrors()
-}, { immediate: true })
 
 async function handleSubmit() {
     if (!validate() || isSubmitting.value)
@@ -54,7 +34,7 @@ async function handleSubmit() {
 
     isSubmitting.value = true
     try {
-        await nuxtApp.$leporid('/api/users/me', {
+        await nuxtApp.$leporid('/api/auth/reset', {
             method: 'PATCH',
             body: {
                 username: form.username,
@@ -62,7 +42,6 @@ async function handleSubmit() {
                 password: form.password,
             },
         })
-        await clear()
         notificationsStore.addNotification({
             type: 'info',
             message: '账户信息已更新，请重新登录。',
@@ -73,23 +52,16 @@ async function handleSubmit() {
         isSubmitting.value = false
     }
 }
-
-useHead({
-    title: '完成账户信息',
-})
 </script>
 
 <template>
     <div class="max-w-md mx-auto px-4 pt-16">
         <div class="space-y-2 text-center">
-            <p class="text-xs uppercase tracking-[0.25em] text-warning">
-                必须操作
-            </p>
             <h1 class="text-2xl font-bold">
-                请完善账户信息
+                完成密码重置步骤
             </h1>
             <p class="text-sm text-base-content/70">
-                出于安全考虑，请先补充邮箱并重设密码后再继续使用 UsagiPass。
+                联系管理员删除密码后，可以通过输入用户名和注册邮箱来重置密码。请确保输入的信息准确无误。
             </p>
         </div>
 
@@ -98,7 +70,7 @@ useHead({
                 <label class="mb-1 block text-sm font-medium">用户名</label>
                 <input
                     v-model="form.username" class="input input-bordered w-full" type="text"
-                    :class="{ 'input-error': ve('username') }" placeholder="正在载入用户名"
+                    :class="{ 'input-error': ve('username') }" placeholder="请输入原用户名"
                 >
             </div>
 
@@ -106,7 +78,7 @@ useHead({
                 <label class="mb-1 block text-sm font-medium">邮箱</label>
                 <input
                     v-model="form.email" class="input input-bordered w-full" type="email"
-                    :class="{ 'input-error': ve('email') }" placeholder="请输入有效邮箱"
+                    :class="{ 'input-error': ve('email') }" placeholder="请输入原邮箱"
                 >
                 <p v-if="ve('email')" class="mt-1 text-xs text-error">
                     {{ ve('email') }}
@@ -134,11 +106,6 @@ useHead({
                     {{ ve('confirmPassword') }}
                 </p>
             </div>
-
-            <p class="flex items-center gap-2 text-xs text-base-content/60">
-                <span class="badge badge-info badge-xs" />
-                如果您希望进行账户合并等操作，请补全信息后前往设置页面进行。
-            </p>
 
             <button class="btn btn-warning w-full" type="submit" :disabled="isSubmitting">
                 <span v-if="isSubmitting" class="loading loading-spinner" />

@@ -48,7 +48,6 @@ const permissionLabelMap = Object.fromEntries(
 ) as Record<number, string>
 
 // Password tab state
-const newPassword = ref('')
 const isSavingPassword = ref(false)
 
 // Orders tab state
@@ -64,7 +63,6 @@ const isLoadingArtifacts = ref(false)
 function openDetail(user: any) {
     detailUser.value = user
     editPermissions.value = [...user.permissions]
-    newPassword.value = ''
     activeTab.value = 'permissions'
     userOrdersData.value = null
     userArtifactsData.value = null
@@ -104,13 +102,11 @@ async function handleSetPassword() {
         return
     isSavingPassword.value = true
     try {
-        await useNuxtApp().$leporid(`/api/admin/users/${detailUser.value.id}/password`, {
-            method: 'PATCH',
-            body: { password: newPassword.value || null },
+        await useNuxtApp().$leporid(`/api/admin/users/${detailUser.value.id}/resetPassword`, {
+            method: 'POST',
             showSuccessToast: true,
-            successMessage: newPassword.value ? '密码已设置' : '密码已重置',
+            successMessage: '密码已重置',
         })
-        newPassword.value = ''
     }
     finally {
         isSavingPassword.value = false
@@ -304,35 +300,12 @@ definePageMeta({
                                     <span class="text-xs text-base-content/40 font-mono">{{ perm.value }}</span>
                                 </label>
                             </div>
-                            <div class="flex justify-end mt-3">
+                            <div class="flex justify-end mt-3 gap-2">
+                                <button class="btn btn-accent btn-sm" :disabled="isSavingPassword" @click="handleSetPassword">
+                                    重置密码
+                                </button>
                                 <button class="btn btn-primary btn-sm" :disabled="isSavingPerms" @click="handleSavePermissions">
                                     保存权限
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="divider" />
-
-                        <div>
-                            <p class="text-sm font-semibold mb-2">
-                                设置密码
-                            </p>
-                            <p class="text-xs text-base-content/50 mb-3">
-                                留空并点击重置将清除本地密码（适用于仅使用第三方登录的用户）。
-                            </p>
-                            <div class="flex gap-2">
-                                <input
-                                    v-model="newPassword"
-                                    type="password"
-                                    class="input input-bordered input-sm flex-1"
-                                    placeholder="新密码（留空则重置为空）"
-                                >
-                                <button
-                                    class="btn btn-accent btn-sm"
-                                    :disabled="isSavingPassword"
-                                    @click="handleSetPassword"
-                                >
-                                    {{ newPassword ? '设置' : '重置' }}
                                 </button>
                             </div>
                         </div>

@@ -19,7 +19,7 @@ const redirectTarget = computed(() => {
 })
 
 const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, passwordLabel: string, usernameLabel?: string }> = [
-    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名' },
+    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名 / 邮箱' },
 ]
 
 // Redirect if already logged in
