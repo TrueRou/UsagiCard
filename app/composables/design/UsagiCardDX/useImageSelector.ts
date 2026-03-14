@@ -21,15 +21,18 @@ export async function useImageSelector(currentDesign: Ref<UsagiCardDxDesign>): P
     }
 
     const selectorImageKey = ref<string>()
+    const overrideFilterRef = ref<string>()
     const selectorOpen = ref(false)
 
-    function openImageSelector(key: string) {
+    function openImageSelector(key: string, overrideFilter?: string) {
         selectorImageKey.value = key
+        overrideFilterRef.value = overrideFilter
         selectorOpen.value = true
     }
 
     function closeImageSelector() {
         selectorImageKey.value = undefined
+        overrideFilterRef.value = undefined
         selectorOpen.value = false
     }
 
@@ -54,7 +57,8 @@ export async function useImageSelector(currentDesign: Ref<UsagiCardDxDesign>): P
     })
 
     const selectorInitialFilters = computed(() => {
-        return selectorImageKey.value ? [selectorImageKey.value] : []
+        const val = overrideFilterRef.value ? overrideFilterRef.value : selectorImageKey.value
+        return val ? [val] : []
     })
 
     return {

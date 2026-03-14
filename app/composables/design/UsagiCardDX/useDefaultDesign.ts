@@ -1,4 +1,4 @@
-export function useDefaultDesign(overrideDesign: Ref<Partial<UsagiCardDxDesign>> = ref({})) {
+export function useDefaultDesign(ogDesign: Ref<Partial<UsagiCardDxDesign>> = ref({})) {
     const defaultDesign: UsagiCardDxDesign = {
         game_version: 'Ver.CN1.53-J',
         simplified_code: 'UsagiCard',
@@ -24,9 +24,6 @@ export function useDefaultDesign(overrideDesign: Ref<Partial<UsagiCardDxDesign>>
         passname_id: '',
     }
 
-    return {
-        currentDesign: computed(() => {
-            return { ...defaultDesign, ...overrideDesign.value }
-        }),
-    }
+    ogDesign.value = { ...defaultDesign, ...ogDesign.value }
+    return ogDesign as Ref<UsagiCardDxDesign>
 }

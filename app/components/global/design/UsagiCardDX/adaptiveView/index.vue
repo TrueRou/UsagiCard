@@ -10,8 +10,9 @@ import '../assets/css/main.css'
 const props = defineProps<{ useDesignCtx: UseDesignCtx }>()
 const route = useRoute()
 const tabKey = route.query.tab as string | undefined
+
 const { img } = useUtils()
-const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
+const currentDesign: Ref<UsagiCardDxDesign> = useDefaultDesign(props.useDesignCtx.currentDesign)
 
 const useQButtonCtx = asyncComputed(async () => {
     const artifact = props.useDesignCtx.fromArtifact

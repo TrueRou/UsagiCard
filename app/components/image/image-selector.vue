@@ -20,7 +20,7 @@ const {
 } = useImageList({
     pageSize: ref(props.selectorCtx.selectorDefaultPageSize),
     aspectId: ref(props.selectorCtx.selectorImageAspect?.value?.id),
-    activeFilters: ref(props.selectorCtx.selectorInitialFilters),
+    activeFilters: ref(props.selectorCtx.selectorInitialFilters.value),
 })
 
 const activeSecondary = ref<string[]>([])

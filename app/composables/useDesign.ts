@@ -13,7 +13,7 @@ export async function useDesign(
         fromProduct,
         fromArtifact,
         designTypeLiteral,
-        rawDesign: rawDesignRef,
+        currentDesign: rawDesignRef,
         sketchpadScale: sketchpadScaleRef,
         displayMode: displayModeRef,
         designerComponent: computed(() => `Design${designTypeLiteral.value}Designer`),

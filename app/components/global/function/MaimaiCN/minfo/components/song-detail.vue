@@ -77,8 +77,6 @@ watch(() => props.song, async (newSong) => {
     isLoading.value = true
     songScores.value = []
 
-    console.log('newSong', newSong, 'atfId', props.artifactId)
-
     if (newSong !== null && props.artifactId) {
         const params = new URLSearchParams({
             id: String(newSong.id),

@@ -2,14 +2,14 @@
 import { useDefaultDesign } from '~/composables/design/UsagiCardDX/useDefaultDesign'
 import CharaInfo from './widget/chara-info.vue'
 import DXRating from './widget/dx-rating.vue'
-import PlayerInfo from './widget/player-info.vue'
 
+import PlayerInfo from './widget/player-info.vue'
 import QRCode from './widget/qr-code.vue'
 import '../assets/css/main.css'
 
 const props = defineProps<{ useDesignCtx: UseDesignCtx }>()
 const { img } = useUtils()
-const { currentDesign } = useDefaultDesign(props.useDesignCtx.rawDesign)
+const currentDesign: Ref<UsagiCardDxDesign> = useDefaultDesign(props.useDesignCtx.currentDesign)
 const { processImage } = useImageProcessor({
     rotate: Math.PI / 2, // 旋转90度
     scale: 0.5, // 缩放到75%
@@ -22,7 +22,7 @@ const landscapeCharacterImage = asyncComputed(() => {
 </script>
 
 <template>
-    <div class="card-hw isolate relative absolute-center font-adjust" :style="{ zoom: useDesignCtx.sketchpadScale.value }" data-theme="light">
+    <div class="card-hw isolate relative font-adjust" :style="{ zoom: useDesignCtx.sketchpadScale.value }" data-theme="light">
         <!-- 卡片背面 -->
         <template v-if="useDesignCtx.displayMode.value === ArtifactDisplayMode.SKETCHPAD_BACK">
             <!-- 卡片背景 -->
@@ -121,13 +121,6 @@ const landscapeCharacterImage = asyncComputed(() => {
 </template>
 
 <style scoped>
-.absolute-center {
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    transform-origin: top left;
-}
-
 .card-hw {
     width: 2.125in;
     height: 3.370in;

@@ -25,7 +25,7 @@ const designerComponent = computed(() => useDesignCtx.designerComponent.value)
 </script>
 
 <template>
-    <div class="w-full relative">
+    <div class="w-full flex flex-col h-full reletive">
         <component :is="designerComponent" :use-design-ctx="useDesignCtx" />
     </div>
 </template>

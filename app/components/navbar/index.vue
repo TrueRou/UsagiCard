@@ -9,14 +9,33 @@ const detached = computed(() => scrollY.value > 0)
 <template>
     <div class="navbar bg-base-100 shadow-sm sticky top-0 z-10" :class="[detached && 'detached']">
         <div class="navbar-start">
-            <a class="btn btn-ghost text-xl">Bunny</a>
+            <div class="dropdown lg:hidden">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+                    <Icon name="mdi:menu" class="w-5 h-5" />
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-1 p-2 shadow bg-base-100 rounded-box w-40">
+                    <li>
+                        <NuxtLink to="/">
+                            首页
+                        </NuxtLink>
+                    </li>
+                    <li>
+                        <NuxtLink to="/marketplace">
+                            工坊
+                        </NuxtLink>
+                    </li>
+                </ul>
+            </div>
+            <NuxtLink class="btn btn-ghost text-xl" to="/">
+                Bunny
+            </NuxtLink>
         </div>
         <div class="navbar-center hidden lg:flex">
             <NuxtLink class="btn btn-ghost" to="/">
                 首页
             </NuxtLink>
             <NuxtLink class="btn btn-ghost" to="/marketplace">
-                关于兔卡
+                工坊
             </NuxtLink>
         </div>
         <menu class="navbar-end">
