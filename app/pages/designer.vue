@@ -35,14 +35,12 @@ const designerComponent = computed(() => useDesignCtx.designerComponent.value)
         <!-- 预览模式提示条 -->
         <div class="flex items-center justify-center gap-3 px-4 py-2 text-sm shrink-0 bg-warning text-warning-content">
             <Icon name="mdi:eye-outline" class="w-4 h-4 shrink-0" />
-            <span>预览模式 — 设计无法保存，满意后请前往下单</span>
+            <span>预览模式 — 设计无法保存，仅供预览参考</span>
             <NuxtLink to="/marketplace" class="btn btn-xs btn-neutral shrink-0">
-                了解如何下单
+                返回商城页面
             </NuxtLink>
         </div>
         <!-- 设计器主体 -->
-        <div class="w-full overflow-y-scroll relative">
-            <component :is="designerComponent" :use-design-ctx="useDesignCtx" />
-        </div>
+        <component :is="designerComponent" :use-design-ctx="useDesignCtx" />
     </div>
 </template>
