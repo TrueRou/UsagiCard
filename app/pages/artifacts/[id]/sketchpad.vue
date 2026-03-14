@@ -35,6 +35,15 @@ onMounted(() => {
 
 <template>
     <div class="w-full h-full overflow-hidden relative">
-        <component :is="sketchpadComponent" v-if="shouldRender" ref="sketchpad" :use-design-ctx="useDesignCtx" />
+        <component :is="sketchpadComponent" v-if="shouldRender" ref="sketchpad" class="absolute-center" :use-design-ctx="useDesignCtx" />
     </div>
 </template>
+
+<style scoped>
+.absolute-center {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: top left;
+}
+</style>
