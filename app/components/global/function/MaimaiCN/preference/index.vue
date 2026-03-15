@@ -123,7 +123,6 @@ function serverName(identifier: string) {
                     class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
-                    disabled
                 >
             </div>
 
@@ -141,7 +140,6 @@ function serverName(identifier: string) {
                     class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
-                    disabled
                 >
             </div>
 
@@ -159,7 +157,6 @@ function serverName(identifier: string) {
                     class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
-                    disabled
                 >
             </div>
 
