@@ -1,14 +1,13 @@
 <script setup lang="ts">
 const props = defineProps<{
-    artifact: ArtifactUserResponse
+    artifactId: string
 }>()
-const { storageSave, storageSaving } = await useArtifact(props.artifact.id)
-const { restartTour } = useTour(toRef(props, 'artifact'), storageSave)
+const { artifact, storageSave, storageSaving } = await useArtifact(props.artifactId)
+const { restartTour } = useTour(artifact, storageSave)
 const { user, loggedIn } = useUserSession()
 
-const artifactRef = toRef(props, 'artifact')
-const { tabConfigs } = useFunction(artifactRef)
-const { qButtonTabs } = useQButton(artifactRef)
+const { tabConfigs } = useFunction(artifact)
+const { qButtonTabs } = useQButton(artifact)
 
 const functionTypeMap: Record<number, string> = {
     0: 'UsagiCard',
@@ -30,7 +29,7 @@ const storage = ref<UsagiCardStorage>({
     secondary_auth_enabled: false,
     secondary_auth_policy: 'private',
     secondary_auth_users: [],
-    ...props.artifact.storage,
+    ...artifact.value.storage,
 })
 
 const authPolicies = [
@@ -137,7 +136,7 @@ function removeUser(id: string) {
                 <p class="text-xs text-base-content/50 mb-0.5">
                     卡片介绍
                 </p>
-                <p class="text-sm font-medium truncate" :title="artifact.product.type.description">
+                <p class="text-sm font-medium text-wrap" :title="artifact.product.type.description">
                     {{ artifact.product.type.description }}
                 </p>
             </div>

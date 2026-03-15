@@ -44,7 +44,7 @@ function goBack() {
     router.push({ path: `/artifacts/${artifactId}` })
 }
 
-const _pageContainer = useTemplateRef<HTMLElement>('page-container')
+// const _pageContainer = useTemplateRef<HTMLElement>('page-container')
 // const { lengthX, lengthY } = useSwipe(pageContainer, {
 //     threshold: 50,
 //     onSwipeEnd(_e, direction) {
@@ -57,7 +57,7 @@ const _pageContainer = useTemplateRef<HTMLElement>('page-container')
 </script>
 
 <template>
-    <div ref="page-container" class="w-full h-full flex flex-col lg:flex-row overflow-hidden">
+    <div class="w-full h-full flex flex-col lg:flex-row overflow-hidden">
         <!-- 移动端顶部菜单栏 -->
         <div data-tour="fn-menubar" class="lg:hidden w-full bg-base-200 border-b">
             <ul class="menu menu-horizontal bg-base-200 w-full">
@@ -133,7 +133,7 @@ const _pageContainer = useTemplateRef<HTMLElement>('page-container')
         <main class="flex-1 overflow-y-auto bg-base-100">
             <Transition name="content-fade" mode="out-in">
                 <div v-if="activeComponent" :key="activeTabKey" class="container mx-auto p-4 lg:p-6">
-                    <component :is="activeComponent" :artifact="artifact" />
+                    <component :is="activeComponent" :artifact-id="artifactId" />
                 </div>
             </Transition>
         </main>

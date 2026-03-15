@@ -2,15 +2,15 @@
 import { marked } from 'marked'
 
 const props = defineProps<{
-    artifact: ArtifactUserResponse
+    artifactId: string
 }>()
 
-const { storageSave, storageSaving } = await useArtifact(props.artifact.id)
+const { artifact, storageSave, storageSaving } = await useArtifact(props.artifactId)
 const { loggedIn, user } = useUserSession()
 const { img } = useUtils()
 
 const storage = ref<UsagiCardStorage>({
-    ...props.artifact.storage,
+    ...artifact.value.storage,
 })
 
 // ---- edit mode ----
@@ -23,15 +23,13 @@ function startEdit() {
 }
 
 // ---- card_avatar ----
-const { data: squaresAspect } = await useLeporid<ImageAspectPublic>('/api/images/aspects/squares')
 const selectorOpen = ref(false)
-const selectorImageAspect = computed(() => squaresAspect.value ?? undefined)
 const selectorInitialFilters = ref<string[]>(['avatar'])
 
 const imageSelectorCtx: UseImageSelectorCtx = {
     selectorOpen,
-    selectorImageAspect,
     selectorInitialFilters,
+    selectorImageAspect: toRef('squares'),
     openImageSelector: (_key: string) => { selectorOpen.value = true },
     closeImageSelector: () => { selectorOpen.value = false },
     handleImageSelect: async (image: ImageSimplePublic) => {
@@ -58,7 +56,7 @@ async function saveAll() {
 }
 
 const showEditButton = computed(() => {
-    const cardStorage = props.artifact.storage as UsagiCardStorage
+    const cardStorage = artifact.value.storage as UsagiCardStorage
     if (cardStorage.secondary_auth_enabled && cardStorage.secondary_auth_policy) {
         if (cardStorage.secondary_auth_policy === 'private' || cardStorage.secondary_auth_policy === 'public_read') {
             const isAuthorized = loggedIn.value && (cardStorage.secondary_auth_users ?? []).includes(user.value?.id ?? 'UNKNOWN')
@@ -73,7 +71,8 @@ const { copy, copied } = useClipboard()
 
 <template>
     <div class="space-y-6">
-        <ImageSelector :selector-ctx="imageSelectorCtx" />
+        <!-- 图片选择器，根据 selectorOpen 进行懒加载 -->
+        <ImageSelector v-if="selectorOpen" :selector-ctx="imageSelectorCtx" />
 
         <!-- 个人简介（含头像、标题、简介） -->
         <div class="space-y-3">

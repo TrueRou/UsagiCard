@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const { imgPreview } = useUtils()
 const { $leporid } = useNuxtApp()
+const { data: imageAspect } = await useLeporid<ImageAspectPublic>(`/api/images/aspects/${props.selectorCtx.selectorImageAspect?.value}`)
 
 const images = ref<ImageSimplePublic[]>([])
 const loading = ref(false)
@@ -99,7 +100,7 @@ async function list(listOptions: ListOptions = {}) {
 
         const secondaryFilters = listOptions.filters ?? activeSecondary.value
         const query: Record<string, any> = {
-            aspect_id: props.selectorCtx.selectorImageAspect?.value?.id,
+            aspect_id: props.selectorCtx.selectorImageAspect?.value,
             page_number: pageNumber.value,
             page_size: pageSize.value,
             labels: Array.from(new Set([...secondaryFilters, ...baseFilters.value])),
@@ -260,8 +261,8 @@ watch([activeSecondary], async () => {
                         <h2 class="text-2xl font-semibold">
                             选择图片
                         </h2>
-                        <p v-if="selectorCtx.selectorImageAspect?.value" class="text-sm text-base-content/70">
-                            比例：{{ selectorCtx.selectorImageAspect.value.name }} · {{ `${selectorCtx.selectorImageAspect.value.ratio_width_unit}:${selectorCtx.selectorImageAspect.value.ratio_height_unit}` }}
+                        <p v-if="imageAspect" class="text-sm text-base-content/70">
+                            比例：{{ imageAspect.name }} · {{ `${imageAspect.ratio_width_unit}:${imageAspect.ratio_height_unit}` }}
                         </p>
                     </div>
                 </header>
@@ -316,7 +317,7 @@ watch([activeSecondary], async () => {
                                 暂无符合条件的图片
                             </p>
                         </div>
-                        <div v-else-if="!selectorCtx.selectorImageAspect?.value">
+                        <div v-else-if="!imageAspect">
                             <p>
                                 图片比例加载失败
                             </p>
@@ -324,7 +325,7 @@ watch([activeSecondary], async () => {
                         <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                             <ImageCard
                                 v-for="image in images" :key="imageKey(image)" :image="image"
-                                :image-aspect="selectorCtx.selectorImageAspect.value"
+                                :image-aspect="imageAspect"
                                 :image-url="imageUrl(image)" :selected="isSelected(image)"
                                 :disabled="pending" :hided-labels="selectorCtx.selectorInitialFilters.value"
                                 @select="updateSelection"
@@ -376,7 +377,7 @@ watch([activeSecondary], async () => {
     </dialog>
 
     <ImageUploader
-        :open="openUploader" :aspect="selectorCtx.selectorImageAspect?.value"
+        :open="openUploader" :aspect="imageAspect"
         :suggested-labels="[...activeFilters]" @update:open="val => openUploader = val"
         @uploaded="handleUploaded"
     />

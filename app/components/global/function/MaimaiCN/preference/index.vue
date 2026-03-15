@@ -2,14 +2,14 @@
 import { z } from 'zod'
 
 const props = defineProps<{
-    artifact: ArtifactUserResponse
+    artifactId: string
 }>()
-const { storageSave, storageSaving } = await useArtifact(props.artifact.id)
+const { artifact, storageSave, storageSaving } = await useArtifact(props.artifactId)
 
 const storage = ref<MaimaiStorage>({
     rem_accounts: [],
     updating_behavior: 'adhoc',
-    ...props.artifact.storage,
+    ...artifact.value.storage,
 })
 
 const serverOptions = [
@@ -119,7 +119,7 @@ function serverName(identifier: string) {
                     </p>
                 </label>
                 <input
-                    :value="storage.player_name ?? ''"
+                    v-model="storage.player_name"
                     class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
@@ -136,7 +136,7 @@ function serverName(identifier: string) {
                     </p>
                 </label>
                 <input
-                    :value="storage.player_rating ?? ''"
+                    v-model="storage.player_rating"
                     class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"
@@ -153,7 +153,7 @@ function serverName(identifier: string) {
                     </p>
                 </label>
                 <input
-                    :value="storage.friend_code ?? ''"
+                    v-model="storage.friend_code"
                     class="input w-full input-bordered input-disabled"
                     type="text"
                     placeholder="尚未同步"

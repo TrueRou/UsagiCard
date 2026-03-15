@@ -4,10 +4,10 @@ import { TileDisplayMode, ViewMode } from '~/composables/function/MaimaiCN/useMa
 import ScoreList from './components/score-list.vue'
 
 const props = defineProps<{
-    artifact: ArtifactUserResponse
+    artifactId: string
 }>()
 
-const { bests } = await useMaimaiScores(props.artifact)
+const { bests } = await useMaimaiScores(props.artifactId)
 
 const currentViewMode = ref<ViewMode>(ViewMode.LIST)
 const tileDisplayMode = ref<TileDisplayMode>(TileDisplayMode.RATING)

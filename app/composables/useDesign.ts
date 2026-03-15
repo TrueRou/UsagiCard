@@ -1,19 +1,19 @@
 export async function useDesign(
     designType: Ref<ProductTypeDesign>,
-    rawDesign: Ref<Record<string, any>> = ref({}),
+    currentDesign: Ref<Record<string, any>> = ref({}),
     fromProduct: Ref<ProductSimpleResponse | undefined> = ref(),
     fromArtifact: Ref<ArtifactUserResponse | undefined> = ref(),
 ): Promise<UseDesignCtx> {
-    const rawDesignRef = ref(rawDesign)
-    const sketchpadScaleRef = ref(1.0)
-    const displayModeRef = ref(ArtifactDisplayMode.SKETCHPAD_FRONT)
+    const currentDesignRef = toRef(currentDesign)
+    const sketchpadScaleRef = toRef(1.0)
+    const displayModeRef = toRef(ArtifactDisplayMode.SKETCHPAD_FRONT)
     const designTypeLiteral = computed(() => ProductTypeDesign[designType.value])
 
     return {
         fromProduct,
         fromArtifact,
         designTypeLiteral,
-        currentDesign: rawDesignRef,
+        currentDesign: currentDesignRef,
         sketchpadScale: sketchpadScaleRef,
         displayMode: displayModeRef,
         designerComponent: computed(() => `Design${designTypeLiteral.value}Designer`),

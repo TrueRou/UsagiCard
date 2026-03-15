@@ -1,7 +1,7 @@
 export interface UseImageSelectorCtx {
     selectorOpen: Ref<boolean>
     selectorImageKey?: Ref<string | undefined>
-    selectorImageAspect?: Ref<ImageAspectPublic | undefined>
+    selectorImageAspect?: Ref<string | undefined>
     selectorInitialFilters: Ref<string[]>
     selectorDefaultPageSize?: number
     selectorConfirmLabel?: string

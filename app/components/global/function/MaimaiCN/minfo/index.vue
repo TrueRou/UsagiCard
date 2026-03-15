@@ -4,7 +4,7 @@ import SongDetail from './components/song-detail.vue'
 import SongSearch from './components/song-search.vue'
 
 defineProps<{
-    artifact: ArtifactUserResponse
+    artifactId: string
 }>()
 
 const selectedSong = ref<Song | null>(null)
@@ -40,7 +40,7 @@ function handleSongSelect(song: Song | null) {
         </div>
 
         <div v-if="selectedSong" class="mt-4">
-            <SongDetail :song="selectedSong" :artifact-id="artifact.id" />
+            <SongDetail :song="selectedSong" :artifact-id="artifactId" />
         </div>
     </div>
 </template>

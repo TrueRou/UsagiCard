@@ -1,13 +1,14 @@
 <script setup lang="ts">
 const props = defineProps<{
-    artifact: ArtifactUserResponse
+    artifactId: string
     fromDialog?: boolean
 }>()
 
 const router = useRouter()
+const { artifact, storageSave } = await useArtifact(props.artifactId)
 
 function goToPrefs() {
-    router.push({ path: `/artifacts/${props.artifact.id}/functions`, query: { tab: 'maicn-pref' } })
+    router.push({ path: `/artifacts/${props.artifactId}/functions`, query: { tab: 'maicn-pref' } })
 }
 
 // ─── Data source definitions ───────────────────────────────────────────────────
@@ -76,13 +77,13 @@ interface UpdatesChainResult {
     player: { name: string, rating: number, friend_code?: string } | null
 }
 
-const STORAGE_KEY = `maimai_update_rule_${props.artifact.id}`
+const STORAGE_KEY = `maimai_update_rule_${props.artifactId}`
 
 // ─── State ─────────────────────────────────────────────────────────────────────
 const storage = ref<MaimaiStorage>({
     rem_accounts: [],
     updating_behavior: 'adhoc',
-    ...props.artifact.storage,
+    ...artifact.value.storage,
 })
 
 const mode = computed(() => storage.value.updating_behavior)
@@ -160,7 +161,7 @@ function onSelectCardOption(item: PlacedItem, value: string) {
     }
     else {
         item.isNew = false
-        item.credential = props.artifact.id
+        item.credential = artifact.value.id
     }
 }
 
@@ -242,7 +243,7 @@ function onPointerUp(e: PointerEvent) {
     const item: PlacedItem = {
         id,
         chainLabel: getSourceDef(id).chainLabel,
-        credential: id === 'usagicard' ? props.artifact.id : '',
+        credential: id === 'usagicard' ? artifact.value.id : '',
         isNew: id !== 'usagicard',
     }
     initItemCredential(item)
@@ -263,19 +264,19 @@ function loadSavedLayout() {
         const saved = JSON.parse(raw)
         if (saved.mode === 'adhoc') {
             sourceSources.value = (saved.sourceIds ?? []).map((sid: string) => {
-                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? props.artifact.id : '', isNew: sid !== 'usagicard' }
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? artifact.value.id : '', isNew: sid !== 'usagicard' }
                 initItemCredential(item)
                 return item
             })
             targetSources.value = (saved.targetIds ?? []).map((sid: string) => {
-                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? props.artifact.id : '', isNew: sid !== 'usagicard' }
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? artifact.value.id : '', isNew: sid !== 'usagicard' }
                 initItemCredential(item)
                 return item
             })
         }
         else {
             aggregateSources.value = (saved.aggregateIds ?? []).map((sid: string) => {
-                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? props.artifact.id : '', isNew: sid !== 'usagicard' }
+                const item: PlacedItem = { id: sid, chainLabel: getSourceDef(sid).chainLabel, credential: sid === 'usagicard' ? artifact.value.id : '', isNew: sid !== 'usagicard' }
                 initItemCredential(item)
                 return item
             })
@@ -365,10 +366,7 @@ async function writeToPref(result: UpdatesChainResult) {
     if (result.player?.friend_code)
         storage.value.friend_code = result.player?.friend_code
     storage.value.updating_at = new Date().toISOString()
-    await useNuxtApp().$leporid<ArtifactUserResponse>(`/api/artifacts/${props.artifact.id}/storage`, {
-        method: 'PATCH',
-        body: { storage: storage.value },
-    })
+    await storageSave(storage.value)
 }
 
 async function submit() {
