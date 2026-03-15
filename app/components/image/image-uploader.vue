@@ -23,7 +23,6 @@ const tagDraft = ref('')
 
 const metadata = reactive({
     name: '',
-    description: '',
     visibility: ImageVisibility.PRIVATE,
     labels: [] as string[],
 })
@@ -121,7 +120,6 @@ function cleanupPreview() {
 
 function reset() {
     metadata.name = ''
-    metadata.description = ''
     metadata.visibility = ImageVisibility.PRIVATE
     metadata.labels = ['workshop', ...props.suggestedLabels ?? []]
     tagDraft.value = ''
@@ -198,7 +196,6 @@ async function submit() {
 
         formData.append('aspect_id', props.aspect.id)
         formData.append('name', metadata.name.trim())
-        formData.append('description', metadata.description.trim() ?? metadata.name.trim())
         formData.append('visibility', String(metadata.visibility.valueOf()))
         metadata.labels.forEach((label: string) => formData.append('labels', label))
 
@@ -288,10 +285,6 @@ async function submit() {
                             <label class="label">
                                 <span class="label-text">描述</span>
                             </label>
-                            <textarea
-                                v-model="metadata.description" class="textarea textarea-bordered w-full"
-                                placeholder="描述这张图片（可选）" rows="3"
-                            />
                         </div>
                         <!-- <div>
                             <label class="label">
