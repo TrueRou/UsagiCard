@@ -14,13 +14,9 @@ const tabKey = route.query.tab as string | undefined
 const { img } = useUtils()
 const currentDesign: Ref<UsagiCardDxDesign> = useDefaultDesign(props.useDesignCtx.currentDesign)
 
-const useQButtonCtx = asyncComputed(async () => {
-    const artifact = props.useDesignCtx.fromArtifact
-    if (artifact.value) {
-        const storageDefaultTab = (artifact.value.storage as UsagiCardStorage)?.default_qbutton_tab ?? undefined
-        return useQButton(artifact as Ref<ArtifactUserResponse>, tabKey || storageDefaultTab)
-    }
-})
+const artifact = props.useDesignCtx.fromArtifact
+const storageDefaultTab = (artifact.value!.storage as UsagiCardStorage)?.default_qbutton_tab ?? undefined
+const useQButtonCtx = useQButton(artifact as Ref<ArtifactUserResponse>, tabKey || storageDefaultTab)
 
 watch(() => props.useDesignCtx.fromArtifact.value, () => {
     if (props.useDesignCtx.fromArtifact.value) {
