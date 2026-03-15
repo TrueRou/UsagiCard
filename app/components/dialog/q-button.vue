@@ -42,7 +42,7 @@ const tabs = computed(() => Object.entries(props.ctx.qButtonTabs.value ?? {}))
                             <component
                                 :is="ctx.activeTabValue.value?.component"
                                 :key="ctx.activeTabKey.value"
-                                :artifact="ctx.artifact.value"
+                                :artifact-id="ctx.artifact.value.id"
                                 :from-dialog="true"
                                 class="w-full h-full"
                             />
