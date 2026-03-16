@@ -219,7 +219,7 @@ definePageMeta({
                                         </span>
                                         <NuxtLink
                                             v-if="artifact.status <= ArtifactStatus.IN_PRODUCTION"
-                                            :to="`/products/${item.product.id}/designer`"
+                                            :to="`/designer?id=${item.product.id}`"
                                             class="btn btn-xs btn-primary"
                                         >
                                             <Icon name="mdi:pencil" class="w-3 h-3 mr-1" />

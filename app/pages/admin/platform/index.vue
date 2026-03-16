@@ -224,12 +224,13 @@ const materialEditing = ref<string | null>(null)
 const materialForm = reactive({
     name: '',
     description: '',
+    manufacturing_type: 0,
     price_modifier: '0.00',
 })
 
 function openMaterialCreate() {
     materialEditing.value = null
-    Object.assign(materialForm, { name: '', description: '', price_modifier: '0.00' })
+    Object.assign(materialForm, { name: '', description: '', manufacturing_type: 0, price_modifier: '0.00' })
     showMaterialModal.value = true
 }
 
@@ -238,6 +239,7 @@ function openMaterialEdit(material: any) {
     Object.assign(materialForm, {
         name: material.name,
         description: material.description,
+        manufacturing_type: material.manufacturing_type,
         price_modifier: String(material.price_modifier),
     })
     showMaterialModal.value = true
@@ -249,6 +251,7 @@ async function handleSaveMaterial() {
         const body = {
             name: materialForm.name,
             description: materialForm.description,
+            manufacturing_type: materialForm.manufacturing_type,
             price_modifier: Number.parseFloat(materialForm.price_modifier || '0'),
         }
         if (materialEditing.value) {
@@ -306,6 +309,10 @@ const DESIGN_TYPE_LABELS: Record<number, string> = {
 const FUNCTION_TYPE_LABELS: Record<number, string> = {
     0: 'UsagiCard',
     1: 'MaiMaiCN',
+}
+
+const MANUFACTURING_TYPE_LABELS: Record<number, string> = {
+    0: 'SELENIUM_425_675',
 }
 
 const showTypeModal = ref(false)
@@ -850,6 +857,14 @@ async function handleDeleteType(id: string) {
                     <label class="form-control">
                         <span class="label-text text-sm mb-1">描述</span>
                         <input v-model="materialForm.description" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">制造类型</span>
+                        <select v-model="materialForm.manufacturing_type" class="select select-bordered select-sm w-full">
+                            <option v-for="(label, val) in MANUFACTURING_TYPE_LABELS" :key="val" :value="Number(val)">
+                                {{ label }}
+                            </option>
+                        </select>
                     </label>
                     <label class="form-control">
                         <span class="label-text text-sm mb-1">价格修正（元）</span>

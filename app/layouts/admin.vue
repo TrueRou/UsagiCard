@@ -17,6 +17,7 @@ const navItems = computed(() => [
     { label: '批次管理', to: '/admin/batches', icon: 'mdi:package-variant-closed', show: hasPermission(UserPermission.ARTIFACTS_ADMIN) },
     { label: '兑换码', to: '/admin/redemptions', icon: 'mdi:ticket-confirmation-outline', show: hasPermission(UserPermission.PLATFORM_ADMIN) },
     { label: '平台配置', to: '/admin/platform', icon: 'mdi:cog-outline', show: hasPermission(UserPermission.PLATFORM_ADMIN) },
+    { label: '市场设置', to: '/admin/marketplace', icon: 'mdi:store-cog-outline', show: hasPermission(UserPermission.MARKETPLACE_ADMIN) },
 ])
 
 const visibleNavItems = computed(() => navItems.value.filter(item => item.show))

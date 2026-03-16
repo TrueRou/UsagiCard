@@ -16,6 +16,7 @@ const allPermissions = [
     { value: UserPermission.ARTIFACTS_ADMIN, label: '工件管理' },
     { value: UserPermission.ORDERS_ADMIN, label: '订单管理' },
     { value: UserPermission.PLATFORM_ADMIN, label: '平台管理' },
+    { value: UserPermission.MARKETPLACE_ADMIN, label: '市场管理' },
 ]
 
 function handleSearch() {

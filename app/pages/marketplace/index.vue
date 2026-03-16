@@ -1,7 +1,14 @@
 <script lang="ts" setup>
-const { allSeries } = useMarketplaceSeriesMap()
+const { allSeries, pending } = useMarketplaceSeriesMap()
+const { loggedIn } = useUserSession()
+const route = useRoute()
 
-const selectedSeriesKey = ref<MarketplaceSeriesKey>('usagicard')
+const selectedSeriesKey = ref<MarketplaceSeriesKey>('')
+
+watch(allSeries, (items) => {
+    if (!selectedSeriesKey.value && items.length > 0)
+        selectedSeriesKey.value = items[0]!.key
+}, { immediate: true })
 
 const selectedSeries = computed(() => {
     return allSeries.value.find(series => series.key === selectedSeriesKey.value) ?? allSeries.value[0]
@@ -19,8 +26,32 @@ const faqItems = [
 ]
 
 useHead({
-    title: '工坊 - 兔兔实验室',
+    title: '市场 - 兔兔实验室',
 })
+
+function getPresetPath(presetId: string) {
+    return `/marketplace/presets/${presetId}`
+}
+
+function getCheckoutPath(sku: MarketplaceSku) {
+    if (sku.presetId)
+        return `/marketplace/products?preset=${encodeURIComponent(sku.presetId)}`
+    return `/marketplace/products?type=${sku.designerType}`
+}
+
+async function handleOrderClick(sku: MarketplaceSku) {
+    const target = getCheckoutPath(sku)
+    if (!loggedIn.value) {
+        return navigateTo(`/auth/login?redirect=${encodeURIComponent(target)}`)
+    }
+    return navigateTo(target)
+}
+
+async function handleDetailClick(sku: MarketplaceSku) {
+    if (sku.presetId)
+        return navigateTo(getPresetPath(sku.presetId))
+    return navigateTo(`/marketplace/products?type=${sku.designerType}&from=${encodeURIComponent(route.fullPath)}`)
+}
 </script>
 
 <template>
@@ -30,7 +61,7 @@ useHead({
                 Marketplace
             </p>
             <h1 class="text-3xl sm:text-4xl font-semibold mt-2">
-                UsagiLab 工坊
+                UsagiLab 市场
             </h1>
             <p class="text-sm sm:text-base text-base-content/70 mt-3 max-w-3xl">
                 在这里挑选你喜欢的系列，可以先尝试设计，满意后再下单。每个系列都有独特的设计风格和功能定位，总有一款适合你。
@@ -41,7 +72,13 @@ useHead({
             <h2 class="text-xl font-semibold">
                 系列筛选
             </h2>
-            <div class="mt-4 flex flex-wrap gap-2">
+            <div v-if="pending" class="mt-4 text-sm text-base-content/60">
+                正在加载系列配置...
+            </div>
+            <div v-else-if="allSeries.length === 0" class="mt-4 text-sm text-base-content/60">
+                暂无可用系列
+            </div>
+            <div v-else class="mt-4 flex flex-wrap gap-2">
                 <button
                     v-for="series in allSeries"
                     :key="series.key"
@@ -64,6 +101,18 @@ useHead({
                 </p>
             </header>
 
+            <div class="grid sm:grid-cols-2 gap-3 mb-4" v-if="selectedSeries.cover || selectedSeries.showcaseVideo">
+                <div v-if="selectedSeries.cover" class="rounded-xl border border-base-300 overflow-hidden bg-base-100">
+                    <img :src="selectedSeries.cover" alt="series cover" class="w-full h-48 object-cover">
+                </div>
+                <div v-if="selectedSeries.showcaseVideo" class="rounded-xl border border-base-300 p-3 bg-base-100">
+                    <p class="text-xs text-base-content/60 mb-2">
+                        展示视频
+                    </p>
+                    <a :href="selectedSeries.showcaseVideo" target="_blank" rel="noopener" class="link link-primary text-sm break-all">{{ selectedSeries.showcaseVideo }}</a>
+                </div>
+            </div>
+
             <div class="overflow-x-auto border border-base-300 rounded-xl bg-base-100">
                 <table class="table table-zebra w-full min-w-230">
                     <thead>
@@ -71,7 +120,6 @@ useHead({
                             <th>SKU</th>
                             <th>材料</th>
                             <th>功能</th>
-                            <th>差异说明</th>
                             <th class="text-right">
                                 操作
                             </th>
@@ -98,16 +146,13 @@ useHead({
                                 </div>
                             </td>
                             <td>
-                                {{ sku.difference }}
-                            </td>
-                            <td>
                                 <div class="flex justify-end gap-2">
-                                    <NuxtLink class="btn btn-xs btn-outline" :to="`/marketplace/${sku.slug}`">
-                                        详情
-                                    </NuxtLink>
-                                    <NuxtLink class="btn btn-xs btn-primary" :to="`/designer?type=${sku.designerType}`">
-                                        设计
-                                    </NuxtLink>
+                                    <button class="btn btn-xs btn-outline" @click="handleDetailClick(sku)">
+                                        商品详情
+                                    </button>
+                                    <button class="btn btn-xs btn-primary" @click="handleOrderClick(sku)">
+                                        下单
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -116,16 +161,13 @@ useHead({
             </div>
         </section>
 
-        <section id="gallery" class="pt-8">
+        <section id="gallery" class="pt-8" v-if="selectedSeries?.feedbackImages?.length">
             <h2 class="text-xl font-semibold">
                 用户返图
             </h2>
-            <p class="text-sm text-base-content/70 mt-2">
-                <!-- 资源目录已预留到 /public/media/feedback，替换文件即可上线展示。 -->
-            </p>
             <ul class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <li v-for="n in 8" :key="n" class="aspect-square rounded-xl bg-base-200 border border-base-300 grid place-items-center text-xs text-base-content/60">
-                    feedback {{ n }}
+                <li v-for="url in selectedSeries.feedbackImages" :key="url" class="aspect-square rounded-xl bg-base-200 border border-base-300 overflow-hidden">
+                    <img :src="url" alt="feedback" class="w-full h-full object-cover">
                 </li>
             </ul>
         </section>

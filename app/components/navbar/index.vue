@@ -21,7 +21,7 @@ const detached = computed(() => scrollY.value > 0)
                     </li>
                     <li>
                         <NuxtLink to="/marketplace">
-                            工坊
+                            市场
                         </NuxtLink>
                     </li>
                 </ul>
@@ -35,7 +35,7 @@ const detached = computed(() => scrollY.value > 0)
                 首页
             </NuxtLink>
             <NuxtLink class="btn btn-ghost" to="/marketplace">
-                工坊
+                市场
             </NuxtLink>
         </div>
         <menu class="navbar-end">

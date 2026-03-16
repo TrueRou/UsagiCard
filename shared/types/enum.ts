@@ -73,4 +73,5 @@ export enum UserPermission {
     ARTIFACTS_ADMIN = 3,
     ORDERS_ADMIN = 4,
     PLATFORM_ADMIN = 5,
+    MARKETPLACE_ADMIN = 6,
 }
