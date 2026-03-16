@@ -10,7 +10,6 @@ const props = defineProps<{
     selectorCtx: UseImageSelectorCtx
 }>()
 
-const { imgPreview } = useUtils()
 const { $leporid } = useNuxtApp()
 const { data: imageAspect } = await useLeporid<ImageAspectPublic>(`/api/images/aspects/${props.selectorCtx.selectorImageAspect?.value}`)
 
@@ -45,8 +44,6 @@ const pending = ref(false)
 const { loggedIn } = useUserSession()
 
 const imageKey = (image: ImageSimplePublic) => image.id
-
-const imageUrl = (image: ImageSimplePublic) => imgPreview(image.id)
 
 function isSelected(image: ImageSimplePublic) {
     if (!selectedImage.value)
@@ -326,7 +323,7 @@ watch([activeSecondary], async () => {
                             <ImageCard
                                 v-for="image in images" :key="imageKey(image)" :image="image"
                                 :image-aspect="imageAspect"
-                                :image-url="imageUrl(image)" :selected="isSelected(image)"
+                                :selected="isSelected(image)"
                                 :disabled="pending" :hided-labels="selectorCtx.selectorInitialFilters.value"
                                 @select="updateSelection"
                                 @rename="handleRename"

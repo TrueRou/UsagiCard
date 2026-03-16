@@ -5,7 +5,6 @@ const props = defineProps<{
     image: ImageSimplePublic
     imageAspect: ImageAspectPublic
     hidedLabels?: string[]
-    imageUrl: string
     selected: boolean
     disabled?: boolean
 }>()
@@ -21,6 +20,9 @@ const { user } = useUserSession()
 const isEditing = ref(false)
 const editableName = ref(props.image.name)
 const isLoaded = ref(false)
+const imageRef = useTemplateRef<HTMLImageElement>('imageRef')
+
+const { img, imgPreview } = useUtils()
 
 watch(() => props.image.name, (name) => {
     if (!isEditing.value) {
@@ -81,7 +83,10 @@ const skeletonAspectRatio = computed(() => {
     return `${width} / ${height}`
 })
 
-function handleImageLoad() {
+function handleImageLoad(isError: boolean = false) {
+    if (!isLoaded.value && isError && imageRef.value) {
+        imageRef.value.src = img(props.image.id)
+    }
     isLoaded.value = true
 }
 </script>
@@ -121,9 +126,11 @@ function handleImageLoad() {
                         :class="{ 'opacity-0': isLoaded }" aria-hidden="true"
                     />
                     <img
-                        :src="imageUrl" :alt="image.name" loading="lazy"
-                        class="absolute inset-0 h-full w-full rounded-lg object-cover transition-opacity duration-300 ease-out"
-                        :class="{ 'opacity-0': !isLoaded }" @load="handleImageLoad" @error="handleImageLoad"
+                        ref="imageRef"
+                        :src="imgPreview(image.id)"
+                        :alt="image.name" loading="lazy" class="absolute inset-0 h-full w-full rounded-lg object-cover transition-opacity duration-300 ease-out"
+                        :class="{ 'opacity-0': !isLoaded }"
+                        @load="handleImageLoad(false)" @error="handleImageLoad(true)"
                     >
                 </div>
             </div>

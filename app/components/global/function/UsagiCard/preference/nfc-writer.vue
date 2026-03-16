@@ -129,10 +129,6 @@ async function readCard() {
                 }
 
                 scanStep.value = 3
-                notificationStore.addNotification({
-                    type: 'success',
-                    message: `读取成功：${sourceUrl}`,
-                })
                 resolve()
             }
         })
@@ -320,9 +316,6 @@ watch(() => props.show, (show) => {
                 </template>
                 <button v-else class="btn btn-primary" type="button" disabled>
                     写入中...
-                </button>
-                <button class="btn" type="button" @click="handleClose()">
-                    关闭
                 </button>
             </div>
         </div>
