@@ -31,14 +31,6 @@ useHead({
         </section>
 
         <section class="max-w-6xl mx-auto px-6 sm:px-10 py-6">
-            <header class="mb-4">
-                <h2 class="text-2xl font-semibold">
-                    系列速览
-                </h2>
-                <p class="text-sm text-base-content/70 mt-1">
-                    目前开放 {{ allSeries.length }} 个系列，每个系列都有独特的设计风格和产品，总有一款适合你。
-                </p>
-            </header>
             <ul class="grid gap-4 sm:grid-cols-2">
                 <li
                     v-for="series in allSeries"
@@ -62,14 +54,6 @@ useHead({
         </section>
 
         <section class="max-w-6xl mx-auto px-6 sm:px-10 py-6">
-            <header class="mb-4">
-                <h2 class="text-2xl font-semibold">
-                    用户返图
-                </h2>
-                <p class="text-sm text-base-content/70 mt-1">
-                    宣传视频与返图资源位，展示了部分群友的定制成品和设计预览，欢迎加入我们一起分享你的定制故事。
-                </p>
-            </header>
             <div class="grid gap-4 lg:grid-cols-3">
                 <!-- <div class="rounded-2xl border border-base-300 bg-base-100 p-4 lg:col-span-2">
                     <p class="text-sm font-semibold mb-2">
