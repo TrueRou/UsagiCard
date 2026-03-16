@@ -69,9 +69,8 @@ useHead({
                     <thead>
                         <tr>
                             <th>SKU</th>
-                            <th>定位</th>
-                            <th>账号系统</th>
-                            <th>卡片主页</th>
+                            <th>材料</th>
+                            <th>功能</th>
                             <th>差异说明</th>
                             <th class="text-right">
                                 操作
@@ -89,19 +88,16 @@ useHead({
                                 </p>
                             </td>
                             <td>
-                                <span class="badge badge-outline">{{ sku.priceHint }}</span>
+                                <div class="flex gap-2 text-nowrap">
+                                    <span v-for="tag in sku.materialTags" :key="tag" class="badge badge-outline">{{ tag }}</span>
+                                </div>
                             </td>
                             <td>
-                                <span class="badge" :class="sku.accountSupport ? 'badge-success' : 'badge-ghost'">
-                                    {{ sku.accountSupport ? '支持' : '不支持' }}
-                                </span>
+                                <div class="flex gap-2 text-nowrap">
+                                    <span v-for="tag in sku.functionTags" :key="tag" class="badge badge-outline">{{ tag }}</span>
+                                </div>
                             </td>
                             <td>
-                                <span class="badge" :class="sku.cardPageSupport ? 'badge-success' : 'badge-ghost'">
-                                    {{ sku.cardPageSupport ? '支持' : '不支持' }}
-                                </span>
-                            </td>
-                            <td class="text-sm text-base-content/80">
                                 {{ sku.difference }}
                             </td>
                             <td>

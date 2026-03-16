@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import NfcWriter from './nfc-writer.vue'
+
 const props = defineProps<{
     artifactId: string
 }>()
@@ -66,6 +68,7 @@ const derivedBehaviors = [
 const newUserId = ref('')
 const addUserError = ref('')
 const showAddUserDialog = ref(false)
+const showNfcWriter = ref(false)
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -112,6 +115,14 @@ function addUser(id?: string) {
 
 function removeUser(id: string) {
     storage.value.secondary_auth_users = (storage.value.secondary_auth_users ?? []).filter(u => u !== id)
+}
+
+function openNfcWriter() {
+    showNfcWriter.value = true
+}
+
+function closeNfcWriter() {
+    showNfcWriter.value = false
 }
 </script>
 
@@ -166,6 +177,14 @@ function removeUser(id: string) {
                 </svg>
             </button>
             <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-44 p-1 shadow-lg border border-base-200">
+                <li>
+                    <button type="button" @click="openNfcWriter()">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        修改NFC模式
+                    </button>
+                </li>
                 <li>
                     <button type="button" @click="restartTour()">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -420,4 +439,10 @@ function removeUser(id: string) {
             </div>
         </div>
     </dialog>
+
+    <NfcWriter
+        :show="showNfcWriter"
+        :artifact-id="props.artifactId"
+        @close="closeNfcWriter()"
+    />
 </template>
