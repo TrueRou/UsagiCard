@@ -22,7 +22,7 @@ useHead({
             </p>
             <div class="mt-7 flex flex-wrap gap-3">
                 <NuxtLink class="btn btn-primary" to="/marketplace">
-                    浏览工坊
+                    浏览市场
                 </NuxtLink>
                 <NuxtLink class="btn btn-outline" to="/designer?type=0">
                     尝试设计
