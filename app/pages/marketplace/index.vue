@@ -101,7 +101,7 @@ async function handleDetailClick(sku: MarketplaceSku) {
                 </p>
             </header>
 
-            <div class="grid sm:grid-cols-2 gap-3 mb-4" v-if="selectedSeries.cover || selectedSeries.showcaseVideo">
+            <div v-if="selectedSeries.cover || selectedSeries.showcaseVideo" class="grid sm:grid-cols-2 gap-3 mb-4">
                 <div v-if="selectedSeries.cover" class="rounded-xl border border-base-300 overflow-hidden bg-base-100">
                     <img :src="selectedSeries.cover" alt="series cover" class="w-full h-48 object-cover">
                 </div>
@@ -161,7 +161,7 @@ async function handleDetailClick(sku: MarketplaceSku) {
             </div>
         </section>
 
-        <section id="gallery" class="pt-8" v-if="selectedSeries?.feedbackImages?.length">
+        <section v-if="selectedSeries?.feedbackImages?.length" id="gallery" class="pt-8">
             <h2 class="text-xl font-semibold">
                 用户返图
             </h2>
@@ -186,14 +186,6 @@ async function handleDetailClick(sku: MarketplaceSku) {
                     </p>
                 </li>
             </ul>
-            <div class="mt-5 flex flex-wrap gap-2">
-                <NuxtLink class="btn btn-primary btn-sm" to="/designer?type=0">
-                    先试设计器
-                </NuxtLink>
-                <NuxtLink class="btn btn-ghost btn-sm" to="/auth/register?redirect=/marketplace">
-                    注册后再下单
-                </NuxtLink>
-            </div>
         </section>
     </div>
 </template>

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const dialogStore = useDialogStore()
+const presetPickerRef = ref<any>()
+const seriesPickerRef = ref<any>()
 
 const seriesParams = reactive({ page_number: 1, page_size: 20 })
 const { data: seriesPage, refresh: refreshSeries } = await useLeporid<any>('/api/admin/marketplace/series', {
@@ -10,12 +12,6 @@ const skuParams = reactive({ page_number: 1, page_size: 20 })
 const { data: skuPage, refresh: refreshSkus } = await useLeporid<any>('/api/admin/marketplace/skus', {
     params: skuParams,
 })
-
-const { data: presetPage } = await useLeporid<any>('/api/admin/platform/presets', {
-    params: { page_number: 1, page_size: 100 },
-})
-
-const presets = computed(() => presetPage.value?.records ?? [])
 
 const isProcessing = ref(false)
 
@@ -120,6 +116,8 @@ async function deleteSeries(id: string) {
 
 const showSkuModal = ref(false)
 const editingSkuId = ref<string | null>(null)
+const selectedPresetForSku = ref<any | null>(null)
+const selectedSeriesForSku = ref<any | null>(null)
 const skuForm = reactive({
     slug: '',
     name: '',
@@ -135,6 +133,8 @@ const skuForm = reactive({
 
 function openSkuCreate() {
     editingSkuId.value = null
+    selectedPresetForSku.value = null
+    selectedSeriesForSku.value = null
     Object.assign(skuForm, {
         slug: '',
         name: '',
@@ -144,14 +144,20 @@ function openSkuCreate() {
         material_tags_text: '',
         function_tags_text: '',
         designer_type: 0,
-        preset_id: presets.value[0]?.id || '',
-        series_id: seriesPage.value?.records?.[0]?.id || '',
+        preset_id: '',
+        series_id: '',
     })
     showSkuModal.value = true
 }
 
 function openSkuEdit(item: any) {
     editingSkuId.value = item.id
+    selectedPresetForSku.value = item.preset_id
+        ? { id: item.preset_id, product_name: item.preset?.product_name || item.preset_id.slice(-8) }
+        : null
+    selectedSeriesForSku.value = item.series_id
+        ? { id: item.series_id, name: item.series?.name || item.series_id.slice(-8), key: item.series?.key || '' }
+        : null
     Object.assign(skuForm, {
         slug: item.slug,
         name: item.name,
@@ -167,7 +173,20 @@ function openSkuEdit(item: any) {
     showSkuModal.value = true
 }
 
+const canSaveSku = computed(() => {
+    if (isProcessing.value)
+        return false
+    if (!skuForm.slug.trim() || !skuForm.name.trim() || !skuForm.start_price.trim())
+        return false
+    if (!skuForm.preset_id || !skuForm.series_id)
+        return false
+    return true
+})
+
 async function saveSku() {
+    if (!canSaveSku.value)
+        return
+
     isProcessing.value = true
     try {
         const body = {
@@ -179,8 +198,8 @@ async function saveSku() {
             material_tags: skuForm.material_tags_text.split('\n').map(v => v.trim()).filter(Boolean),
             function_tags: skuForm.function_tags_text.split('\n').map(v => v.trim()).filter(Boolean),
             designer_type: skuForm.designer_type,
-            preset_id: skuForm.preset_id,
-            series_id: skuForm.series_id,
+            preset_id: selectedPresetForSku.value?.id || skuForm.preset_id,
+            series_id: selectedSeriesForSku.value?.id || skuForm.series_id,
         }
 
         if (editingSkuId.value) {
@@ -351,14 +370,35 @@ definePageMeta({
                 <h3 class="text-lg font-bold mb-4">
                     {{ editingSeriesId ? '编辑系列' : '新增系列' }}
                 </h3>
-                <div class="space-y-2">
-                    <input v-model="seriesForm.key" class="input input-bordered input-sm w-full" placeholder="key">
-                    <input v-model="seriesForm.name" class="input input-bordered input-sm w-full" placeholder="名称">
-                    <input v-model="seriesForm.title" class="input input-bordered input-sm w-full" placeholder="标题">
-                    <input v-model="seriesForm.summary" class="input input-bordered input-sm w-full" placeholder="简介">
-                    <input v-model="seriesForm.cover_url" class="input input-bordered input-sm w-full" placeholder="封面图片URL">
-                    <input v-model="seriesForm.showcase_video_url" class="input input-bordered input-sm w-full" placeholder="展示视频URL(可选)">
-                    <textarea v-model="seriesForm.feedback_urls_text" class="textarea textarea-bordered w-full h-28" placeholder="晒图URL（每行一个）" />
+                <div class="mt-4 space-y-3">
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">Key</span>
+                        <input v-model="seriesForm.key" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">名称</span>
+                        <input v-model="seriesForm.name" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">标题</span>
+                        <input v-model="seriesForm.title" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">简介</span>
+                        <input v-model="seriesForm.summary" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">封面图片 URL</span>
+                        <input v-model="seriesForm.cover_url" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">展示视频 URL（可选）</span>
+                        <input v-model="seriesForm.showcase_video_url" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control flex flex-col">
+                        <span class="label-text text-sm mb-1">晒图 URL（每行一个）</span>
+                        <textarea v-model="seriesForm.feedback_urls_text" class="textarea textarea-bordered w-full h-28" />
+                    </label>
                 </div>
                 <div class="modal-action">
                     <button class="btn btn-outline btn-sm" @click="showSeriesModal = false">
@@ -376,42 +416,106 @@ definePageMeta({
                 <h3 class="text-lg font-bold mb-4">
                     {{ editingSkuId ? '编辑SKU' : '新增SKU' }}
                 </h3>
-                <div class="space-y-2">
-                    <input v-model="skuForm.slug" class="input input-bordered input-sm w-full" placeholder="slug">
-                    <input v-model="skuForm.name" class="input input-bordered input-sm w-full" placeholder="名称">
-                    <input v-model="skuForm.subtitle" class="input input-bordered input-sm w-full" placeholder="副标题">
-                    <input v-model="skuForm.start_price" class="input input-bordered input-sm w-full" placeholder="起步价文本，如 ￥199 起">
-                    <input v-model="skuForm.description" class="input input-bordered input-sm w-full" placeholder="描述">
-                    <textarea v-model="skuForm.material_tags_text" class="textarea textarea-bordered w-full h-20" placeholder="材料标签（每行一个）" />
-                    <textarea v-model="skuForm.function_tags_text" class="textarea textarea-bordered w-full h-20" placeholder="功能标签（每行一个）" />
-                    <select v-model="skuForm.designer_type" class="select select-bordered select-sm w-full">
-                        <option :value="0">
-                            UsagiCardDX
-                        </option>
-                        <option :value="1">
-                            UsagiCardWars
-                        </option>
-                    </select>
-                    <select v-model="skuForm.series_id" class="select select-bordered select-sm w-full">
-                        <option v-for="item in seriesPage?.records || []" :key="item.id" :value="item.id">
-                            {{ item.name }} ({{ item.key }})
-                        </option>
-                    </select>
-                    <select v-model="skuForm.preset_id" class="select select-bordered select-sm w-full">
-                        <option v-for="item in presets" :key="item.id" :value="item.id">
-                            {{ item.product_name }}
-                        </option>
-                    </select>
+                <div class="mt-4 space-y-3">
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">Slug</span>
+                        <input v-model="skuForm.slug" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">名称</span>
+                        <input v-model="skuForm.name" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">副标题</span>
+                        <input v-model="skuForm.subtitle" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">起步价文本</span>
+                        <input v-model="skuForm.start_price" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">描述</span>
+                        <input v-model="skuForm.description" class="input input-bordered input-sm w-full">
+                    </label>
+                    <label class="form-control flex flex-col">
+                        <span class="label-text text-sm mb-1">材料标签（每行一个）</span>
+                        <textarea v-model="skuForm.material_tags_text" class="textarea textarea-bordered w-full h-20" />
+                    </label>
+                    <label class="form-control flex flex-col">
+                        <span class="label-text text-sm mb-1">功能标签（每行一个）</span>
+                        <textarea v-model="skuForm.function_tags_text" class="textarea textarea-bordered w-full h-20" />
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text text-sm mb-1">设计器类型</span>
+                        <select v-model="skuForm.designer_type" class="select select-bordered select-sm w-full">
+                            <option :value="0">
+                                UsagiCardDX
+                            </option>
+                            <option :value="1">
+                                UsagiCardWars
+                            </option>
+                        </select>
+                    </label>
+                    <div class="form-control">
+                        <span class="label-text text-sm mb-1">所属系列（必选）</span>
+                        <div class="flex gap-2">
+                            <input
+                                :value="selectedSeriesForSku ? `${selectedSeriesForSku.name}${selectedSeriesForSku.key ? ` (${selectedSeriesForSku.key})` : ''}` : ''"
+                                readonly
+                                class="input input-bordered input-sm flex-1 text-xs"
+                            >
+                            <button
+                                class="btn btn-accent btn-sm"
+                                type="button"
+                                @click="seriesPickerRef?.open(selectedSeriesForSku ? [selectedSeriesForSku] : [])"
+                            >
+                                {{ selectedSeriesForSku ? '重选' : '选择' }}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-control">
+                        <span class="label-text text-sm mb-1">关联预设（必选）</span>
+                        <div class="flex gap-2">
+                            <input
+                                :value="selectedPresetForSku ? selectedPresetForSku.product_name : ''"
+                                readonly
+                                class="input input-bordered input-sm flex-1 text-xs"
+                            >
+                            <button
+                                class="btn btn-accent btn-sm"
+                                type="button"
+                                @click="presetPickerRef?.open(selectedPresetForSku ? [selectedPresetForSku] : [])"
+                            >
+                                {{ selectedPresetForSku ? '重选' : '选择' }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-action">
                     <button class="btn btn-outline btn-sm" @click="showSkuModal = false">
                         取消
                     </button>
-                    <button class="btn btn-primary btn-sm" :disabled="isProcessing" @click="saveSku">
+                    <button class="btn btn-primary btn-sm" :disabled="!canSaveSku" @click="saveSku">
                         保存
                     </button>
                 </div>
             </div>
         </dialog>
+
+        <AdminResourcePicker
+            ref="seriesPickerRef"
+            resource-type="marketplaceSeries"
+            :multiple="false"
+            title="选择市场系列"
+            @confirm="items => { if (items[0]) { selectedSeriesForSku = items[0]; skuForm.series_id = items[0].id } }"
+        />
+
+        <AdminResourcePicker
+            ref="presetPickerRef"
+            resource-type="preset"
+            :multiple="false"
+            title="选择关联预设"
+            @confirm="items => { if (items[0]) { selectedPresetForSku = items[0]; skuForm.preset_id = items[0].id } }"
+        />
     </div>
 </template>

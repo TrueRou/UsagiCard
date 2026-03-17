@@ -31,12 +31,6 @@ if (error.value || !preset.value) {
     await navigateTo('/marketplace')
 }
 
-const prettyDesign = computed(() => {
-    if (!preset.value)
-        return ''
-    return JSON.stringify(preset.value.product_design, null, 2)
-})
-
 useHead({
     title: `${preset.value?.product_name ?? '预设详情'} - 市场`,
 })
@@ -87,13 +81,6 @@ async function handleContinue() {
                         {{ preset.type.description }}
                     </p>
                 </div>
-            </div>
-
-            <div class="border border-base-300 rounded-lg p-4">
-                <p class="text-xs uppercase tracking-wider text-base-content/60 mb-2">
-                    预设设计（JSON）
-                </p>
-                <pre class="text-xs whitespace-pre-wrap wrap-break-word text-base-content/80">{{ prettyDesign }}</pre>
             </div>
 
             <div class="pt-2 flex justify-end">

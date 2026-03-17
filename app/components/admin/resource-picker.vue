@@ -1,5 +1,5 @@
 <script setup lang="ts">
-type ResourceType = 'product' | 'artifact' | 'preset' | 'sku' | 'user' | 'material' | 'type'
+type ResourceType = 'product' | 'artifact' | 'preset' | 'sku' | 'user' | 'material' | 'type' | 'marketplaceSeries'
 
 interface ResourceConfig {
     url: string
@@ -85,6 +85,12 @@ const resourceConfigs: Record<ResourceType, ResourceConfig> = {
         label: '商品类型',
         displayFn: item => item.name,
         subtitleFn: item => item.description,
+    },
+    marketplaceSeries: {
+        url: '/api/admin/marketplace/series',
+        label: '市场系列',
+        displayFn: item => item.name,
+        subtitleFn: item => `${item.title || ''}  ·  ${item.key || ''}`,
     },
 }
 
