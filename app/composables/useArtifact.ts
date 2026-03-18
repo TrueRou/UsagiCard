@@ -1,21 +1,19 @@
 export async function useArtifact(artifactId: string) {
     const artifactAsyncData = await useLeporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
-    const { data: artifact, error } = artifactAsyncData
+    const { data, error } = artifactAsyncData
 
-    if (artifact.value === undefined) {
-        throw createError({ statusCode: 404, statusText: '工件不存在', fatal: true, data: error.value })
-    }
-
-    const artifactDesignType = toRef(artifact.value.product.type.design_type)
-    const artifactDesign = toRef(artifact.value.product.design)
-    const artifactProduct = toRef(artifact.value.product)
-    const useDesignCtx = await useDesign(artifactDesignType, artifactDesign, artifactProduct, artifact)
+    const artifact = computed(() => {
+        if (data.value === undefined) {
+            throw createError({ statusCode: 404, statusText: '工件不存在', fatal: true, data: error.value })
+        }
+        return data.value
+    })
 
     const storageSaving = ref(false)
     const storageSave = async (newStorage: Record<string, any>) => {
         storageSaving.value = true
         try {
-            artifact.value = await useNuxtApp().$leporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
+            data.value = await useNuxtApp().$leporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
                 method: 'PATCH',
                 body: { storage: newStorage },
             })
@@ -26,10 +24,15 @@ export async function useArtifact(artifactId: string) {
     }
 
     return {
-        artifact: artifact as Ref<ArtifactUserResponse>,
+        artifact,
         artifactAsyncData,
         storageSave,
         storageSaving,
-        useDesignCtx,
+        useDesignCtx: useDesign(
+            computed(() => artifact.value.product.design),
+            computed(() => artifact.value.product.type.design_type),
+            computed(() => artifact.value.product),
+            computed(() => artifact.value),
+        ),
     }
 }
