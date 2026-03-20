@@ -4,7 +4,7 @@ export async function useArtifact(artifactId: string) {
 
     const artifact = computed(() => {
         if (data.value === undefined) {
-            throw createError({ statusCode: 404, statusText: '工件不存在', fatal: true, data: error.value })
+            throw createError({ statusCode: 404, statusMessage: '工件不存在', message: error.value?.message })
         }
         return data.value
     })
