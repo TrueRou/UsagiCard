@@ -23,6 +23,14 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
+        session: {
+            name: 'nuxt-session',
+            password: process.env.NUXT_SESSION_PASSWORD || '',
+            maxAge: 31536000,
+            cookie: {
+                sameSite: 'lax',
+            },
+        },
         leporid: {
             baseURL: 'https://api.turou.fun/leporid',
         },
