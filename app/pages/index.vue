@@ -55,6 +55,14 @@ async function handleDetailClick(sku: MarketplaceSku) {
             <p class="text-base sm:text-lg max-w-3xl text-base-content/80">
                 将独特的设计与个性化的功能结合，快速定制属于你的高技术力周边，从创意到成品一步到位。
             </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a class="btn btn-accent" href="/docs">
+                    文档
+                </a>
+                <a class="btn btn-primary" href="/docs/begin">
+                    快速开始
+                </a>
+            </div>
         </section>
         <div class="max-w-6xl mx-auto px-6 sm:px-10">
             <section v-for="selectedSeries in allSeries" id="products" :key="selectedSeries.key" class="pt-8">
@@ -85,7 +93,7 @@ async function handleDetailClick(sku: MarketplaceSku) {
                             {{ value.name }}
                         </a>
                     </template>
-                    <NuxtLink class="btn btn-sm btn-outline" :to="{ path: '/marketplace', query: { key: selectedSeries.key } }">
+                    <NuxtLink class="btn btn-sm btn-secondary" :to="{ path: '/marketplace', query: { key: selectedSeries.key } }">
                         详情
                     </NuxtLink>
                 </div>
