@@ -21,6 +21,13 @@ useHead({
 const storageDefaultTab = (artifact.value.storage as UsagiCardStorage)?.default_function_tab ?? undefined
 const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabKey || storageDefaultTab)
 
+const currentDocLink = computed<string | null>(() => {
+    if (activeTabKey.value) {
+        return `/docs/functions/${activeTabKey.value.substring(0, activeTabKey.value.indexOf('-')) || activeTabKey.value}`
+    }
+    return null
+})
+
 const { startPhase2 } = useTour(artifact, storageSave)
 
 onMounted(() => {
@@ -134,6 +141,11 @@ function goBack() {
             <Transition name="content-fade" mode="out-in">
                 <div v-if="activeComponent" :key="activeTabKey" class="container mx-auto p-4 lg:p-6">
                     <component :is="activeComponent" :artifact-id="artifactId" />
+                    <div v-if="currentDocLink" data-tour="fn-doc-link" class="flex justify-center my-4">
+                        <a :href="currentDocLink" class="text-xs text-base-content/60 underline underline-offset-4 hover:text-primary transition-colors">
+                            查看该功能模块的文档
+                        </a>
+                    </div>
                 </div>
             </Transition>
         </main>
