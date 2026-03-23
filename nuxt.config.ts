@@ -40,8 +40,8 @@ export default defineNuxtConfig({
         },
         public: {
             URL: 'http://localhost:3000',
-            imageURL: 'https://assets.turou.fun/leporid/images',
-            imagePreviewURL: 'https://assets.turou.fun/leporid/thumbnails',
+            imageURL: 'https://cdn.assets.turou.fun/leporid/images',
+            imagePreviewURL: 'https://cdn.assets.turou.fun/leporid/thumbnails',
         },
     },
     nitro: {
