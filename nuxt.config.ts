@@ -3,12 +3,23 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
-    devtools: { enabled: true },
+    devtools: { enabled: process.env.NODE_ENV === 'development' },
     css: ['~/assets/css/main.css'],
+    app: {
+        head: {
+            link: [
+                { rel: 'dns-prefetch', href: 'https://cdn.assets.turou.fun' },
+                { rel: 'preconnect', href: 'https://cdn.assets.turou.fun', crossorigin: '' },
+            ],
+        },
+    },
     vite: {
         plugins: [
             tailwindcss(),
         ],
+        build: {
+            sourcemap: false,
+        },
     },
     modules: [
         '@pinia/nuxt',
