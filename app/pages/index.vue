@@ -56,10 +56,10 @@ async function handleDetailClick(sku: MarketplaceSku) {
                 将独特的设计与个性化的功能结合，快速定制属于你的高技术力周边，从创意到成品一步到位。
             </p>
             <div class="mt-4 flex flex-wrap gap-2">
-                <a class="btn btn-accent" href="/docs">
+                <a class="btn btn-accent" href="/docs/index.html">
                     文档
                 </a>
-                <a class="btn btn-primary" href="/docs/begin">
+                <a class="btn btn-primary" href="/docs/begin.html">
                     快速开始
                 </a>
             </div>

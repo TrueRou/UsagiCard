@@ -23,7 +23,7 @@ const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabK
 
 const currentDocLink = computed<string | null>(() => {
     if (activeTabKey.value) {
-        return `/docs/functions/${activeTabKey.value.substring(0, activeTabKey.value.indexOf('-')) || activeTabKey.value}`
+        return `/docs/functions/${activeTabKey.value.substring(0, activeTabKey.value.indexOf('-')) || activeTabKey.value}.html`
     }
     return null
 })
