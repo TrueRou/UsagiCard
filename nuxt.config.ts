@@ -49,6 +49,9 @@ export default defineNuxtConfig({
             baseURL: 'https://api.turou.fun/otoge',
             developerToken: '',
         },
+        credential: {
+            key: '',
+        },
         public: {
             URL: 'http://localhost:3000',
             imageURL: 'https://cdn.assets.turou.fun/leporid/images',
