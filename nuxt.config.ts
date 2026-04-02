@@ -44,13 +44,11 @@ export default defineNuxtConfig({
         },
         leporid: {
             baseURL: 'https://api.turou.fun/leporid',
+            credentialKey: '',
         },
         otoge: {
             baseURL: 'https://api.turou.fun/otoge',
             developerToken: '',
-        },
-        credential: {
-            key: '',
         },
         public: {
             URL: 'http://localhost:3000',
