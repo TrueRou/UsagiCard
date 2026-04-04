@@ -5,7 +5,7 @@ const props = defineProps<{
         statusMessage?: string
         message?: string
         stack?: string
-        data?: unknown
+        data?: Record<string, any>
     }
 }>()
 
@@ -33,6 +33,45 @@ const dataText = computed(() => {
         return String(props.error.data)
     }
 })
+
+const actionHint = computed(() => {
+    const hint = props.error.data?.hint
+    return typeof hint === 'string' && hint.trim() ? hint : ''
+})
+
+const actionTo = computed(() => {
+    const to = props.error.data?.to
+    return typeof to === 'string' && to.trim() ? to : ''
+})
+
+const actionRedirect = computed(() => {
+    const redirect = props.error.data?.redirect
+    return typeof redirect === 'string' && redirect.trim() ? redirect : ''
+})
+
+const actionClear = computed(() => {
+    const clear = props.error.data?.clear
+    return clear === true || clear === 1 || clear === '1' || clear === 'true'
+})
+
+const actionLink = computed(() => {
+    if (!actionTo.value || !actionHint.value)
+        return null
+
+    if (!actionRedirect.value && !actionClear.value)
+        return actionTo.value
+
+    const query: Record<string, string> = {}
+    if (actionRedirect.value)
+        query.redirect = actionRedirect.value
+    if (actionClear.value)
+        query.clear = '1'
+
+    return {
+        path: actionTo.value,
+        query,
+    }
+})
 </script>
 
 <template>
@@ -49,6 +88,14 @@ const dataText = computed(() => {
             <p class="text-base text-base-content/80 md:text-lg">
                 {{ description }}
             </p>
+
+            <NuxtLink
+                v-if="actionLink"
+                :to="actionLink"
+                class="btn btn-primary"
+            >
+                {{ actionHint }}
+            </NuxtLink>
 
             <div
                 v-if="stackText || dataText"
