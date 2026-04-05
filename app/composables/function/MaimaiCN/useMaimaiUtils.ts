@@ -142,6 +142,19 @@ export const RateTypeMap: Record<RateType, string> = {
     [RateType.D]: 'D',
 }
 
+export interface ScoreExtend extends MaimaiScore {
+    dx_star: number | null
+    version: number
+    level_dx_score: number
+    play_time: string | null
+}
+
+export interface PlateObject {
+    song: Song
+    levels: LevelIndex[]
+    scores: ScoreExtend[]
+}
+
 export enum ViewMode {
     LIST = 'list',
     TILE = 'tile',
