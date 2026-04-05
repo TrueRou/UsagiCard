@@ -9,18 +9,18 @@ definePageMeta({
 
 const route = useRoute()
 const artifactId = route.params.id as string // UUID string
-const { artifact, useDesignCtx, storageSave } = await useArtifact(artifactId)
+const { artifact, storageOf, storageSave, useDesignCtx } = await useArtifact(artifactId)
 const adaptiveComponent = computed(() => useDesignCtx.adaptiveViewComponent.value)
 
 useHead({
     title: `${artifact.value.product.type.name} - 兔兔实验室`,
 })
 
-const { startPhase1 } = useTour(artifact, storageSave)
+const { startPhase1 } = useTour(artifact, storageOf, storageSave)
 
 onMounted(() => {
-    const storage = artifact.value.storage as UsagiCardStorage
-    if (!storage?.skip_tour) {
+    const ucStorage = storageOf('UsagiCard').value
+    if (!ucStorage?.skip_tour) {
         setTimeout(() => startPhase1(), 500)
     }
 })

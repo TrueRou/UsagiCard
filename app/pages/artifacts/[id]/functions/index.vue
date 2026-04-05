@@ -12,13 +12,13 @@ const router = useRouter()
 const artifactId = route.params.id as string
 const tabKey = route.query.tab as string | undefined
 
-const { artifact, storageSave } = await useArtifact(artifactId)
+const { artifact, storageOf, storageSave } = await useArtifact(artifactId)
 
 useHead({
     title: `${artifact.value.product.type.name} - 兔兔实验室`,
 })
 
-const storageDefaultTab = (artifact.value.storage as UsagiCardStorage)?.default_function_tab ?? undefined
+const storageDefaultTab = storageOf('UsagiCard').value?.default_function_tab ?? undefined
 const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabKey || storageDefaultTab)
 
 const currentDocLink = computed<string | null>(() => {
@@ -28,7 +28,7 @@ const currentDocLink = computed<string | null>(() => {
     return null
 })
 
-const { startPhase2 } = useTour(artifact, storageSave)
+const { startPhase2 } = useTour(artifact, storageOf, storageSave)
 
 onMounted(() => {
     if (route.query.tour === 'continue') {

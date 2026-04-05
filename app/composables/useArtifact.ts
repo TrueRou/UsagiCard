@@ -1,3 +1,5 @@
+type StorageNamespace = keyof ArtifactStorage
+
 export async function useArtifact(artifactId: string) {
     const artifactAsyncData = await useLeporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
     const { data, error } = artifactAsyncData
@@ -9,13 +11,18 @@ export async function useArtifact(artifactId: string) {
         return data.value
     })
 
+    const storageOf = <K extends StorageNamespace>(ns: K) => {
+        return computed(() => (artifact.value.storage as ArtifactStorage)[ns])
+    }
+
     const storageSaving = ref(false)
-    const storageSave = async (newStorage: Record<string, any>) => {
+    const storageSave = async <K extends StorageNamespace>(namespace: K, newData: NonNullable<ArtifactStorage[K]>) => {
         storageSaving.value = true
         try {
+            const fullStorage = { ...artifact.value.storage, [namespace]: newData }
             data.value = await useNuxtApp().$leporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
                 method: 'PATCH',
-                body: { storage: newStorage },
+                body: { storage: fullStorage },
             })
         }
         finally {
@@ -26,6 +33,7 @@ export async function useArtifact(artifactId: string) {
     return {
         artifact,
         artifactAsyncData,
+        storageOf,
         storageSave,
         storageSaving,
         useDesignCtx: useDesign(
