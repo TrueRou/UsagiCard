@@ -20,9 +20,11 @@ export async function useArtifact(artifactId: string) {
         storageSaving.value = true
         try {
             const fullStorage = { ...artifact.value.storage, [namespace]: newData }
-            data.value = await useNuxtApp().$leporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
+            data.value = await useNuxtApp().$leporid(`/api/artifacts/${artifactId}/storage`, {
                 method: 'PATCH',
                 body: { storage: fullStorage },
+                showSuccessToast: true,
+                successMessage: '保存成功',
             })
         }
         finally {
