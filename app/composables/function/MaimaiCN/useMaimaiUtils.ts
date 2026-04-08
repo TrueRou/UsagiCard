@@ -155,6 +155,57 @@ export interface PlateObject {
     scores: ScoreExtend[]
 }
 
+export const MaimaiVersionLabelMap: Record<number, string> = {
+    10000: 'maimai',
+    11000: 'maimai PLUS',
+    12000: 'GreeN',
+    13000: 'GreeN PLUS',
+    14000: 'ORANGE',
+    15000: 'ORANGE PLUS',
+    16000: 'PiNK',
+    17000: 'PiNK PLUS',
+    18000: 'MURASAKi',
+    18500: 'MURASAKi PLUS',
+    19000: 'MiLK',
+    19500: 'MiLK PLUS',
+    19900: 'FiNALE',
+    20000: 'でらっくす',
+    21000: 'Splash',
+    22000: 'UNiVERSE',
+    23000: 'FESTiVAL',
+    24000: 'BUDDiES',
+    25000: 'PRiSM',
+}
+
+export const MaimaiVersionAliasMap: Record<number, string[]> = {
+    10000: ['初'],
+    11000: ['真'],
+    12000: ['超'],
+    13000: ['檄'],
+    14000: ['橙'],
+    15000: ['晓'],
+    16000: ['桃'],
+    17000: ['樱'],
+    18000: ['紫'],
+    18500: ['堇'],
+    19000: ['白'],
+    19500: ['雪'],
+    19900: ['辉'],
+    20000: ['熊', '华'],
+    21000: ['爽', '煌'],
+    22000: ['星', '宙'],
+    23000: ['祭', '祝'],
+    24000: ['双', '宴'],
+    25000: ['镜', '彩'],
+}
+
+export const MaimaiVersionAliasOptions = Object.entries(MaimaiVersionAliasMap)
+    .flatMap(([value, aliases]) => aliases.map(alias => ({ value: Number(value), token: alias })))
+
+export const MaimaiVersionOptions = Object.entries(MaimaiVersionLabelMap)
+    .map(([value, label]) => ({ value: Number(value), label }))
+    .sort((a, b) => a.value - b.value)
+
 export enum ViewMode {
     LIST = 'list',
     TILE = 'tile',
@@ -323,6 +374,12 @@ export function useMaimaiUtils() {
         return `${intPart}.${decimalPart}%`
     }
 
+    const getMaimaiVersionLabel = (version: number | null | undefined) => {
+        if (version === null || version === undefined)
+            return '未知版本'
+        return MaimaiVersionLabelMap[version] || `版本 ${version}`
+    }
+
     return {
         getDifficultyColor,
         getAchievementStyle,
@@ -335,5 +392,6 @@ export function useMaimaiUtils() {
         handleImageError,
         getSongJacketUrl,
         formatAchievement,
+        getMaimaiVersionLabel,
     }
 }
