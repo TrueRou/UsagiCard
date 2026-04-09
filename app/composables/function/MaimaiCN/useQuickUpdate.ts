@@ -124,7 +124,7 @@ export function useQuickUpdate(
                 updatedStorage.player_rating = res.stores.user_player.data.rating
             updatedStorage.updating_at = new Date().toISOString()
 
-            const targetRating = res.target?.usagicard?.scores_rating ?? 0
+            const targetRating = Object.values(res.target).find(v => v.scores_rating)?.scores_rating
 
             await useNuxtApp().$leporid(`/api/artifacts/${artifactId}/storage`, {
                 method: 'PATCH',
