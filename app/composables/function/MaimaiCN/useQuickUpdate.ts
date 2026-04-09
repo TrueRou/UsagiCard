@@ -18,6 +18,28 @@ const SERVER_TO_CHAIN_LABEL: Record<string, string> = {
 
 export const QUICK_UPDATE_COOLDOWN_MS = 15 * 60 * 1000
 
+function resolveCredential(
+    id: string,
+    artifactId: string,
+    remAccounts: NonNullable<MaimaiStorage['rem_accounts']>,
+): { chainLabel: string, credential: string } | null {
+    if (id === 'usagicard')
+        return { chainLabel: 'usagicard', credential: artifactId }
+
+    if (id.startsWith('account:')) {
+        const index = Number.parseInt(id.slice(8))
+        const account = remAccounts[index]
+        if (!account?.credential)
+            return null
+        const chainLabel = SERVER_TO_CHAIN_LABEL[account.server]
+        if (!chainLabel)
+            return null
+        return { chainLabel, credential: account.credential }
+    }
+
+    return null
+}
+
 export function useQuickUpdate(
     artifactId: string,
     storage: ComputedRef<MaimaiStorage | undefined>,
@@ -37,23 +59,61 @@ export function useQuickUpdate(
         if (remAccounts.length === 0)
             return
 
-        const dict: Record<string, { credentials: string }> = {
-            usagicard: { credentials: artifactId },
-        }
+        const rule = storage.value.quick_update_rule
+        let sourceDict: Record<string, { credentials: string }>
+        let targetDict: Record<string, { credentials: string }>
 
-        for (const account of remAccounts) {
-            const chainLabel = SERVER_TO_CHAIN_LABEL[account.server]
-            if (chainLabel && account.credential) {
-                dict[chainLabel] = { credentials: account.credential }
+        if (rule) {
+            // Use saved rule
+            sourceDict = {}
+            targetDict = {}
+
+            if (rule.mode === 'adhoc') {
+                for (const id of (rule.source_ids ?? [])) {
+                    const resolved = resolveCredential(id, artifactId, remAccounts)
+                    if (resolved)
+                        sourceDict[resolved.chainLabel] = { credentials: resolved.credential }
+                }
+                for (const id of (rule.target_ids ?? [])) {
+                    const resolved = resolveCredential(id, artifactId, remAccounts)
+                    if (resolved)
+                        targetDict[resolved.chainLabel] = { credentials: resolved.credential }
+                }
+            }
+            else {
+                const dict: Record<string, { credentials: string }> = {}
+                for (const id of (rule.aggregate_ids ?? [])) {
+                    const resolved = resolveCredential(id, artifactId, remAccounts)
+                    if (resolved)
+                        dict[resolved.chainLabel] = { credentials: resolved.credential }
+                }
+                sourceDict = dict
+                targetDict = dict
             }
         }
+        else {
+            // Default: aggregate all accounts + usagicard
+            const dict: Record<string, { credentials: string }> = {
+                usagicard: { credentials: artifactId },
+            }
+            for (const account of remAccounts) {
+                const chainLabel = SERVER_TO_CHAIN_LABEL[account.server]
+                if (chainLabel && account.credential)
+                    dict[chainLabel] = { credentials: account.credential }
+            }
+            sourceDict = dict
+            targetDict = dict
+        }
+
+        if (Object.keys(sourceDict).length === 0 || Object.keys(targetDict).length === 0)
+            return
 
         try {
             const res = await useNuxtApp().$leporid<UpdatesChainResult>(
                 '/api/nuxt/maimai/update',
                 {
                     method: 'POST',
-                    body: { source: dict, target: dict },
+                    body: { source: sourceDict, target: targetDict },
                 },
             )
 
