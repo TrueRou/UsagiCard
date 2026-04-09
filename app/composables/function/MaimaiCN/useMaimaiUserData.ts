@@ -6,6 +6,10 @@ export interface StoreLatestResponse {
     snapshot: Record<string, unknown>
 }
 
+export interface StoreFieldsResponse {
+    fields: string[]
+}
+
 export interface StoreCurvesResponse {
     uuid: string
     start_time: string | null
@@ -84,4 +88,26 @@ export async function fetchUserDataCurves(
             end_time: endTime,
         },
     })
+}
+
+export async function fetchUserRegionCurves(
+    artifactId: string,
+    startTime?: string,
+    endTime?: string,
+): Promise<StoreCurvesResponse> {
+    const { $leporid } = useNuxtApp()
+    return $leporid<StoreCurvesResponse>('/api/otoge/maimai/usagicard/user_region/curves', {
+        method: 'POST',
+        body: {
+            uuid: artifactId,
+            start_time: startTime,
+            end_time: endTime,
+        },
+    })
+}
+
+export async function fetchUserRegionFields(): Promise<string[]> {
+    const { $leporid } = useNuxtApp()
+    const response = await $leporid<StoreFieldsResponse>('/api/otoge/maimai/usagicard/user_region/fields')
+    return response.fields
 }
