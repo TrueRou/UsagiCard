@@ -43,7 +43,7 @@ function resolveCredential(
 export function useQuickUpdate(
     artifactId: string,
     storage: ComputedRef<MaimaiStorage | undefined>,
-    nsStorage: ComputedRef<ArtifactStorage | undefined>,
+    storageSave: StorageSaveFn,
 ) {
     onMounted(async () => {
         if (!storage.value?.quick_update)
@@ -126,17 +126,9 @@ export function useQuickUpdate(
 
             const targetRating = Object.values(res.target).find(v => v.scores_rating)?.scores_rating
 
-            await useNuxtApp().$leporid(`/api/artifacts/${artifactId}/storage`, {
-                method: 'PATCH',
-                body: {
-                    storage: {
-                        ...nsStorage.value,
-                        MaimaiCN: updatedStorage,
-                    },
-                },
-                showSuccessToast: true,
+            await storageSave('MaimaiCN', updatedStorage, {
                 successMessage: `快速更新完成（Rating -> ${targetRating}）`,
-            } as any)
+            })
         }
         catch (e: any) {
             const { addNotification } = useNotificationsStore()

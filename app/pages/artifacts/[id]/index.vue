@@ -28,6 +28,6 @@ onMounted(() => {
 
 <template>
     <div class="w-full h-full overflow-hidden relative">
-        <component :is="adaptiveComponent" :use-design-ctx="useDesignCtx" />
+        <component :is="adaptiveComponent" :use-design-ctx="useDesignCtx" :storage-save="storageSave" />
     </div>
 </template>

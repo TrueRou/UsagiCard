@@ -1,5 +1,11 @@
 type StorageNamespace = keyof ArtifactStorage
 
+export type StorageSaveFn = <K extends StorageNamespace>(
+    namespace: K,
+    newData: NonNullable<ArtifactStorage[K]>,
+    options?: { successMessage?: string },
+) => Promise<void>
+
 export async function useArtifact(artifactId: string) {
     const artifactAsyncData = await useLeporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
     const { data, error } = artifactAsyncData
@@ -16,7 +22,7 @@ export async function useArtifact(artifactId: string) {
     }
 
     const storageSaving = ref(false)
-    const storageSave = async <K extends StorageNamespace>(namespace: K, newData: NonNullable<ArtifactStorage[K]>) => {
+    const storageSave: StorageSaveFn = async (namespace, newData, options) => {
         storageSaving.value = true
         try {
             const fullStorage = { ...artifact.value.storage, [namespace]: newData }
@@ -24,7 +30,7 @@ export async function useArtifact(artifactId: string) {
                 method: 'PATCH',
                 body: { storage: fullStorage },
                 showSuccessToast: true,
-                successMessage: '保存成功',
+                successMessage: options?.successMessage ?? '保存成功',
             })
         }
         finally {
