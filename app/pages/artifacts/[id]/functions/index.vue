@@ -84,7 +84,7 @@ function goBack() {
                                 <li v-if="!val.hidden">
                                     <a
                                         :class="{ active: activeTabKey === key }"
-                                        class="text-base py-3 px-4"
+                                        class="text-base whitespace-nowrap py-3 px-4"
                                         @click="handleTabKeySwap(key)"
                                     >
                                         <span v-if="val.icon">{{ val.icon }}</span>
