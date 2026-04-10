@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import BattleDialog from '~/components/global/function/MaimaiCN/battle/dialog.vue'
+import { useBattle } from '~/composables/function/MaimaiCN/useBattle'
+
 definePageMeta({
     layout: 'full-page',
     pageTransition: {
@@ -13,6 +16,14 @@ const artifactId = route.params.id as string
 const tabKey = route.query.tab as string | undefined
 
 const { artifact, storageOf, storageSave } = await useArtifact(artifactId)
+const maimaiStorage = storageOf('MaimaiCN')
+const {
+    activeBattle,
+    attemptNearbyMatch,
+    closeBattleDialog,
+    dialogOpen,
+    resumeActiveBattle,
+} = useBattle(artifactId, maimaiStorage, storageSave)
 
 useHead({
     title: `${artifact.value.product.type.name} - 兔兔实验室`,
@@ -30,10 +41,16 @@ const currentDocLink = computed<string | null>(() => {
 
 const { startPhase2 } = useTour(artifact, storageOf, storageSave)
 
+async function handleMaimaiUpdateComplete() {
+    await attemptNearbyMatch()
+}
+
 onMounted(() => {
     if (route.query.tour === 'continue') {
         setTimeout(() => startPhase2(key => (activeTabKey.value = key)), 400)
     }
+
+    void resumeActiveBattle()
 })
 
 const mobileDetailsRefs = ref<HTMLDetailsElement[]>([])
@@ -140,7 +157,11 @@ function goBack() {
         <main class="flex-1 overflow-y-auto bg-base-100">
             <Transition name="content-fade" mode="out-in">
                 <div v-if="activeComponent" :key="activeTabKey" class="container mx-auto p-4 lg:p-6">
-                    <component :is="activeComponent" :artifact-id="artifactId" />
+                    <component
+                        :is="activeComponent"
+                        :artifact-id="artifactId"
+                        :on-maimai-update-complete="handleMaimaiUpdateComplete"
+                    />
                     <div v-if="currentDocLink" data-tour="fn-doc-link" class="flex justify-center my-4">
                         <a :href="currentDocLink" class="text-xs text-base-content/60 underline underline-offset-4 hover:text-primary transition-colors">
                             查看该功能模块的文档
@@ -149,6 +170,12 @@ function goBack() {
                 </div>
             </Transition>
         </main>
+        <BattleDialog
+            :battle="activeBattle"
+            :open="dialogOpen"
+            :self-uuid="artifactId"
+            @close="closeBattleDialog"
+        />
     </div>
 </template>
 

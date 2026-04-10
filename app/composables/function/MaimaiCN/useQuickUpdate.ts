@@ -44,6 +44,7 @@ export function useQuickUpdate(
     artifactId: string,
     storage: ComputedRef<MaimaiStorage | undefined>,
     storageSave: StorageSaveFn,
+    onUpdated?: () => void | Promise<void>,
 ) {
     onMounted(async () => {
         if (!storage.value?.quick_update)
@@ -129,6 +130,7 @@ export function useQuickUpdate(
             await storageSave('MaimaiCN', updatedStorage, {
                 successMessage: `快速更新完成（Rating -> ${targetRating}）`,
             })
+            await onUpdated?.()
         }
         catch (e: any) {
             const { addNotification } = useNotificationsStore()

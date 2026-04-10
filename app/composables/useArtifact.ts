@@ -3,7 +3,7 @@ type StorageNamespace = keyof ArtifactStorage
 export type StorageSaveFn = <K extends StorageNamespace>(
     namespace: K,
     newData: NonNullable<ArtifactStorage[K]>,
-    options?: { successMessage?: string },
+    options?: { successMessage?: string, showSuccessToast?: boolean },
 ) => Promise<void>
 
 export async function useArtifact(artifactId: string) {
@@ -29,7 +29,7 @@ export async function useArtifact(artifactId: string) {
             data.value = await useNuxtApp().$leporid(`/api/artifacts/${artifactId}/storage`, {
                 method: 'PATCH',
                 body: { storage: fullStorage },
-                showSuccessToast: true,
+                showSuccessToast: options?.showSuccessToast ?? true,
                 successMessage: options?.successMessage ?? '保存成功',
             })
         }
