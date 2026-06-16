@@ -14,96 +14,59 @@ const SERVER_TO_CHAIN_LABEL: Record<string, string> = {
     diving_fish: 'divingfish',
     lxns: 'lxns',
     arcade_legacy: 'arcade_legacy',
+    arcade: 'arcade',
+    usagi_card: 'usagicard',
 }
 
 export const QUICK_UPDATE_COOLDOWN_MS = 15 * 60 * 1000
 
-function resolveCredential(
-    id: string,
-    artifactId: string,
-    remAccounts: NonNullable<MaimaiStorage['rem_accounts']>,
-): { chainLabel: string, credential: string } | null {
-    if (id === 'usagicard')
-        return { chainLabel: 'usagicard', credential: artifactId }
-
-    if (id.startsWith('account:')) {
-        const index = Number.parseInt(id.slice(8))
-        const account = remAccounts[index]
-        if (!account?.credential)
-            return null
-        const chainLabel = SERVER_TO_CHAIN_LABEL[account.server]
-        if (!chainLabel)
-            return null
-        return { chainLabel, credential: account.credential }
-    }
-
-    return null
-}
-
 export function useQuickUpdate(
     artifactId: string,
-    storage: ComputedRef<MaimaiStorage | undefined>,
+    storage: ComputedRef<MaimaiStorage>,
     storageSave: StorageSaveFn,
     onUpdated?: () => void | Promise<void>,
 ) {
     onMounted(async () => {
-        if (!storage.value?.quick_update)
+        if (storage.value.update?.enabled_mode !== 'on')
             return
 
-        if (storage.value.updating_at) {
-            const elapsed = Date.now() - new Date(storage.value.updating_at).getTime()
+        if (storage.value.update?.last_updated_at) {
+            const elapsed = Date.now() - new Date(storage.value.update.last_updated_at).getTime()
             if (elapsed < QUICK_UPDATE_COOLDOWN_MS)
                 return
         }
 
-        const remAccounts = storage.value.rem_accounts ?? []
-        if (remAccounts.length === 0)
+        const strategy = storage.value.update?.strategy
+        if (!strategy || (strategy.sources.length === 0 && strategy.targets.length === 0))
             return
 
-        const rule = storage.value.quick_update_rule
-        let sourceDict: Record<string, { credentials: string }>
-        let targetDict: Record<string, { credentials: string }>
+        // 如果存在 transient 节点，跳过快速更新（无法自动提供凭据）
+        const hasTransient = [...strategy.sources, ...strategy.targets].some(node => node.transient)
+        if (hasTransient)
+            return
 
-        if (rule) {
-            // Use saved rule
-            sourceDict = {}
-            targetDict = {}
+        // 构建 source/target 字典
+        const sourceDict: Record<string, { credentials: string }> = {}
+        const targetDict: Record<string, { credentials: string }> = {}
 
-            if (rule.mode === 'adhoc') {
-                for (const id of (rule.source_ids ?? [])) {
-                    const resolved = resolveCredential(id, artifactId, remAccounts)
-                    if (resolved)
-                        sourceDict[resolved.chainLabel] = { credentials: resolved.credential }
-                }
-                for (const id of (rule.target_ids ?? [])) {
-                    const resolved = resolveCredential(id, artifactId, remAccounts)
-                    if (resolved)
-                        targetDict[resolved.chainLabel] = { credentials: resolved.credential }
-                }
-            }
-            else {
-                const dict: Record<string, { credentials: string }> = {}
-                for (const id of (rule.aggregate_ids ?? [])) {
-                    const resolved = resolveCredential(id, artifactId, remAccounts)
-                    if (resolved)
-                        dict[resolved.chainLabel] = { credentials: resolved.credential }
-                }
-                sourceDict = dict
-                targetDict = dict
-            }
+        for (const node of strategy.sources) {
+            const chainLabel = SERVER_TO_CHAIN_LABEL[node.server]
+            if (!chainLabel)
+                continue
+            const credential = node.server === 'usagi_card' ? artifactId : (node.credential ?? '')
+            if (!credential)
+                continue
+            sourceDict[chainLabel] = { credentials: credential }
         }
-        else {
-            // Default: aggregate all accounts + usagicard
-            const dict: Record<string, { credentials: string }> = {
-                usagicard: { credentials: artifactId },
-            }
-            for (const account of remAccounts) {
-                const chainLabel = SERVER_TO_CHAIN_LABEL[account.server]
-                if (chainLabel && account.credential)
-                    dict[chainLabel] = { credentials: account.credential }
-            }
-            sourceDict = dict
-            targetDict = dict
+
+        for (const node of strategy.targets) {
+            const chainLabel = SERVER_TO_CHAIN_LABEL[node.server]
+            if (!chainLabel)
+                continue
+            const credential = node.server === 'usagi_card' ? artifactId : (node.credential ?? '')
+            if (!credential)
+                continue
+            targetDict[chainLabel] = { credentials: credential }
         }
 
         if (Object.keys(sourceDict).length === 0 || Object.keys(targetDict).length === 0)
@@ -119,11 +82,16 @@ export function useQuickUpdate(
             )
 
             const updatedStorage: MaimaiStorage = { ...storage.value }
+            const bioUpdate: typeof updatedStorage.bio = { ...updatedStorage.bio }
             if (res.stores?.user_player?.data?.name)
-                updatedStorage.player_name = res.stores.user_player.data.name
+                bioUpdate.player_name = res.stores.user_player.data.name
             if (res.stores?.user_player?.data?.rating)
-                updatedStorage.player_rating = res.stores.user_player.data.rating
-            updatedStorage.updating_at = new Date().toISOString()
+                bioUpdate.player_rating = res.stores.user_player.data.rating
+            updatedStorage.bio = bioUpdate
+            updatedStorage.update = {
+                ...updatedStorage.update,
+                last_updated_at: new Date().toISOString(),
+            }
 
             const targetRating = Object.values(res.target).find(v => v.scores_rating)?.scores_rating
 

@@ -8,14 +8,14 @@ export interface UseDesignCtx {
     sketchpadComponent: Ref<string>
     adaptiveViewComponent: Ref<string>
     fromProduct: Ref<ProductSimpleResponse | undefined> // 如果尚处于设计器预览阶段，fromProduct 将为 undefined
-    fromArtifact: Ref<ArtifactUserResponse | undefined> // 如果尚处于产品设计阶段，fromArtifact 将为 undefined
+    fromArtifact: Ref<(ArtifactUserResponse & { storage: ArtifactStorage }) | undefined> // 如果尚处于产品设计阶段，fromArtifact 将为 undefined
 }
 
 export function useDesign(
     design: ComputedRef<Record<string, any>>,
     designType: ComputedRef<ProductTypeDesign>,
     fromProduct: ComputedRef<ProductSimpleResponse | undefined> = computed(() => undefined),
-    fromArtifact: ComputedRef<ArtifactUserResponse | undefined> = computed(() => undefined),
+    fromArtifact: ComputedRef<(ArtifactUserResponse & { storage: ArtifactStorage }) | undefined> = computed(() => undefined),
 ): UseDesignCtx {
     const designTypeLiteral = computed(() => ProductTypeDesign[designType.value])
 

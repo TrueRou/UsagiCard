@@ -124,6 +124,15 @@ export default defineNuxtPlugin((nuxtApp) => {
                 return
             }
 
+            // 423 Locked: 需要二级密码，不展示 toast，由组件层处理
+            if (rawData.code === 423) {
+                throw createError({
+                    statusCode: 423,
+                    data: rawData,
+                    message,
+                })
+            }
+
             showErrorToast(message, options, context.options.method?.toString())
             throw createError({
                 statusCode: context.response.status || 400,

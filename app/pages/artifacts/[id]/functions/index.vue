@@ -15,29 +15,30 @@ const router = useRouter()
 const artifactId = route.params.id as string
 const tabKey = route.query.tab as string | undefined
 
-const { artifact, storageOf, storageSave } = await useArtifact(artifactId)
-const maimaiStorage = storageOf('MaimaiCN')
+const { artifact, storageOf, storageSave, secondaryPinDialogOpen, secondaryPinArtifactId, handleSecondaryPinVerified, handleSecondaryPinClose } = await useArtifact(artifactId)
+const maimaiBattle = artifact.value.product.type.function_types.includes(ProductTypeFunction.MaimaiCN)
+    ? useBattle(artifactId, storageOf('MaimaiCN'), storageSave)
+    : {
+            activeBattle: ref(null),
+            attemptNearbyMatch: async () => null,
+            closeBattleDialog: () => {},
+            dialogOpen: ref(false),
+            resumeActiveBattle: async () => {},
+        }
 const {
     activeBattle,
     attemptNearbyMatch,
     closeBattleDialog,
     dialogOpen,
     resumeActiveBattle,
-} = useBattle(artifactId, maimaiStorage, storageSave)
+} = maimaiBattle
 
 useHead({
     title: `${artifact.value.product.type.name} - 兔兔实验室`,
 })
 
-const storageDefaultTab = storageOf('UsagiCard').value?.default_function_tab ?? undefined
+const storageDefaultTab = storageOf('UsagiCard').value.menu?.default_function_tab ?? undefined
 const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabKey || storageDefaultTab)
-
-const currentDocLink = computed<string | null>(() => {
-    if (activeTabKey.value) {
-        return `/docs/functions/${activeTabKey.value.substring(0, activeTabKey.value.indexOf('-')) || activeTabKey.value}.html`
-    }
-    return null
-})
 
 const { startPhase2 } = useTour(artifact, storageOf, storageSave)
 
@@ -49,170 +50,122 @@ onMounted(() => {
     if (route.query.tour === 'continue') {
         setTimeout(() => startPhase2(key => (activeTabKey.value = key)), 400)
     }
-
     void resumeActiveBattle()
 })
 
-const mobileDetailsRefs = ref<HTMLDetailsElement[]>([])
+// 扁平化所有 tab 项用于导航栏渲染
+const navItems = computed(() => {
+    const items: Array<{ key: string, label: string, icon?: string }> = []
+    for (const config of tabConfigs.value ?? []) {
+        Object.entries(config.items).forEach(([key, val]) => {
+            if (!val.hidden) {
+                items.push({ key, label: val.label, icon: val.icon })
+            }
+        })
+    }
+    return items
+})
 
-function handleTabKeySwap(tabKey: string) {
-    activeTabKey.value = tabKey
-    router.push({ query: { tab: tabKey } })
-
-    mobileDetailsRefs.value.forEach((details) => {
-        details.open = false
-    })
+function handleTabKeySwap(key: string) {
+    activeTabKey.value = key
+    router.push({ query: { tab: key } })
 }
 
 function goBack() {
     router.push({ path: `/artifacts/${artifactId}` })
 }
-
-// const _pageContainer = useTemplateRef<HTMLElement>('page-container')
-// const { lengthX, lengthY } = useSwipe(pageContainer, {
-//     threshold: 50,
-//     onSwipeEnd(_e, direction) {
-//         if (Math.abs(lengthX.value) < Math.abs(lengthY.value) * 1.5)
-//             return
-//         if (direction === 'right')
-//             goBack()
-//     },
-// })
 </script>
 
 <template>
-    <div class="w-full h-full flex flex-col lg:flex-row overflow-hidden">
-        <!-- 移动端顶部菜单栏 -->
-        <div data-tour="fn-menubar" class="lg:hidden w-full bg-base-200 border-b">
-            <ul class="menu menu-horizontal bg-base-200 w-full">
-                <li>
-                    <button @click="goBack">
-                        <svg data-v-1c88b26a="" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path data-v-1c88b26a="" fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                    </button>
-                </li>
-                <li v-for="(item, index) in tabConfigs" :key="item.label">
-                    <details :ref="el => { if (el) mobileDetailsRefs[index] = el as HTMLDetailsElement }">
-                        <summary class="text-base font-medium">
-                            <span v-if="item.icon">{{ item.icon }}</span>
-                            {{ item.label }}
-                        </summary>
-                        <ul class="dropdown-content bg-base-100 shadow-lg rounded-box z-50 mt-4">
-                            <template v-for="val, key in item.items" :key="key">
-                                <li v-if="!val.hidden">
-                                    <a
-                                        :class="{ active: activeTabKey === key }"
-                                        class="text-base whitespace-nowrap py-3 px-4"
-                                        @click="handleTabKeySwap(key)"
-                                    >
-                                        <span v-if="val.icon">{{ val.icon }}</span>
-                                        {{ val.label }}
-                                    </a>
-                                </li>
-                            </template>
-                        </ul>
-                    </details>
-                </li>
-                <NavbarUserMenu class="ml-auto" />
-            </ul>
-        </div>
+    <div class="h-full w-full flex flex-col lg:flex-row">
+        <!-- 桌面端：左侧精简导航栏 -->
+        <aside class="hidden lg:flex flex-col items-center w-16 h-full bg-base-200/50 border-r border-base-300/50 py-4 gap-1 fixed left-0 top-0 z-40">
+            <!-- 返回按钮 -->
+            <button
+                class="btn btn-ghost btn-sm btn-square mb-3 tooltip tooltip-right"
+                data-tip="返回卡面"
+                @click="goBack"
+            >
+                <Icon name="mdi:arrow-left" class="w-5 h-5" />
+            </button>
 
-        <!-- 桌面端侧边菜单栏 -->
-        <aside data-tour="fn-menubar" class="hidden lg:flex lg:flex-col w-64 min-h-full bg-base-200 border-r">
-            <div class="flex-1 overflow-y-auto p-2">
-                <ul class="menu menu-compact rounded-box w-full">
-                    <li class="w-full">
-                        <button class="w-full justify-start" @click="goBack">
-                            <svg data-v-1c88b26a="" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path data-v-1c88b26a="" fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>返回
-                        </button>
-                    </li>
-                    <li v-for="item in tabConfigs" :key="item.label" class="w-full">
-                        <details open class="w-full">
-                            <summary class="w-full">
-                                <span v-if="item.icon">{{ item.icon }}</span>
-                                {{ item.label }}
-                            </summary>
-                            <ul class="w-full">
-                                <template v-for="val, key in item.items" :key="key">
-                                    <li v-if="!val.hidden" class="w-full">
-                                        <a
-                                            :data-tour="`tab-${key}`"
-                                            :class="{ active: activeTabKey === key }"
-                                            class="w-full justify-start"
-                                            @click="handleTabKeySwap(key)"
-                                        >
-                                            <span v-if="val.icon">{{ val.icon }}</span>
-                                            {{ val.label }}
-                                        </a>
-                                    </li>
-                                </template>
-                            </ul>
-                        </details>
-                    </li>
-                </ul>
-            </div>
-            <NavbarSidebarUser />
+            <div class="divider my-0 mx-2"></div>
+
+            <!-- Tab 导航图标 -->
+            <button
+                v-for="item in navItems"
+                :key="item.key"
+                class="flex flex-col items-center gap-0.5 w-14 py-2 rounded-lg transition-colors"
+                :class="[
+                    activeTabKey === item.key
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-base-content/60 hover:bg-base-300/50 hover:text-base-content',
+                ]"
+                @click="handleTabKeySwap(item.key)"
+            >
+                <Icon :name="item.icon || 'mdi:circle-outline'" class="w-5 h-5" />
+                <span class="text-[10px] leading-tight">{{ item.label }}</span>
+            </button>
         </aside>
 
         <!-- 主内容区域 -->
-        <main class="flex-1 overflow-y-auto bg-base-100">
+        <main class="flex-1 h-full overflow-y-auto pb-18 lg:pb-0 lg:ml-16">
             <Transition name="content-fade" mode="out-in">
-                <div v-if="activeComponent" :key="activeTabKey" class="container mx-auto p-4 lg:p-6">
-                    <component
-                        :is="activeComponent"
-                        :artifact-id="artifactId"
-                        :on-maimai-update-complete="handleMaimaiUpdateComplete"
-                    />
-                    <div v-if="currentDocLink" data-tour="fn-doc-link" class="flex justify-center my-4">
-                        <a :href="currentDocLink" class="text-xs text-base-content/60 underline underline-offset-4 hover:text-primary transition-colors">
-                            查看该功能模块的文档
-                        </a>
-                    </div>
-                </div>
+                <component
+                    :is="activeComponent"
+                    v-if="activeComponent"
+                    :key="activeTabKey"
+                    :artifact-id="artifactId"
+                    @on-maimai-update-complete="handleMaimaiUpdateComplete"
+                />
             </Transition>
         </main>
+
+        <!-- 移动端：底部导航栏 -->
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-base-100 border-t border-base-300/50 safe-area-bottom">
+            <div class="flex items-center justify-around h-14">
+                <button
+                    v-for="item in navItems"
+                    :key="item.key"
+                    class="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-colors"
+                    :class="[
+                        activeTabKey === item.key
+                            ? 'text-primary'
+                            : 'text-base-content/50',
+                    ]"
+                    @click="handleTabKeySwap(item.key)"
+                >
+                    <Icon :name="item.icon || 'mdi:circle-outline'" class="w-5 h-5" />
+                    <span class="text-[10px] leading-tight">{{ item.label }}</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Battle 对话框 -->
         <BattleDialog
-            :battle="activeBattle"
+            v-if="activeBattle"
             :open="dialogOpen"
-            :self-uuid="artifactId"
+            :battle="activeBattle"
+            :artifact-id="artifactId"
             @close="closeBattleDialog"
         />
+
+        <!-- 二级密码对话框 -->
+        <Teleport to="body">
+            <SecondaryPinDialog
+                v-if="secondaryPinDialogOpen"
+                :artifact-id="secondaryPinArtifactId"
+                mode="verify"
+                @verified="handleSecondaryPinVerified"
+                @close="handleSecondaryPinClose"
+            />
+        </Teleport>
     </div>
 </template>
 
 <style scoped>
-/* 自定义滚动条样式 */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.3);
-}
-
-/* 页面进入/退出过渡效果 */
-.function-page-enter-active,
-.function-page-leave-active {
-    transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.function-page-enter-from {
-    opacity: 0;
-    transform: translateX(10px);
-}
-
-.function-page-leave-to {
-    opacity: 0;
-    transform: translateX(-10px);
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 内容切换过渡效果 */

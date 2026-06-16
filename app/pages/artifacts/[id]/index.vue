@@ -14,14 +14,22 @@ const route = useRoute()
 const artifactId = route.params.id as string // UUID string
 const { artifact, storageOf, storageSave, useDesignCtx } = await useArtifact(artifactId)
 const adaptiveComponent = computed(() => useDesignCtx.adaptiveViewComponent.value)
-const maimaiStorage = storageOf('MaimaiCN')
+const maimaiBattle = artifact.value.product.type.function_types.includes(ProductTypeFunction.MaimaiCN)
+    ? useBattle(artifactId, storageOf('MaimaiCN'), storageSave)
+    : {
+            activeBattle: ref(null),
+            attemptNearbyMatch: async () => null,
+            closeBattleDialog: () => {},
+            dialogOpen: ref(false),
+            resumeActiveBattle: async () => {},
+        }
 const {
     activeBattle,
     attemptNearbyMatch,
     closeBattleDialog,
     dialogOpen,
     resumeActiveBattle,
-} = useBattle(artifactId, maimaiStorage, storageSave)
+} = maimaiBattle
 
 useHead({
     title: `${artifact.value.product.type.name} - 兔兔实验室`,
@@ -35,7 +43,7 @@ async function handleMaimaiRefreshComplete() {
 
 onMounted(() => {
     const ucStorage = storageOf('UsagiCard').value
-    if (!ucStorage?.skip_tour) {
+    if (!ucStorage.skip_tour) {
         setTimeout(() => startPhase1(), 500)
     }
 
