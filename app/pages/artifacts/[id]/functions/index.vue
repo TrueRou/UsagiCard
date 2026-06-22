@@ -42,16 +42,11 @@ const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabK
 const usagiCardMenu = computed(() => storageOf('UsagiCard').value.menu)
 const { visibleNavItems, resolveValidTabKey } = useFunctionMenu(tabConfigs, usagiCardMenu)
 
-const { startPhase2 } = useTour(artifact, storageOf, storageSave)
-
 async function handleMaimaiUpdateComplete() {
     await attemptNearbyMatch()
 }
 
 onMounted(() => {
-    if (route.query.tour === 'continue') {
-        setTimeout(() => startPhase2(key => (activeTabKey.value = key)), 400)
-    }
     void resumeActiveBattle()
 })
 

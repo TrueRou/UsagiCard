@@ -35,18 +35,11 @@ useHead({
     title: `${artifact.value.product.type.name} - 兔兔实验室`,
 })
 
-const { startPhase1 } = useTour(artifact, storageOf, storageSave)
-
 async function handleMaimaiRefreshComplete() {
     await attemptNearbyMatch()
 }
 
 onMounted(() => {
-    const ucStorage = storageOf('UsagiCard').value
-    if (!ucStorage.skip_tour) {
-        setTimeout(() => startPhase1(), 500)
-    }
-
     void resumeActiveBattle()
 })
 </script>

@@ -23,6 +23,15 @@ export interface UseFunctionTabsCtx {
             hidden?: boolean
         }>
     }
+    settingsConfig?: {
+        items: Record<string, {
+            label: string
+            description: string
+            component: string
+            icon?: string
+            order?: number
+        }>
+    }
     defaultTabKey: string
     qButtonTabKey?: string
 }

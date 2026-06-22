@@ -27,7 +27,6 @@
         "daisyui": "^5.5.14",
         "echarts": "^6.0.0",
         "flexsearch": "^0.8.212",
-        "intro.js": "^8.3.2",
         "marked": "^17.0.3",
         "nuxt": "^4.2.2",
         "nuxt-auth-utils": "0.5.25",
