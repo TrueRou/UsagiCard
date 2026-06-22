@@ -39,6 +39,8 @@ useHead({
 
 const storageDefaultTab = storageOf('UsagiCard').value.menu?.default_function_tab ?? undefined
 const { tabConfigs, activeTabKey, activeComponent } = useFunction(artifact, tabKey || storageDefaultTab)
+const usagiCardMenu = computed(() => storageOf('UsagiCard').value.menu)
+const { visibleNavItems, resolveValidTabKey } = useFunctionMenu(tabConfigs, usagiCardMenu)
 
 const { startPhase2 } = useTour(artifact, storageOf, storageSave)
 
@@ -53,22 +55,26 @@ onMounted(() => {
     void resumeActiveBattle()
 })
 
-// 扁平化所有 tab 项用于导航栏渲染
-const navItems = computed(() => {
-    const items: Array<{ key: string, label: string, icon?: string }> = []
-    for (const config of tabConfigs.value ?? []) {
-        Object.entries(config.items).forEach(([key, val]) => {
-            if (!val.hidden) {
-                items.push({ key, label: val.label, icon: val.icon })
-            }
-        })
-    }
-    return items
+watch([() => route.query.tab, visibleNavItems], ([queryTab]) => {
+    const nextKey = resolveValidTabKey(typeof queryTab === 'string' ? queryTab : undefined)
+    if (!nextKey)
+        return
+    if (activeTabKey.value !== nextKey)
+        activeTabKey.value = nextKey
+    if (route.query.tab !== nextKey)
+        router.replace({ query: { ...route.query, tab: nextKey } })
+}, { immediate: true })
+
+watch(activeTabKey, (key) => {
+    const nextKey = resolveValidTabKey(key)
+    if (!nextKey || key === nextKey)
+        return
+    activeTabKey.value = nextKey
 })
 
 function handleTabKeySwap(key: string) {
     activeTabKey.value = key
-    router.push({ query: { tab: key } })
+    router.push({ query: { ...route.query, tab: key } })
 }
 
 function goBack() {
@@ -89,11 +95,11 @@ function goBack() {
                 <Icon name="mdi:arrow-left" class="w-5 h-5" />
             </button>
 
-            <div class="divider my-0 mx-2"></div>
+            <div class="divider my-0 mx-2" />
 
             <!-- Tab 导航图标 -->
             <button
-                v-for="item in navItems"
+                v-for="item in visibleNavItems"
                 :key="item.key"
                 class="flex flex-col items-center gap-0.5 w-14 py-2 rounded-lg transition-colors"
                 :class="[
@@ -110,22 +116,24 @@ function goBack() {
 
         <!-- 主内容区域 -->
         <main class="flex-1 h-full overflow-y-auto pb-18 lg:pb-0 lg:ml-16">
-            <Transition name="content-fade" mode="out-in">
-                <component
-                    :is="activeComponent"
-                    v-if="activeComponent"
-                    :key="activeTabKey"
-                    :artifact-id="artifactId"
-                    @on-maimai-update-complete="handleMaimaiUpdateComplete"
-                />
-            </Transition>
+            <div class="min-h-full w-full lg:mx-auto lg:w-[min(100%,56rem)] xl:w-[min(100%,64rem)]">
+                <Transition name="content-fade" mode="out-in">
+                    <component
+                        :is="activeComponent"
+                        v-if="activeComponent"
+                        :key="activeTabKey"
+                        :artifact-id="artifactId"
+                        @on-maimai-update-complete="handleMaimaiUpdateComplete"
+                    />
+                </Transition>
+            </div>
         </main>
 
         <!-- 移动端：底部导航栏 -->
         <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-base-100 border-t border-base-300/50 safe-area-bottom">
             <div class="flex items-center justify-around h-14">
                 <button
-                    v-for="item in navItems"
+                    v-for="item in visibleNavItems"
                     :key="item.key"
                     class="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-colors"
                     :class="[
