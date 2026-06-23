@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BattleDialog from '~/components/global/function/MaimaiCN/battle/dialog.vue'
+import BattleDialog from '~/components/function/maimai-cn/battle/dialog.vue'
 import { useBattle } from '~/composables/function/MaimaiCN/useBattle'
 
 definePageMeta({

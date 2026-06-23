@@ -12,36 +12,12 @@ export interface UseImageSelectorCtx {
     clearImageSelect: (key: string) => void
 }
 
-export interface UseFunctionTabsCtx {
-    tabConfig: {
-        label: string
-        icon?: string
-        items: Record<string, {
-            label: string
-            component: string
-            icon?: string
-            hidden?: boolean
-        }>
-    }
-    settingsConfig?: {
-        items: Record<string, {
-            label: string
-            description: string
-            component: string
-            icon?: string
-            order?: number
-        }>
-    }
-    defaultTabKey: string
-    qButtonTabKey?: string
-}
-
 export interface UseQButtonCtx {
     artifact: Ref<ArtifactUserResponse>
-    switchTab: (tabKey: string) => void
+    switchQuickAction: (actionKey: string) => void
     qDialogOpen: (val: boolean) => void
     qDialogOpened: Ref<boolean>
-    qButtonTabs: Ref<Record<string, { from: string, label: string, component: string, icon?: string }> | undefined>
-    activeTabKey: Ref<string | undefined>
-    activeTabValue: ComputedRef<{ label: string, component: string, icon?: string } | undefined>
+    quickActions: Ref<Record<string, FunctionQuickActionMeta> | undefined>
+    activeQuickActionKey: Ref<string | undefined>
+    activeQuickAction: ComputedRef<FunctionQuickActionMeta | undefined>
 }

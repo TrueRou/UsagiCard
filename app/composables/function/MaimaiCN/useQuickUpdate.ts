@@ -1,14 +1,4 @@
-interface UpdatesChainEntryResult {
-    errors: string | null
-    scores_num: number
-    scores_rating: number
-}
-
-interface UpdatesChainResult {
-    source: Record<string, UpdatesChainEntryResult>
-    target: Record<string, UpdatesChainEntryResult>
-    stores: Record<string, { message: string, data: any | null }>
-}
+import type { UpdatesChainResult } from './useMaimaiTypes'
 
 const SERVER_TO_CHAIN_LABEL: Record<string, string> = {
     diving_fish: 'divingfish',

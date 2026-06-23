@@ -3,49 +3,34 @@ export function useQButton(artifact: Ref<ArtifactUserResponse>, potentialTabKey?
         return artifact.value.product.type.function_types
     })
 
-    const functionTabs: Ref<UseFunctionTabsCtx[] | undefined> = asyncComputed(async () => {
-        const retVal: UseFunctionTabsCtx[] = []
-        for (const typeFunction of functionTypes.value) {
-            const module = await import(`./function/${ProductTypeFunction[typeFunction]}/useFunctionTabs.ts`)
-            retVal.push(module.useFunctionTabs())
+    const quickActions = computed(() => {
+        const actions: Record<string, FunctionQuickActionMeta> = {}
+        for (const action of getEnabledQuickActions(functionTypes.value)) {
+            actions[action.key] = action
         }
-        return retVal
-    }, undefined, { lazy: true })
-
-    const qButtonTabs = computed(() => {
-        const qTabs: Record<string, { from: string, label: string, component: string, icon?: string }> = {}
-        for (const tab of functionTabs.value ?? []) {
-            if (tab.qButtonTabKey) {
-                const item = tab.tabConfig.items[tab.qButtonTabKey]
-                if (item) {
-                    qTabs[tab.qButtonTabKey] = { from: tab.tabConfig.label, ...item }
-                }
-            }
-        }
-        return qTabs
+        return actions
     })
 
-    const activeTabKey = ref<string | undefined>(potentialTabKey)
+    const activeQuickActionKey = ref<string | undefined>(potentialTabKey)
     const qDialogOpened = ref(false)
 
-    watch([qButtonTabs], () => {
-        if (qButtonTabs.value !== undefined && Object.keys(qButtonTabs.value).length > 0) {
-            // Only fall back to first key if current activeTabKey is not a valid tab
-            if (!activeTabKey.value || !qButtonTabs.value[activeTabKey.value]) {
-                activeTabKey.value = Object.keys(qButtonTabs.value)[0]
+    watch([quickActions], () => {
+        if (quickActions.value !== undefined && Object.keys(quickActions.value).length > 0) {
+            if (!activeQuickActionKey.value || !quickActions.value[activeQuickActionKey.value]) {
+                activeQuickActionKey.value = Object.keys(quickActions.value)[0]
             }
         }
     })
 
-    const activeTabValue = computed(() => {
-        if (activeTabKey.value && qButtonTabs.value) {
-            return qButtonTabs.value[activeTabKey.value]
+    const activeQuickAction = computed(() => {
+        if (activeQuickActionKey.value && quickActions.value) {
+            return quickActions.value[activeQuickActionKey.value]
         }
     })
 
-    const switchTab = (tabKey: string) => {
-        if (qButtonTabs.value && qButtonTabs.value[tabKey]) {
-            activeTabKey.value = tabKey
+    const switchQuickAction = (actionKey: string) => {
+        if (quickActions.value && quickActions.value[actionKey]) {
+            activeQuickActionKey.value = actionKey
         }
     }
 
@@ -55,11 +40,11 @@ export function useQButton(artifact: Ref<ArtifactUserResponse>, potentialTabKey?
 
     return {
         artifact,
-        switchTab,
+        switchQuickAction,
         qDialogOpen,
         qDialogOpened,
-        qButtonTabs,
-        activeTabKey,
-        activeTabValue,
+        quickActions,
+        activeQuickActionKey,
+        activeQuickAction,
     }
 }

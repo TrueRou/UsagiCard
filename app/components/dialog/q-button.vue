@@ -1,7 +1,10 @@
 <script setup lang="ts">
 const props = defineProps<{ ctx: UseQButtonCtx }>()
+defineEmits<{
+    onMaimaiUpdateComplete: []
+}>()
 
-const tabs = computed(() => Object.entries(props.ctx.qButtonTabs.value ?? {}))
+const actions = computed(() => Object.entries(props.ctx.quickActions.value ?? {}))
 </script>
 
 <template>
@@ -19,15 +22,15 @@ const tabs = computed(() => Object.entries(props.ctx.qButtonTabs.value ?? {}))
                     <!-- Tab 导航栏（兼作标题栏） -->
                     <div class="flex items-center border-b border-base-200 px-2 shrink-0">
                         <button
-                            v-for="[key, tab] in tabs"
+                            v-for="[key, action] in actions"
                             :key="key"
                             class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
-                            :class="ctx.activeTabKey.value === key
+                            :class="ctx.activeQuickActionKey.value === key
                                 ? 'border-primary text-primary'
                                 : 'border-transparent text-base-content/60 hover:text-base-content'"
-                            @click="ctx.switchTab(key)"
+                            @click="ctx.switchQuickAction(key)"
                         >
-                            {{ tab.label }}
+                            {{ action.label }}
                         </button>
                         <button class="btn btn-ghost btn-sm btn-circle ml-auto" @click="ctx.qDialogOpen(false)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -40,11 +43,11 @@ const tabs = computed(() => Object.entries(props.ctx.qButtonTabs.value ?? {}))
                     <div class="flex-1 min-h-0 overflow-y-auto p-2">
                         <Transition name="tab-fade" mode="out-in">
                             <component
-                                :is="ctx.activeTabValue.value?.component"
-                                :key="ctx.activeTabKey.value"
+                                :is="ctx.activeQuickAction.value?.component"
+                                :key="ctx.activeQuickActionKey.value"
                                 :artifact-id="ctx.artifact.value.id"
-                                :from-dialog="true"
                                 class="w-full h-full"
+                                @on-maimai-update-complete="$emit('onMaimaiUpdateComplete')"
                             />
                         </Transition>
                     </div>
