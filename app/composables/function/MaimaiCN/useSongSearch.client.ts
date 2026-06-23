@@ -29,9 +29,6 @@ const CACHE_KEYS = {
     MAIMAI_INDEXING_VERSION: 'maimaiIndexingVersion',
 }
 
-// clean up old cache
-localStorage.removeItem('lastIndexingTime')
-
 export function useSongSearch() {
     const MAX_SEARCH_NUMBER = 100
     const CURRENT_VERSION = 1
@@ -67,6 +64,9 @@ export function useSongSearch() {
     }
 
     const indexSongs = async () => {
+        // clean up old cache
+        localStorage.removeItem('lastIndexingTime')
+
         let songData = cache.load<Song[]>(CACHE_KEYS.MAIMAI_SONGS)
         const lastRefresh = cache.load<number>(CACHE_KEYS.MAIMAI_INDEXING_TIME) || 0
         const version = cache.load<number>(CACHE_KEYS.MAIMAI_INDEXING_VERSION) || 0

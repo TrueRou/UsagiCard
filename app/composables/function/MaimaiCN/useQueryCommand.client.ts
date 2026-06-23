@@ -1,7 +1,8 @@
 import type { MaimaiBests, ParsedQueryCommand, PlateAttr, PlateObject, QueryScoreFilter, QueryState, ScoreExtend, ScoreFilterKey, Song } from './useMaimaiTypes'
 import type { FSType, RateType } from './useMaimaiUtils'
 import { FCType, MaimaiVersionAliasMap, MaimaiVersionAliasOptions, MaimaiVersionOptions } from './useMaimaiUtils'
-import { useSongSearch } from './useSongSearch.client'
+
+type SongSearch = ReturnType<typeof import('./useSongSearch.client')['useSongSearch']>
 
 const PLATE_REGEX = /^[真超檄橙晓桃樱紫堇白雪辉熊华爽煌星宙祭祝双宴镜彩](?:[极将神]|舞舞)(?:进度)?$/
 const PLATE_CAPTURE = /^([真超檄橙晓桃樱紫堇白雪辉熊华爽煌星宙祭祝双宴镜彩])([极将神]|舞舞)(?:进度)?$/
@@ -227,8 +228,6 @@ function parseQueryCommand(input: string): ParsedQueryCommand {
 }
 
 export function useQueryCommand(artifactId: string) {
-    const { indexSongs, searchSong } = useSongSearch()
-
     const state = reactive<QueryState>({
         type: 'typing',
         data: null,
@@ -247,6 +246,19 @@ export function useQueryCommand(artifactId: string) {
     let latestExecutionId = 0
     let allScoresCache: ScoreExtend[] | null = null
     let allScoresPromise: Promise<ScoreExtend[]> | null = null
+    let songSearch: SongSearch | null = null
+
+    const ensureSongSearch = async () => {
+        if (!songSearch) {
+            const { useSongSearch } = await import('./useSongSearch.client')
+            songSearch = useSongSearch()
+        }
+        return songSearch
+    }
+
+    const searchSong = (keyword: string) => {
+        return songSearch?.searchSong(keyword) ?? []
+    }
 
     const fetchBests = async () => {
         return await useNuxtApp().$leporid<MaimaiBests>(`/api/otoge/maimai/usagicard/bests?uuid=${artifactId}`)
@@ -311,7 +323,8 @@ export function useQueryCommand(artifactId: string) {
             })
     }
 
-    const searchAndSelect = (keyword: string) => {
+    const searchAndSelect = async (keyword: string) => {
+        await ensureSongSearch()
         const results = searchSong(keyword)
         state.previewResults = results.slice(0, 6)
         state.meta = {}
@@ -331,6 +344,7 @@ export function useQueryCommand(artifactId: string) {
     }
 
     const initSearch = async () => {
+        const { indexSongs } = await ensureSongSearch()
         await indexSongs()
         if (state.draft)
             execute(state.draft)
@@ -456,7 +470,7 @@ export function useQueryCommand(artifactId: string) {
                 state.meta = { queryLabel: parsed.displayLabel }
             }
             else {
-                searchAndSelect(parsed.raw)
+                await searchAndSelect(parsed.raw)
             }
         }
         catch (e: any) {
