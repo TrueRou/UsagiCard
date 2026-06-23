@@ -68,13 +68,6 @@ function deleteDigit() {
     error.value = ''
 }
 
-function clearAll() {
-    digits.value = []
-    confirmDigits.value = []
-    error.value = ''
-    setStep.value = 'input'
-}
-
 async function handleVerify() {
     loading.value = true
     error.value = ''
@@ -129,7 +122,9 @@ function triggerShake() {
     confirmDigits.value = []
     if (mode === 'set')
         setStep.value = 'input'
-    setTimeout(() => { shaking.value = false }, 500)
+    setTimeout(() => {
+        shaking.value = false
+    }, 500)
 }
 
 const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del']

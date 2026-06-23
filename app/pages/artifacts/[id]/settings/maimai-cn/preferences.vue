@@ -8,7 +8,7 @@ requireFunctionType(artifact, ProductTypeFunction.MaimaiCN)
 </script>
 
 <template>
-    <div class="p-4 max-w-lg mx-auto">
+    <div class="p-4">
         <MaimaiCNPreferences :artifact-id="artifactId" />
     </div>
 </template>

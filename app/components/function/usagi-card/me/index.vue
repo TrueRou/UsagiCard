@@ -49,7 +49,7 @@ function formatDate(dateStr: string | null | undefined) {
 </script>
 
 <template>
-    <div class="p-4 space-y-5 max-w-lg mx-auto">
+    <div class="p-4 space-y-5">
         <!-- 上半部分: Function 摘要小组件 -->
         <div class="space-y-3">
             <!-- UsagiCard 摘要: 头像 + 标题 -->

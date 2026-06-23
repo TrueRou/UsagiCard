@@ -4,6 +4,10 @@ import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
     antfu({
+        ignores: [
+            '**/*.yaml',
+            '**/*.yml',
+        ],
         rules: {
             'node/prefer-global/process': ['off'],
             'node/prefer-global/buffer': ['off'],

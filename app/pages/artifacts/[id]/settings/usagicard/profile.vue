@@ -36,7 +36,7 @@ async function saveProfile() {
 </script>
 
 <template>
-    <div class="p-4 space-y-4 max-w-lg mx-auto">
+    <div class="p-4 space-y-4">
         <ImageSelector v-if="selectorOpen" :selector-ctx="imageSelectorCtx" />
 
         <div class="space-y-2">
