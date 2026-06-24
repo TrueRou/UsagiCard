@@ -30,16 +30,14 @@ export function useQuickUpdate(
         if (!strategy || (strategy.sources.length === 0 && strategy.targets.length === 0))
             return
 
-        // 如果存在 transient 节点，跳过快速更新（无法自动提供凭据）
-        const hasTransient = [...strategy.sources, ...strategy.targets].some(node => node.transient)
-        if (hasTransient)
-            return
+        const sources = strategy.sources.filter(node => !node.transient)
+        const targets = strategy.targets.filter(node => !node.transient)
 
         // 构建 source/target 字典
         const sourceDict: Record<string, { credentials: string }> = {}
         const targetDict: Record<string, { credentials: string }> = {}
 
-        for (const node of strategy.sources) {
+        for (const node of sources) {
             const chainLabel = SERVER_TO_CHAIN_LABEL[node.server]
             if (!chainLabel)
                 continue
@@ -49,7 +47,7 @@ export function useQuickUpdate(
             sourceDict[chainLabel] = { credentials: credential }
         }
 
-        for (const node of strategy.targets) {
+        for (const node of targets) {
             const chainLabel = SERVER_TO_CHAIN_LABEL[node.server]
             if (!chainLabel)
                 continue

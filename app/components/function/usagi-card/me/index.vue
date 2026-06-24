@@ -20,7 +20,7 @@ function navigateToPage(path: string) {
 }
 
 function openCustomizeMenu() {
-    router.push(`/artifacts/${props.artifactId}/settings/usagicard/menu`)
+    router.push(`/artifacts/${props.artifactId}/settings/usagicard/personalization`)
 }
 
 function openSettings() {

@@ -1,3 +1,7 @@
+# Agent folders
+.omo
+.codegraph
+
 # Nuxt dev/build outputs
 .output
 .data

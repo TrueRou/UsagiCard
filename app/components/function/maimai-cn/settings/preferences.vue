@@ -54,6 +54,9 @@ const battleModeOptions = [
     { value: 'nearby_1h' as const, label: '1 小时', description: '在 1 小时内允许随刷新触发 nearby 匹配' },
 ]
 
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+let savingFromAutoSync = false
+
 function buildStorageSnapshot() {
     return {
         update: { enabled_mode: 'off' as const, last_updated_at: null, strategy: { sources: [], targets: [] } },
@@ -73,31 +76,57 @@ function isBattleStillActive(battle: MaimaiBattlePreferenceState) {
 }
 
 async function saveAndSync() {
-    const nextEnabledMode = storage.value.battle?.enabled_mode ?? 'off'
-    const previousBattle = originalBattlePreference.value
-    const currentBattle = normalizeBattlePreference(storage.value.battle)
+    savingFromAutoSync = true
+    try {
+        const nextEnabledMode = storage.value.battle?.enabled_mode ?? 'off'
+        const previousBattle = originalBattlePreference.value
+        const currentBattle = normalizeBattlePreference(storage.value.battle)
 
-    if (nextEnabledMode === 'off') {
-        storage.value.battle = {
-            ...currentBattle,
-            enabled_mode: 'off',
-            expires_at: null,
+        if (nextEnabledMode === 'off') {
+            storage.value.battle = {
+                ...currentBattle,
+                enabled_mode: 'off',
+                expires_at: null,
+            }
         }
-    }
-    else if (nextEnabledMode === previousBattle.enabled_mode && isBattleStillActive(previousBattle)) {
-        storage.value.battle = {
-            ...currentBattle,
-            enabled_mode: previousBattle.enabled_mode,
-            expires_at: previousBattle.expires_at,
+        else if (nextEnabledMode === previousBattle.enabled_mode && isBattleStillActive(previousBattle)) {
+            storage.value.battle = {
+                ...currentBattle,
+                enabled_mode: previousBattle.enabled_mode,
+                expires_at: previousBattle.expires_at,
+            }
         }
-    }
-    else {
-        storage.value.battle = await resolveAvailability(nextEnabledMode)
-    }
+        else {
+            storage.value.battle = await resolveAvailability(nextEnabledMode)
+        }
 
-    await storageSave('MaimaiCN', storage.value)
-    storage.value = buildStorageSnapshot()
+        await storageSave('MaimaiCN', storage.value, { showSuccessToast: false })
+        storage.value = buildStorageSnapshot()
+        await nextTick()
+    }
+    finally {
+        savingFromAutoSync = false
+    }
 }
+
+function scheduleSave() {
+    if (saveTimer)
+        clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => {
+        void saveAndSync()
+    }, 500)
+}
+
+watch(storage, () => {
+    if (savingFromAutoSync)
+        return
+    scheduleSave()
+}, { deep: true })
+
+onBeforeUnmount(() => {
+    if (saveTimer)
+        clearTimeout(saveTimer)
+})
 
 watch(isBattleExpired, (expired) => {
     if (!expired || !storage.value.battle || storage.value.battle.enabled_mode === 'off')
@@ -111,7 +140,7 @@ watch(isBattleExpired, (expired) => {
 </script>
 
 <template>
-    <form class="space-y-5" @submit.prevent="saveAndSync">
+    <form class="space-y-5" @submit.prevent>
         <section class="grid gap-4 md:grid-cols-2">
             <div class="space-y-2">
                 <label>
@@ -189,7 +218,7 @@ watch(isBattleExpired, (expired) => {
                     冷却中，下次可执行时间: {{ nextUpdateTime }}
                 </div>
                 <p class="text-xs text-base-content/50">
-                    冷却时间 15 分钟。快速更新使用保存的更新计划，含有临时节点的计划不会自动执行。
+                    冷却时间 15 分钟。快速更新会跳过临时节点，仅使用已保存凭据的节点执行。
                 </p>
             </template>
         </section>
@@ -228,10 +257,10 @@ watch(isBattleExpired, (expired) => {
             </div>
         </section>
 
-        <button class="btn btn-primary w-full" :disabled="storageSaving" type="submit">
-            <span v-if="storageSaving" class="loading loading-spinner loading-sm" />
-            保存设置
-        </button>
+        <div v-if="storageSaving" class="flex items-center justify-center gap-2 text-xs text-base-content/50">
+            <span class="loading loading-spinner loading-xs" />
+            正在保存
+        </div>
 
         <Teleport to="body">
             <SecondaryPinDialog
