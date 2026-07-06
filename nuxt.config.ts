@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: { enabled: process.env.NODE_ENV === 'development' },
-    css: ['~/assets/css/main.css'],
+    css: ['~/assets/styles/main.css'],
     app: {
         head: {
             link: [

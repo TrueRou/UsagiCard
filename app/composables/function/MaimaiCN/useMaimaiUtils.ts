@@ -190,20 +190,20 @@ export function useMaimaiUtils() {
             return undefined
 
         const rankIcons: { [key: string]: string } = {
-            'SSS+': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_SSSp.png', import.meta.url).href,
-            'SSS': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_SSS.png', import.meta.url).href,
-            'SS+': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_SSp.png', import.meta.url).href,
-            'SS': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_SS.png', import.meta.url).href,
-            'S+': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_Sp.png', import.meta.url).href,
-            'S': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_S.png', import.meta.url).href,
-            'AAA': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_AAA.png', import.meta.url).href,
-            'AA': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_AA.png', import.meta.url).href,
-            'A': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_A.png', import.meta.url).href,
-            'BBB': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_BBB.png', import.meta.url).href,
-            'BB': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_BB.png', import.meta.url).href,
-            'B': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_B.png', import.meta.url).href,
-            'C': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_C.png', import.meta.url).href,
-            'D': new URL('@/assets/function/maimai_cn/UI_TTR_Rank_D.png', import.meta.url).href,
+            'SSS+': new URL('@/assets/images/maimai/UI_TTR_Rank_SSSp.png', import.meta.url).href,
+            'SSS': new URL('@/assets/images/maimai/UI_TTR_Rank_SSS.png', import.meta.url).href,
+            'SS+': new URL('@/assets/images/maimai/UI_TTR_Rank_SSp.png', import.meta.url).href,
+            'SS': new URL('@/assets/images/maimai/UI_TTR_Rank_SS.png', import.meta.url).href,
+            'S+': new URL('@/assets/images/maimai/UI_TTR_Rank_Sp.png', import.meta.url).href,
+            'S': new URL('@/assets/images/maimai/UI_TTR_Rank_S.png', import.meta.url).href,
+            'AAA': new URL('@/assets/images/maimai/UI_TTR_Rank_AAA.png', import.meta.url).href,
+            'AA': new URL('@/assets/images/maimai/UI_TTR_Rank_AA.png', import.meta.url).href,
+            'A': new URL('@/assets/images/maimai/UI_TTR_Rank_A.png', import.meta.url).href,
+            'BBB': new URL('@/assets/images/maimai/UI_TTR_Rank_BBB.png', import.meta.url).href,
+            'BB': new URL('@/assets/images/maimai/UI_TTR_Rank_BB.png', import.meta.url).href,
+            'B': new URL('@/assets/images/maimai/UI_TTR_Rank_B.png', import.meta.url).href,
+            'C': new URL('@/assets/images/maimai/UI_TTR_Rank_C.png', import.meta.url).href,
+            'D': new URL('@/assets/images/maimai/UI_TTR_Rank_D.png', import.meta.url).href,
         }
 
         const style = getAchievementStyle(achievements)
@@ -253,10 +253,10 @@ export function useMaimaiUtils() {
         if (fc === null)
             return undefined
         const fcIcons = {
-            0: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_APp.png', import.meta.url).href, // APP
-            1: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_AP.png', import.meta.url).href, // AP
-            2: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_FCp.png', import.meta.url).href, // FCP
-            3: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_FC.png', import.meta.url).href, // FC
+            0: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_APp.png', import.meta.url).href, // APP
+            1: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_AP.png', import.meta.url).href, // AP
+            2: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_FCp.png', import.meta.url).href, // FCP
+            3: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_FC.png', import.meta.url).href, // FC
         }
         return fcIcons[fc]
     }
@@ -266,11 +266,11 @@ export function useMaimaiUtils() {
         if (fs === null)
             return undefined
         const fsIcons = {
-            0: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_Sync.png', import.meta.url).href, // SYNC
-            1: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_FS.png', import.meta.url).href, // FS
-            2: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_FSp.png', import.meta.url).href, // FSP
-            3: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_FSD.png', import.meta.url).href, // FSD
-            4: new URL('@/assets/function/maimai_cn/UI_MSS_MBase_Icon_FSDp.png', import.meta.url).href, // FSDP
+            0: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_Sync.png', import.meta.url).href, // SYNC
+            1: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_FS.png', import.meta.url).href, // FS
+            2: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_FSp.png', import.meta.url).href, // FSP
+            3: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_FSD.png', import.meta.url).href, // FSD
+            4: new URL('@/assets/images/maimai/UI_MSS_MBase_Icon_FSDp.png', import.meta.url).href, // FSDP
         }
         return fsIcons[fs]
     }
