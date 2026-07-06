@@ -17,3 +17,9 @@ if (!defaultPage) {
 
 await navigateTo(defaultPage.path(artifactId), { replace: true })
 </script>
+
+<template>
+    <div class="p-4 text-sm text-base-content/60">
+        正在跳转功能页...
+    </div>
+</template>

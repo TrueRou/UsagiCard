@@ -155,7 +155,7 @@ export interface MaimaiBattleAvailabilityResponse {
 
 export interface MaimaiBattleParticipant {
     id: number
-    uuid: string
+    side: 'self' | 'opponent'
     player_name: string | null
     player_rating: number | null
     total_achievement: number
@@ -163,7 +163,6 @@ export interface MaimaiBattleParticipant {
 
 export interface MaimaiBattleRoundScore {
     participant_id: number
-    uuid: string
     achievement: number
     play_count: number
     dx_score: number
@@ -190,10 +189,8 @@ export interface MaimaiBattleDetail {
     triggered_at: string | null
     completed_at: string | null
     expires_at: string | null
-    match_bucket_type: string
-    match_bucket_key: string
     round_count: number
-    winner_uuid: string | null
+    winner_participant_id: number | null
     result_summary: Record<string, any>
     participants: MaimaiBattleParticipant[]
     rounds: MaimaiBattleRound[]
@@ -204,6 +201,7 @@ export interface MaimaiBattleMatchResponse {
     reason: string | null
     active_battle_id: string | null
     last_attempt_at: string | null
+    match_method: 'browser_geolocation' | 'geoip' | 'unknown' | null
     battle: MaimaiBattleDetail | null
 }
 

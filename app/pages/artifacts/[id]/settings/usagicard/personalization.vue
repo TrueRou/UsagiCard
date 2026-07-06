@@ -6,8 +6,7 @@ const { artifact, storageOf, storageSave, storageSaving } = await useArtifact(ar
 const storage = ref<UsagiCardStorage>({
     ...storageOf('UsagiCard').value,
 })
-storage.value.menu ??= {}
-const menuStorage = computed(() => storage.value.menu)
+const menuStorage = computed(() => storage.value.menu ?? {})
 
 const functionTypes = computed(() => artifact.value.product.type.function_types)
 const functionPages = computed(() => getEnabledFunctionPages(functionTypes.value))

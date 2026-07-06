@@ -122,7 +122,6 @@ function goBack() {
             v-if="activeBattle"
             :open="dialogOpen"
             :battle="activeBattle"
-            :artifact-id="artifactId"
             @close="closeBattleDialog"
         />
 

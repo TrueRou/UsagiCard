@@ -254,7 +254,31 @@ watch(isBattleExpired, (expired) => {
                 <p class="text-base-content/50">
                     {{ battleModeOptions.find(o => o.value === battleEnabledMode)?.description }}
                 </p>
+                <p class="text-base-content/50">
+                    开启后会在匹配时请求浏览器位置权限以提高准确度；如果拒绝或不可用，将自动改用网络区域进行粗略匹配。
+                </p>
             </div>
+        </section>
+
+        <section class="rounded-xl border border-base-300 p-4 space-y-3">
+            <details>
+                <summary class="cursor-pointer list-none">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="font-medium text-sm">
+                                高级设置
+                            </p>
+                            <p class="text-xs text-base-content/60">
+                                编辑查分更新执行前参考的更新计划
+                            </p>
+                        </div>
+                        <Icon name="mdi:chevron-down" class="w-5 h-5 text-base-content/50" />
+                    </div>
+                </summary>
+                <div class="mt-4">
+                    <FunctionMaimaiCnSettingsUpdatePlanEditor :artifact-id="artifactId" />
+                </div>
+            </details>
         </section>
 
         <div v-if="storageSaving" class="flex items-center justify-center gap-2 text-xs text-base-content/50">

@@ -1,12 +1,5 @@
 import type { UpdatesChainResult } from './useMaimaiTypes'
-
-const SERVER_TO_CHAIN_LABEL: Record<string, string> = {
-    diving_fish: 'divingfish',
-    lxns: 'lxns',
-    arcade_legacy: 'arcade_legacy',
-    arcade: 'arcade',
-    usagi_card: 'usagicard',
-}
+import { buildMaimaiUpdatePayload } from './useMaimaiUpdatePlan'
 
 export const QUICK_UPDATE_COOLDOWN_MS = 15 * 60 * 1000
 
@@ -26,38 +19,9 @@ export function useQuickUpdate(
                 return
         }
 
-        const strategy = storage.value.update?.strategy
-        if (!strategy || (strategy.sources.length === 0 && strategy.targets.length === 0))
-            return
+        const payload = buildMaimaiUpdatePayload(storage.value.update?.strategy, artifactId, { includeTransient: false })
 
-        const sources = strategy.sources.filter(node => !node.transient)
-        const targets = strategy.targets.filter(node => !node.transient)
-
-        // 构建 source/target 字典
-        const sourceDict: Record<string, { credentials: string }> = {}
-        const targetDict: Record<string, { credentials: string }> = {}
-
-        for (const node of sources) {
-            const chainLabel = SERVER_TO_CHAIN_LABEL[node.server]
-            if (!chainLabel)
-                continue
-            const credential = node.server === 'usagi_card' ? artifactId : (node.credential ?? '')
-            if (!credential)
-                continue
-            sourceDict[chainLabel] = { credentials: credential }
-        }
-
-        for (const node of targets) {
-            const chainLabel = SERVER_TO_CHAIN_LABEL[node.server]
-            if (!chainLabel)
-                continue
-            const credential = node.server === 'usagi_card' ? artifactId : (node.credential ?? '')
-            if (!credential)
-                continue
-            targetDict[chainLabel] = { credentials: credential }
-        }
-
-        if (Object.keys(sourceDict).length === 0 || Object.keys(targetDict).length === 0)
+        if (Object.keys(payload.source).length === 0)
             return
 
         try {
@@ -65,7 +29,7 @@ export function useQuickUpdate(
                 '/api/nuxt/maimai/update',
                 {
                     method: 'POST',
-                    body: { source: sourceDict, target: targetDict },
+                    body: payload,
                 },
             )
 

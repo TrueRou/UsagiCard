@@ -55,7 +55,6 @@ onMounted(() => {
         <BattleDialog
             :battle="activeBattle"
             :open="dialogOpen"
-            :self-uuid="artifactId"
             @close="closeBattleDialog"
         />
     </div>

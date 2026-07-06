@@ -10,7 +10,7 @@ interface ApiResponse<T = unknown> {
     data?: T
 }
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((nuxtApp) => {
     let pendingRequestCount = 0
 
     const startGlobalLoading = () => {
