@@ -1,4 +1,4 @@
-export function useQButton(artifact: Ref<ArtifactUserResponse>, potentialTabKey?: string): UseQButtonCtx {
+export function useQButton(artifact: Ref<ArtifactUserResponse>): UseQButtonCtx {
     const functionTypes: ComputedRef<ProductTypeFunction[]> = computed(() => {
         return artifact.value.product.type.function_types
     })
@@ -11,7 +11,7 @@ export function useQButton(artifact: Ref<ArtifactUserResponse>, potentialTabKey?
         return actions
     })
 
-    const activeQuickActionKey = ref<string | undefined>(potentialTabKey)
+    const activeQuickActionKey = ref<string | undefined>()
     const qDialogOpened = ref(false)
 
     watch([quickActions], () => {

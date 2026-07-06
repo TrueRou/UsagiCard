@@ -83,7 +83,7 @@ export const functionManifests: FunctionManifest[] = [
                 key: 'uc-personalization',
                 functionType: ProductTypeFunction.UsagiCard,
                 label: '个性化设置',
-                description: '菜单栏、默认入口和快捷入口',
+                description: '菜单栏和快捷入口',
                 icon: 'mdi:tune-variant',
                 path: artifactId => `/artifacts/${artifactId}/settings/usagicard/personalization`,
                 order: 30,

@@ -10,7 +10,6 @@ const menuStorage = computed(() => storage.value.menu ?? {})
 
 const functionTypes = computed(() => artifact.value.product.type.function_types)
 const functionPages = computed(() => getEnabledFunctionPages(functionTypes.value))
-const quickActions = computed(() => getEnabledQuickActions(functionTypes.value))
 const { configurablePageItems, customMenuKeys, userCustomized } = useFunctionMenu(functionPages, computed(() => menuStorage.value))
 
 const draftMenuKeys = ref<string[]>([])
@@ -35,8 +34,6 @@ async function saveMenu() {
     menuStorage.value.menu_tabs = draftUsesSystemDefault.value
         ? []
         : draftMenuKeys.value.filter(key => availableKeys.has(key))
-    if (menuStorage.value.default_function_tab && !draftMenuKeys.value.includes(menuStorage.value.default_function_tab))
-        menuStorage.value.default_function_tab = null
     await storageSave('UsagiCard', storage.value, { showSuccessToast: false })
 }
 
@@ -88,10 +85,6 @@ async function onMenuDrop(targetKey: string) {
     draftUsesSystemDefault.value = false
     draftMenuKeys.value = nextKeys
     await saveMenu()
-}
-
-async function saveDefaults() {
-    await storageSave('UsagiCard', storage.value, { showSuccessToast: false })
 }
 </script>
 
@@ -162,49 +155,6 @@ async function saveDefaults() {
             <p v-if="availableMenuItems.length === 0" class="text-sm text-base-content/50">
                 所有可配置功能都已经在菜单栏中。
             </p>
-        </section>
-
-        <section class="rounded-xl border border-base-300 p-4 space-y-4">
-            <div>
-                <p class="font-medium text-sm">
-                    默认入口
-                </p>
-                <p class="text-xs text-base-content/60">
-                    打开功能面板或快捷功能面板时默认显示的页面
-                </p>
-            </div>
-
-            <div class="grid gap-4 md:grid-cols-2">
-                <div class="space-y-2">
-                    <label>
-                        <p class="font-medium text-sm">默认功能入口</p>
-                        <p class="text-xs text-base-content/60">打开功能面板时默认显示的页面</p>
-                    </label>
-                    <select v-model="storage.menu!.default_function_tab" class="select select-bordered w-full" @change="saveDefaults">
-                        <option :value="null">
-                            跟随系统默认
-                        </option>
-                        <option v-for="item in functionPages" :key="item.key" :value="item.key">
-                            {{ item.label }}
-                        </option>
-                    </select>
-                </div>
-
-                <div class="space-y-2">
-                    <label>
-                        <p class="font-medium text-sm">默认快捷功能</p>
-                        <p class="text-xs text-base-content/60">打开快捷功能面板时默认显示的操作</p>
-                    </label>
-                    <select v-model="storage.menu!.default_qbutton_tab" class="select select-bordered w-full" :disabled="quickActions.length === 0" @change="saveDefaults">
-                        <option :value="null">
-                            跟随系统默认
-                        </option>
-                        <option v-for="item in quickActions" :key="item.key" :value="item.key">
-                            {{ item.label }}
-                        </option>
-                    </select>
-                </div>
-            </div>
         </section>
     </div>
 </template>
