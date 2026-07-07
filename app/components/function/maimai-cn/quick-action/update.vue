@@ -69,8 +69,17 @@ function isTargetBound(server: MaimaiUpdateServer) {
 
 function openBindDialog(option: BindTargetOption) {
     activeBindOption.value = option
-    bindCredential.value = getStoredTargetCredential(option.id) ?? ''
+    bindCredential.value = ''
     bindDialogOpen.value = true
+}
+
+async function handleTargetAction(option: BindTargetOption) {
+    if (isTargetBound(option.id)) {
+        await saveStrategy(removeMaimaiUpdateNode(storage.value.update?.strategy, 'targets', option.id))
+        return
+    }
+
+    openBindDialog(option)
 }
 
 async function saveStrategy(strategy: ReturnType<typeof sanitizeMaimaiUpdateStrategy>, showSuccessToast = true) {
@@ -96,10 +105,6 @@ async function saveBindCredential() {
     bindDialogOpen.value = false
     activeBindOption.value = null
     bindCredential.value = ''
-}
-
-async function removeTarget(server: MaimaiUpdateServer) {
-    await saveStrategy(removeMaimaiUpdateNode(storage.value.update?.strategy, 'targets', server))
 }
 
 async function removeRememberedUid() {
@@ -146,11 +151,8 @@ async function rememberArcadeLegacyUid(sgwcmaid: string) {
 }
 
 async function submitWithLatestQr() {
-    await doSubmit(latestQrCredential.value.trim(), false)
-}
-
-async function submitWithoutLatestQr() {
-    await doSubmit(null, true)
+    const latestQr = latestQrCredential.value.trim()
+    await doSubmit(latestQr || null, !latestQr)
 }
 
 async function doSubmit(latestQr: string | null, skippedQr: boolean) {
@@ -260,11 +262,13 @@ function resetResult() {
                                     {{ isTargetBound(option.id) ? '已绑定' : '尚未绑定' }}
                                 </p>
                             </div>
-                            <button v-if="isTargetBound(option.id)" type="button" class="btn btn-ghost btn-xs text-error" @click="removeTarget(option.id)">
-                                移除
-                            </button>
                         </div>
-                        <button type="button" class="btn btn-outline btn-sm w-full mt-3" @click="openBindDialog(option)">
+                        <button
+                            type="button"
+                            class="btn btn-sm w-full mt-3"
+                            :class="isTargetBound(option.id) ? 'btn-outline' : 'border-success/50 bg-success/10 text-base-content hover:border-success hover:bg-success/15'"
+                            @click="handleTargetAction(option)"
+                        >
                             {{ isTargetBound(option.id) ? '重新绑定' : option.label }}
                         </button>
                     </div>
@@ -359,9 +363,6 @@ function resetResult() {
                     <h3 class="text-base font-semibold">
                         {{ activeBindOption.label }}
                     </h3>
-                    <p class="text-sm text-base-content/60">
-                        {{ getMaimaiUpdateSourceDef(activeBindOption.id)?.credentialLabel }}
-                    </p>
                     <input v-model="bindCredential" type="text" class="input input-bordered w-full" :placeholder="getMaimaiUpdateSourceDef(activeBindOption.id)?.credentialLabel">
                     <div class="flex gap-2 justify-end">
                         <button class="btn btn-ghost" @click="bindDialogOpen = false">
@@ -393,10 +394,7 @@ function resetResult() {
                         <button class="btn btn-ghost" @click="qrDialogOpen = false">
                             取消
                         </button>
-                        <button class="btn btn-outline" :disabled="submitting" @click="submitWithoutLatestQr">
-                            强制更新
-                        </button>
-                        <button class="btn btn-primary" :disabled="submitting || !latestQrCredential.trim()" @click="submitWithLatestQr">
+                        <button class="btn btn-primary" :disabled="submitting" @click="submitWithLatestQr">
                             正常更新
                         </button>
                     </div>

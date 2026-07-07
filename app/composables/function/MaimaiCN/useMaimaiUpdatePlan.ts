@@ -120,7 +120,7 @@ export function maimaiUpdateChainLabelToColor(chainLabel: string) {
 
 export function sanitizeMaimaiUpdateStrategy(strategy?: MaimaiUpdateStrategy | null): Required<MaimaiUpdateStrategy> {
     return {
-        sources: (strategy?.sources ?? []).filter(node => node.server !== 'usagi_card' && node.server !== 'arcade'),
+        sources: (strategy?.sources ?? []).filter(node => node.server !== 'usagi_card'),
         targets: (strategy?.targets ?? []).filter(node => node.server !== 'usagi_card' && node.server !== 'arcade' && node.server !== 'arcade_legacy'),
     }
 }
