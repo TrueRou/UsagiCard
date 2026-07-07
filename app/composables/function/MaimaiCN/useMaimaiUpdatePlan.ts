@@ -20,6 +20,9 @@ export interface MaimaiUpdateDataSourceDef {
     credentialLabel: string
     chainLabel: string
     isTransient: boolean
+    visibleInPicker: boolean
+    canBindAsSource: boolean
+    canBindAsTarget: boolean
 }
 
 export const MAIMAI_UPDATE_SOURCE_COLORS: Record<MaimaiUpdateServer, string> = {
@@ -35,17 +38,23 @@ export const MAIMAI_UPDATE_DATA_SOURCES: MaimaiUpdateDataSourceDef[] = [
         id: 'arcade',
         chainLabel: 'arcade',
         name: '微信二维码',
-        description: '通过微信扫码获取完整成绩',
-        credentialLabel: '微信二维码识别内容',
+        description: '输入 SGWCMAID 执行全量更新',
+        credentialLabel: 'SGWCMAID',
         isTransient: true,
+        visibleInPicker: false,
+        canBindAsSource: false,
+        canBindAsTarget: false,
     },
     {
         id: 'arcade_legacy',
         chainLabel: 'arcade_legacy',
-        name: '好友对战',
-        description: '使用可保存凭据进行快速更新',
+        name: '记住的 UID',
+        description: '使用 SGWCMAID 换取的旧版机台凭据进行快速更新',
         credentialLabel: '凭据',
         isTransient: false,
+        visibleInPicker: false,
+        canBindAsSource: false,
+        canBindAsTarget: false,
     },
     {
         id: 'usagi_card',
@@ -54,24 +63,35 @@ export const MAIMAI_UPDATE_DATA_SOURCES: MaimaiUpdateDataSourceDef[] = [
         description: '通过绑定的兔卡同步成绩',
         credentialLabel: '留空视为当前卡片',
         isTransient: false,
+        visibleInPicker: false,
+        canBindAsSource: false,
+        canBindAsTarget: false,
     },
     {
         id: 'diving_fish',
         chainLabel: 'divingfish',
         name: '水鱼',
-        description: 'DivingFish - 舞萌 DX 查分器',
+        description: 'DivingFish',
         credentialLabel: 'Import-Token',
         isTransient: false,
+        visibleInPicker: true,
+        canBindAsSource: false,
+        canBindAsTarget: true,
     },
     {
         id: 'lxns',
         chainLabel: 'lxns',
         name: '落雪',
-        description: '落雪咖啡屋 - maimai DX 查分器',
+        description: '落雪咖啡屋',
         credentialLabel: '个人 API 密钥',
         isTransient: false,
+        visibleInPicker: true,
+        canBindAsSource: false,
+        canBindAsTarget: true,
     },
 ]
+
+export const MAIMAI_UPDATE_BINDABLE_TARGETS = MAIMAI_UPDATE_DATA_SOURCES.filter(source => source.canBindAsTarget)
 
 export const MAIMAI_UPDATE_SERVER_TO_CHAIN_LABEL: Record<MaimaiUpdateServer, string> = {
     diving_fish: 'divingfish',
@@ -100,8 +120,8 @@ export function maimaiUpdateChainLabelToColor(chainLabel: string) {
 
 export function sanitizeMaimaiUpdateStrategy(strategy?: MaimaiUpdateStrategy | null): Required<MaimaiUpdateStrategy> {
     return {
-        sources: (strategy?.sources ?? []).filter(node => node.server !== 'usagi_card'),
-        targets: (strategy?.targets ?? []).filter(node => node.server !== 'usagi_card'),
+        sources: (strategy?.sources ?? []).filter(node => node.server !== 'usagi_card' && node.server !== 'arcade'),
+        targets: (strategy?.targets ?? []).filter(node => node.server !== 'usagi_card' && node.server !== 'arcade' && node.server !== 'arcade_legacy'),
     }
 }
 
@@ -163,4 +183,22 @@ export function getMaimaiUpdateResultTargetNames(result: UpdatesChainResult | nu
     if (!result)
         return []
     return getMaimaiUpdateTargetNames(result.target)
+}
+
+export function removeMaimaiUpdateNode(
+    strategy: MaimaiUpdateStrategy | undefined | null,
+    zone: 'sources' | 'targets',
+    server: MaimaiUpdateServer,
+): Required<MaimaiUpdateStrategy> {
+    const next = sanitizeMaimaiUpdateStrategy(strategy)
+    next[zone] = next[zone].filter(node => node.server !== server)
+    return next
+}
+
+export function getMaimaiUpdateNode(
+    strategy: MaimaiUpdateStrategy | undefined | null,
+    zone: 'sources' | 'targets',
+    server: MaimaiUpdateServer,
+) {
+    return sanitizeMaimaiUpdateStrategy(strategy)[zone].find(node => node.server === server) ?? null
 }

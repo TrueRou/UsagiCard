@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
-import MaimaiCNQuickUpdate from '~/components/function/maimai-cn/quick_actions/update.vue'
-import UsagiCardQuickMe from '~/components/function/usagi-card/quick_actions/me.vue'
+import MaimaiCNQuickUpdate from '~/components/function/maimai-cn/quick-action/update.vue'
+import UsagiCardQuickMe from '~/components/function/usagi-card/quick-action/me.vue'
 
 export interface FunctionPageMeta {
     key: string
@@ -123,15 +123,6 @@ export const functionManifests: FunctionManifest[] = [
                 path: artifactId => `/artifacts/${artifactId}/functions/maimai-cn/playdata`,
                 configurable: true,
                 order: 20,
-            },
-            {
-                key: 'maicn-update',
-                functionType: ProductTypeFunction.MaimaiCN,
-                label: '查分更新',
-                icon: 'mdi:sync',
-                path: artifactId => `/artifacts/${artifactId}/functions/maimai-cn/update`,
-                configurable: true,
-                order: 30,
             },
         ],
         settings: [
