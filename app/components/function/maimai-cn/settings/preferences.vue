@@ -10,10 +10,6 @@ const {
     storageOf,
     storageSave,
     storageSaving,
-    secondaryPinDialogOpen,
-    secondaryPinArtifactId,
-    handleSecondaryPinVerified,
-    handleSecondaryPinClose,
 } = await useArtifact(props.artifactId)
 type MaimaiPreferenceStorage = Omit<MaimaiStorage, 'battle'> & { battle: ReturnType<typeof createDefaultBattlePreference> }
 
@@ -285,15 +281,5 @@ watch(isBattleExpired, (expired) => {
             <span class="loading loading-spinner loading-xs" />
             正在保存
         </div>
-
-        <Teleport to="body">
-            <SecondaryPinDialog
-                v-if="secondaryPinDialogOpen"
-                :artifact-id="secondaryPinArtifactId"
-                mode="verify"
-                @verified="handleSecondaryPinVerified"
-                @close="handleSecondaryPinClose"
-            />
-        </Teleport>
     </form>
 </template>

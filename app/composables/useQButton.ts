@@ -35,6 +35,8 @@ export function useQButton(artifact: Ref<ArtifactUserResponse>): UseQButtonCtx {
     }
 
     const qDialogOpen = (val: boolean) => {
+        if (val)
+            activeQuickActionKey.value = Object.keys(quickActions.value)[0]
         qDialogOpened.value = val
     }
 

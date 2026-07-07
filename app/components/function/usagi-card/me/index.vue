@@ -98,6 +98,14 @@ function formatDate(dateStr: string | null | undefined) {
                         {{ formatDate(maimaiStorage.update?.last_updated_at) }}
                     </p>
                 </div>
+                <div class="bg-base-200/50 rounded-xl px-3 py-2.5">
+                    <p class="text-xs text-base-content/50 mb-0.5">
+                        这里有点丑
+                    </p>
+                    <p class="text-sm font-medium">
+                        后面会改的
+                    </p>
+                </div>
             </div>
         </div>
 

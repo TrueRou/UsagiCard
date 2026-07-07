@@ -6,7 +6,13 @@ const { artifact, storageOf, storageSave, storageSaving } = await useArtifact(ar
 const storage = ref<UsagiCardStorage>({
     ...storageOf('UsagiCard').value,
 })
-const menuStorage = computed(() => storage.value.menu ?? {})
+if (!storage.value.menu) {
+    storage.value.menu = { menu_tabs: [], swipe: { enabled_mode: 'off' } }
+}
+else if (!storage.value.menu.swipe) {
+    storage.value.menu.swipe = { enabled_mode: 'off' }
+}
+const menuStorage = computed(() => storage.value.menu!)
 
 const functionTypes = computed(() => artifact.value.product.type.function_types)
 const functionPages = computed(() => getEnabledFunctionPages(functionTypes.value))
@@ -28,12 +34,26 @@ const draftMenuItems = computed(() => draftMenuKeys.value
     .map(key => configurablePageMap.value.get(key))
     .filter((item): item is NonNullable<typeof item> => Boolean(item)))
 const availableMenuItems = computed(() => configurablePageItems.value.filter(item => !draftMenuKeys.value.includes(item.key)))
+const swipeEnabled = computed({
+    get: () => menuStorage.value.swipe?.enabled_mode === 'on',
+    set: (enabled: boolean) => {
+        menuStorage.value.swipe = {
+            ...(menuStorage.value.swipe ?? {}),
+            enabled_mode: enabled ? 'on' : 'off',
+        }
+    },
+})
 
 async function saveMenu() {
     const availableKeys = new Set(configurablePageItems.value.map(item => item.key))
     menuStorage.value.menu_tabs = draftUsesSystemDefault.value
         ? []
         : draftMenuKeys.value.filter(key => availableKeys.has(key))
+    await storageSave('UsagiCard', storage.value, { showSuccessToast: false })
+}
+
+async function saveSwipeEnabled(enabled: boolean) {
+    swipeEnabled.value = enabled
     await storageSave('UsagiCard', storage.value, { showSuccessToast: false })
 }
 
@@ -138,6 +158,21 @@ async function onMenuDrop(targetKey: string) {
         </section>
 
         <section class="rounded-xl border border-base-300 p-4 space-y-3">
+            <label class="flex items-start justify-between gap-4">
+                <span class="space-y-1">
+                    <span class="block font-medium text-sm">滑动手势</span>
+                    <span class="block text-xs text-base-content/60">在手机端左右滑动切换菜单栏中的功能页。</span>
+                </span>
+                <input
+                    :checked="swipeEnabled"
+                    class="toggle toggle-primary shrink-0"
+                    type="checkbox"
+                    @change="saveSwipeEnabled(($event.target as HTMLInputElement).checked)"
+                >
+            </label>
+        </section>
+
+        <section class="rounded-xl border border-base-300 p-4 space-y-3">
             <div>
                 <p class="font-medium text-sm">
                     可添加功能
@@ -152,7 +187,7 @@ async function onMenuDrop(targetKey: string) {
                     <span>{{ item.label }}</span>
                 </button>
             </div>
-            <p v-if="availableMenuItems.length === 0" class="text-sm text-base-content/50">
+            <p v-if="availableMenuItems.length === 0" class="text-xs">
                 所有可配置功能都已经在菜单栏中。
             </p>
         </section>

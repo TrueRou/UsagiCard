@@ -1,12 +1,21 @@
 type StorageNamespace = keyof ArtifactStorage
 
+interface StorageSaveOptions {
+    successMessage?: string
+    showSuccessToast?: boolean
+}
+
 export type StorageSaveFn = <K extends StorageNamespace>(
     namespace: K,
     newData: NonNullable<ArtifactStorage[K]>,
-    options?: { successMessage?: string, showSuccessToast?: boolean },
+    options?: StorageSaveOptions,
 ) => Promise<void>
 
 export async function useArtifact(artifactId: string) {
+    /*
+    / 工件元数据相关
+    */
+
     const artifactAsyncData = await useLeporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
     const { data, error } = artifactAsyncData
 
@@ -17,81 +26,87 @@ export async function useArtifact(artifactId: string) {
         return data.value as ArtifactUserResponse & { storage: ArtifactStorage }
     })
 
+    /*
+    / 工件二级密码相关
+    */
+
+    const secondaryTokenKey = `artifact:${artifactId}:secondary-pin-token`
+    const secondaryToken = useState<string | null>(secondaryTokenKey, () => null)
+    const { request: requestSecondaryPin } = useSecondaryPinDialog()
+
+    function setSecondaryToken(token: string | null) {
+        secondaryToken.value = token
+        if (!import.meta.client)
+            return
+        if (token)
+            sessionStorage.setItem(secondaryTokenKey, token)
+        else
+            sessionStorage.removeItem(secondaryTokenKey)
+    }
+
+    /*
+    / 工件存储相关
+    */
+
+    function cloneStorageData<T>(value: T): T {
+        const raw = toRaw(value)
+        if (raw === undefined)
+            return raw
+        return JSON.parse(JSON.stringify(raw))
+    }
+
     const storageOf = <K extends StorageNamespace>(ns: K) => {
-        return computed(() => artifact.value.storage[ns])
+        return computed(() => cloneStorageData(artifact.value.storage[ns]))
     }
 
     const storageSaving = ref(false)
 
-    // 二级 PIN token 管理（页面级别）
-    const secondaryToken = ref<string | null>(null)
-    const secondaryPinDialogOpen = ref(false)
-    let pendingPinResolve: ((token: string | null) => void) | null = null
-
-    function requestSecondaryPin(): Promise<string | null> {
-        secondaryPinDialogOpen.value = true
-        return new Promise((resolve) => {
-            pendingPinResolve = resolve
-        })
-    }
-
-    function handleSecondaryPinVerified(token: string) {
-        secondaryToken.value = token
-        secondaryPinDialogOpen.value = false
-        pendingPinResolve?.(token)
-        pendingPinResolve = null
-    }
-
-    function handleSecondaryPinClose() {
-        secondaryPinDialogOpen.value = false
-        pendingPinResolve?.(null)
-        pendingPinResolve = null
-    }
-
-    async function doSave(fullStorage: Record<string, any>, options?: { successMessage?: string, showSuccessToast?: boolean }) {
-        const headers: Record<string, string> = {}
-        if (secondaryToken.value) {
-            headers['X-Secondary-Password'] = secondaryToken.value
-        }
-
-        data.value = await useNuxtApp().$leporid(`/api/artifacts/${artifactId}/storage`, {
-            method: 'PATCH',
-            body: { storage: fullStorage },
-            headers,
-            showSuccessToast: options?.showSuccessToast ?? true,
-            successMessage: options?.successMessage ?? '保存成功',
-        })
-    }
-
     const storageSave: StorageSaveFn = async (namespace, newData, options) => {
+        const currentStorage = cloneStorageData(artifact.value.storage[namespace])
+        const fullStorage = cloneStorageData({ ...artifact.value.storage, [namespace]: newData })
+        let saved = false
+
         storageSaving.value = true
         try {
-            const fullStorage = { ...artifact.value.storage, [namespace]: newData }
-            try {
-                await doSave(fullStorage, options)
-            }
-            catch (e: any) {
-                // 423: 需要二级密码
-                if (e?.statusCode === 423) {
-                    const token = await requestSecondaryPin()
-                    if (token) {
-                        // 重试保存
-                        await doSave(fullStorage, options)
-                    }
-                    else {
-                        // 用户取消
-                        throw createError({ statusCode: 423, message: '需要二级密码验证' })
-                    }
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    data.value = await useNuxtApp().$leporid(`/api/artifacts/${artifactId}/storage`, {
+                        method: 'PATCH',
+                        body: { storage: fullStorage },
+                        headers: secondaryToken.value
+                            ? { 'X-Secondary-Password': secondaryToken.value }
+                            : {},
+                        showSuccessToast: options?.showSuccessToast ?? true,
+                        successMessage: options?.successMessage ?? '保存成功',
+                    } as any)
+                    saved = true
+                    return
                 }
-                else {
-                    throw e
+                catch (error: any) {
+                    if (error?.statusCode !== 423 || attempt > 0)
+                        throw error
+
+                    setSecondaryToken(null)
+                    const token = await requestSecondaryPin(artifactId)
+                    if (!token)
+                        return
+                    setSecondaryToken(token)
                 }
             }
         }
         finally {
+            if (!saved) {
+                for (const key of Object.keys(newData) as Array<keyof typeof newData>)
+                    delete newData[key]
+                Object.assign(newData, currentStorage)
+            }
             setTimeout(() => storageSaving.value = false, 500)
         }
     }
+
+    onMounted(() => {
+        secondaryToken.value = sessionStorage.getItem(secondaryTokenKey)
+    })
 
     return {
         artifact,
@@ -99,11 +114,6 @@ export async function useArtifact(artifactId: string) {
         storageOf,
         storageSave,
         storageSaving,
-        // 二级 PIN 相关
-        secondaryPinDialogOpen,
-        secondaryPinArtifactId: artifactId,
-        handleSecondaryPinVerified,
-        handleSecondaryPinClose,
         useDesignCtx: useDesign(
             computed(() => artifact.value.product.design),
             computed(() => artifact.value.product.type.design_type),

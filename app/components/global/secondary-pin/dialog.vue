@@ -102,8 +102,8 @@ async function handleSetConfirm() {
     error.value = ''
     try {
         await useNuxtApp().$leporid(
-            `/api/artifacts/${props.artifactId}/set-pin`,
-            { method: 'POST', body: { password: first }, showSuccessToast: true, successMessage: '二级密码设置成功', showErrorToast: false },
+            `/api/artifacts/${props.artifactId}/pin`,
+            { method: 'PATCH', body: { password: first }, showSuccessToast: true, successMessage: '二级密码设置成功', showErrorToast: false },
         )
         emit('set')
     }

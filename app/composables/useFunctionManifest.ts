@@ -1,6 +1,5 @@
 import type { Component } from 'vue'
 import MaimaiCNQuickUpdate from '~/components/function/maimai-cn/quick-action/update.vue'
-import UsagiCardQuickMe from '~/components/function/usagi-card/quick-action/me.vue'
 
 export interface FunctionPageMeta {
     key: string
@@ -90,14 +89,14 @@ export const functionManifests: FunctionManifest[] = [
             },
         ],
         quickActions: [
-            {
-                key: 'uc-me',
-                functionType: ProductTypeFunction.UsagiCard,
-                label: '我的卡片',
-                icon: 'mdi:account-circle-outline',
-                component: UsagiCardQuickMe,
-                order: 1000,
-            },
+            // {
+            //     key: 'uc-me',
+            //     functionType: ProductTypeFunction.UsagiCard,
+            //     label: '我的卡片',
+            //     icon: 'mdi:account-circle-outline',
+            //     component: UsagiCardQuickMe,
+            //     order: 1000,
+            // },
         ],
     },
     {

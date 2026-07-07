@@ -165,7 +165,7 @@ async function doSubmit(latestQr: string | null, skippedQr: boolean) {
         const payload = buildMaimaiUpdatePayload(storage.value.update?.strategy, props.artifactId, { latestQrCredential: latestQr })
         updateTargetNames.value = getMaimaiUpdateTargetNames(payload.target)
         const result = await useNuxtApp().$leporid<UpdatesChainResult>(
-            `/api/artifacts/${props.artifactId}/maimai/updates/chain`,
+            `/api/nuxt/maimai/update`,
             { method: 'POST', body: payload, showSuccessToast: false } as any,
         )
         updateResult.value = result
@@ -335,7 +335,7 @@ function resetResult() {
                     </div>
                 </div>
                 <button class="btn btn-outline" @click="resetResult">
-                    重新开始
+                    返回
                 </button>
             </div>
         </template>
@@ -395,7 +395,7 @@ function resetResult() {
                             取消
                         </button>
                         <button class="btn btn-primary" :disabled="submitting" @click="submitWithLatestQr">
-                            正常更新
+                            确认
                         </button>
                     </div>
                 </div>

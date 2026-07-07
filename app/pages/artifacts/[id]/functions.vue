@@ -13,7 +13,7 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const artifactId = route.params.id as string
-const { artifact, storageOf, storageSave, secondaryPinDialogOpen, secondaryPinArtifactId, handleSecondaryPinVerified, handleSecondaryPinClose } = await useArtifact(artifactId)
+const { artifact, storageOf, storageSave } = await useArtifact(artifactId)
 
 const maimaiBattle = artifact.value.product.type.function_types.includes(ProductTypeFunction.MaimaiCN)
     ? useBattle(artifactId, storageOf('MaimaiCN'), storageSave)
@@ -39,11 +39,18 @@ useHead({
 const pageItems = computed(() => getEnabledFunctionPages(artifact.value.product.type.function_types))
 const usagiCardMenu = computed(() => storageOf('UsagiCard').value.menu)
 const { visibleNavItems } = useFunctionMenu(pageItems, usagiCardMenu)
+const swipeEnabled = computed(() => usagiCardMenu.value?.swipe?.enabled_mode === 'on')
 
 const activePageKey = computed(() => {
     const currentPath = route.path
     return visibleNavItems.value.find(item => item.path(artifactId) === currentPath)?.key
 })
+const activePageIndex = computed(() => visibleNavItems.value.findIndex(item => item.key === activePageKey.value))
+
+const swipeStart = ref<{ x: number, y: number, pointerId: number } | null>(null)
+const swipeTracking = ref(false)
+const SWIPE_DISTANCE = 72
+const SWIPE_DIRECTION_RATIO = 1.5
 
 async function handleMaimaiUpdateComplete() {
     await attemptNearbyMatch()
@@ -55,6 +62,65 @@ onMounted(() => {
 
 function handlePageSwap(path: string) {
     router.push(path)
+}
+
+function isMobileViewport() {
+    return import.meta.client && window.matchMedia('(max-width: 1023px)').matches
+}
+
+function shouldIgnoreSwipeTarget(target: EventTarget | null) {
+    return target instanceof Element && Boolean(target.closest('button, a, input, textarea, select, [role="button"], [data-no-swipe]'))
+}
+
+function onSwipePointerDown(event: PointerEvent) {
+    if (!swipeEnabled.value || !isMobileViewport() || event.pointerType === 'mouse' || shouldIgnoreSwipeTarget(event.target))
+        return
+    swipeStart.value = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }
+    swipeTracking.value = true
+}
+
+function onSwipePointerMove(event: PointerEvent) {
+    const start = swipeStart.value
+    if (!start || start.pointerId !== event.pointerId)
+        return
+    const deltaX = event.clientX - start.x
+    const deltaY = event.clientY - start.y
+    swipeTracking.value = Math.abs(deltaX) > Math.abs(deltaY) * SWIPE_DIRECTION_RATIO
+}
+
+function onSwipePointerEnd(event: PointerEvent) {
+    const start = swipeStart.value
+    if (!start || start.pointerId !== event.pointerId)
+        return
+
+    swipeStart.value = null
+    const canSwipe = swipeTracking.value
+    swipeTracking.value = false
+    if (!canSwipe)
+        return
+
+    const deltaX = event.clientX - start.x
+    const deltaY = event.clientY - start.y
+    if (Math.abs(deltaX) < SWIPE_DISTANCE || Math.abs(deltaX) <= Math.abs(deltaY) * SWIPE_DIRECTION_RATIO)
+        return
+
+    const currentIndex = activePageIndex.value
+    if (currentIndex < 0)
+        return
+    if (currentIndex === 0 && deltaX > 0) {
+        router.push({ path: `/artifacts/${artifactId}` })
+        return
+    }
+
+    const nextIndex = deltaX < 0 ? currentIndex + 1 : currentIndex - 1
+    const nextItem = visibleNavItems.value[nextIndex]
+    if (nextItem)
+        handlePageSwap(nextItem.path(artifactId))
+}
+
+function onSwipePointerCancel() {
+    swipeStart.value = null
+    swipeTracking.value = false
 }
 
 function goBack() {
@@ -91,11 +157,21 @@ function goBack() {
             </button>
         </aside>
 
-        <main class="flex-1 h-full overflow-y-auto pb-18 lg:pb-0 lg:ml-16">
+        <main
+            class="flex-1 h-full overflow-y-auto pb-18 lg:pb-0 lg:ml-16 touch-pan-y"
+            @pointerdown="onSwipePointerDown"
+            @pointermove="onSwipePointerMove"
+            @pointerup="onSwipePointerEnd"
+            @pointercancel="onSwipePointerCancel"
+        >
             <div class="min-h-full w-full lg:mx-auto lg:w-[min(100%,56rem)] xl:w-[min(100%,64rem)]">
-                <Transition name="content-fade" mode="out-in">
-                    <NuxtPage @on-maimai-update-complete="handleMaimaiUpdateComplete" />
-                </Transition>
+                <NuxtPage v-slot="{ Component, route: pageRoute }" @on-maimai-update-complete="handleMaimaiUpdateComplete">
+                    <Transition name="content-fade" mode="out-in">
+                        <div :key="pageRoute.fullPath" class="min-h-full">
+                            <component :is="Component" @on-maimai-update-complete="handleMaimaiUpdateComplete" />
+                        </div>
+                    </Transition>
+                </NuxtPage>
             </div>
         </main>
 
@@ -124,16 +200,6 @@ function goBack() {
             :battle="activeBattle"
             @close="closeBattleDialog"
         />
-
-        <Teleport to="body">
-            <SecondaryPinDialog
-                v-if="secondaryPinDialogOpen"
-                :artifact-id="secondaryPinArtifactId"
-                mode="verify"
-                @verified="handleSecondaryPinVerified"
-                @close="handleSecondaryPinClose"
-            />
-        </Teleport>
     </div>
 </template>
 
