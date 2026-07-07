@@ -17,14 +17,16 @@ const description = computed(() => {
     return props.error.message || props.error.statusMessage || '很抱歉，页面暂时不可用。'
 })
 
+const isDev = import.meta.dev
+
 const stackText = computed(() => {
-    if (!props.error.stack)
+    if (!isDev || !props.error.stack)
         return ''
     return String(props.error.stack).trim()
 })
 
 const dataText = computed(() => {
-    if (!props.error.data)
+    if (!isDev || !props.error.data)
         return ''
     try {
         return JSON.stringify(props.error.data, null, 2)

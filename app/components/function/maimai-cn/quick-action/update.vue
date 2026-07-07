@@ -244,40 +244,29 @@ function resetResult() {
                         更新到兔卡和其他查分器
                     </p>
                 </div>
-                <div class="grid gap-3">
-                    <div class="rounded-lg border border-secondary bg-secondary/10 p-3">
-                        <Icon name="mdi:card-account-details-outline" class="w-6 h-6 text-secondary" />
-                        <p class="mt-3 text-sm font-medium">
-                            兔卡
-                        </p>
-                        <p class="mt-1 text-xs text-base-content/60">
-                            UsagiCard<br>提供歌曲成绩、游玩数据、附近对战等特色功能
-                        </p>
-                    </div>
-                    <div class="grid gap-3 md:grid-cols-2">
-                        <div
-                            v-for="option in bindTargetOptions"
-                            :key="option.id"
-                            class="rounded-lg border border-base-300 p-3"
-                        >
-                            <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <Icon :name="option.icon" class="w-6 h-6 text-primary" />
-                                    <p class="mt-3 text-sm font-medium">
-                                        {{ getMaimaiUpdateSourceDef(option.id)?.name }}
-                                    </p>
-                                    <p class="mt-1 text-xs" :class="isTargetBound(option.id) ? 'text-success' : 'text-base-content/60'">
-                                        {{ isTargetBound(option.id) ? '已绑定，将作为同步目标。' : getMaimaiUpdateSourceDef(option.id)?.description }}
-                                    </p>
-                                </div>
-                                <button v-if="isTargetBound(option.id)" type="button" class="btn btn-ghost btn-xs text-error" @click="removeTarget(option.id)">
-                                    移除
-                                </button>
+                <div class="grid gap-3 md:grid-cols-2">
+                    <div
+                        v-for="option in bindTargetOptions"
+                        :key="option.id"
+                        class="rounded-lg border border-base-300 p-3"
+                    >
+                        <div class="flex items-start gap-3">
+                            <Icon :name="option.icon" class="w-6 h-6 text-primary" />
+                            <div>
+                                <p class="text-sm font-medium">
+                                    {{ getMaimaiUpdateSourceDef(option.id)?.name }}
+                                </p>
+                                <p class="mt-1 text-xs text-base-content/60">
+                                    {{ isTargetBound(option.id) ? '已绑定' : '尚未绑定' }}
+                                </p>
                             </div>
-                            <button type="button" class="btn btn-outline btn-sm w-full mt-3" @click="openBindDialog(option)">
-                                {{ isTargetBound(option.id) ? '重新绑定' : option.label }}
+                            <button v-if="isTargetBound(option.id)" type="button" class="btn btn-ghost btn-xs text-error" @click="removeTarget(option.id)">
+                                移除
                             </button>
                         </div>
+                        <button type="button" class="btn btn-outline btn-sm w-full mt-3" @click="openBindDialog(option)">
+                            {{ isTargetBound(option.id) ? '重新绑定' : option.label }}
+                        </button>
                     </div>
                 </div>
             </section>

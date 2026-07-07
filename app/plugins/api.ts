@@ -8,7 +8,12 @@ interface ApiResponse<T = unknown> {
     code?: number
     message?: string
     data?: T
+    timestamp?: string
+    detail?: string
 }
+
+const UNAUTHORIZED = 401
+const LOCKED = 423
 
 export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((nuxtApp) => {
     let pendingRequestCount = 0
@@ -18,10 +23,8 @@ export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((
             return
 
         pendingRequestCount += 1
-        if (pendingRequestCount === 1) {
-            const loadingIndicator = useLoadingIndicator()
-            loadingIndicator.start()
-        }
+        if (pendingRequestCount === 1)
+            useLoadingIndicator().start()
     }
 
     const stopGlobalLoading = () => {
@@ -29,65 +32,62 @@ export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((
             return
 
         pendingRequestCount = Math.max(0, pendingRequestCount - 1)
-        if (pendingRequestCount === 0) {
-            const loadingIndicator = useLoadingIndicator()
-            loadingIndicator.finish()
-        }
+        if (pendingRequestCount === 0)
+            useLoadingIndicator().finish()
     }
 
-    const shouldShowErrorToast = (options?: ApiFetchOptions, method?: string) => {
-        if (options?.showErrorToast !== undefined)
-            return options.showErrorToast
-
-        return (method || 'GET').toUpperCase() !== 'GET'
-    }
-
-    const addToast = (type: 'success' | 'error', message: string) => {
+    const addToast = (type: 'success' | 'error' | 'warning' | 'info', message: string) => {
         if (!import.meta.client)
             return
 
-        const { addNotification } = useNotificationsStore()
-        addNotification({ type, message })
+        useNotificationsStore().addNotification({ type, message })
     }
 
-    const showErrorToast = (message: string, options?: ApiFetchOptions, method?: string) => {
-        if (shouldShowErrorToast(options, method)) {
-            addToast('error', message)
-        }
+    const shouldShowErrorToast = (options: ApiFetchOptions | undefined, method: string, status: number) => {
+        if (options?.showErrorToast !== undefined)
+            return options.showErrorToast
+
+        if (method.toUpperCase() !== 'GET')
+            return true
+
+        return status >= 500
     }
 
-    const showSuccessToast = (message: string, options?: ApiFetchOptions) => {
-        if (options?.showSuccessToast === true) {
-            addToast('success', message)
-        }
+    const resolveMessage = (rawData: ApiResponse | undefined, fallback: string) => {
+        return rawData?.message || rawData?.detail || fallback
     }
 
     const handleUnauthorized = async (message?: string) => {
+        const msg = message || '登录状态过期，请重新登录。'
+
         if (import.meta.server) {
-            // hey bro, handle this in composable, throwing and error here will wrap it with FetchError
-            console.warn(`[auth-ssr] Unauthorized access detected on server side. throwing: ${message}`)
-            throw createError({ statusCode: 401, message: '登录状态过期，请重新登录。' })
+            throw createError({
+                statusCode: UNAUTHORIZED,
+                statusMessage: '需要登录',
+                message: msg,
+                data: { to: '/auth/login', hint: '重新登录', clear: true },
+            })
         }
 
-        await useUserSession().clear()
-
         const route = useRoute()
+
         if (route.path === '/auth/login') {
+            addToast('error', msg)
             return
         }
 
-        addToast('error', message || '登录状态过期，请重新登录。')
+        await useUserSession().clear()
+        addToast('error', msg)
         const redirect = encodeURIComponent(route.fullPath || '/')
-        await nuxtApp.runWithContext(() => navigateTo(`/auth/login?redirect=${redirect}`))
+        await nuxtApp.runWithContext(() => navigateTo(`/auth/login?redirect=${redirect}&clear=1`))
     }
 
     const leporid = $fetch.create({
         onRequest(context) {
             if (import.meta.server) {
                 const reqHeaders = useRequestHeaders(['cookie'])
-                const cookie = reqHeaders.cookie || ''
                 const headers = new Headers(context.options.headers as HeadersInit | undefined)
-                headers.set('cookie', cookie)
+                headers.set('cookie', reqHeaders.cookie || '')
                 context.options.headers = headers
             }
 
@@ -97,48 +97,69 @@ export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((
             stopGlobalLoading()
 
             const options = context.options as ApiFetchOptions
-            const message = context.error?.message || '请求失败，请稍后重试。'
-            showErrorToast(message, options, context.options.method?.toString())
+            const method = context.options.method?.toString() || 'GET'
+            if (shouldShowErrorToast(options, method, 0))
+                addToast('error', '网络连接失败，请检查网络后重试。')
         },
-        async onResponse(context) {
+        onResponse(context) {
             stopGlobalLoading()
 
             const options = context.options as ApiFetchOptions
             const rawData = context.response._data as ApiResponse | undefined
 
-            if (!rawData || rawData.code === undefined) {
+            if (!rawData || typeof rawData.code !== 'number')
                 return
-            }
 
-            if (rawData.code === 200) {
-                showSuccessToast(options.successMessage || rawData.message || '操作成功', options)
-                if (rawData.data !== undefined) {
-                    context.response._data = rawData.data
+            if (rawData.code !== 200) {
+                const message = resolveMessage(rawData, context.response.statusText || '请求失败')
+
+                if (rawData.code === UNAUTHORIZED) {
+                    if (import.meta.client)
+                        handleUnauthorized(message).catch(() => {})
+                    throw createError({
+                        statusCode: UNAUTHORIZED,
+                        statusMessage: '需要登录',
+                        message,
+                        data: rawData,
+                    })
                 }
-                return
-            }
 
-            const message = rawData.message || context.response.statusText || '请求失败，请稍后重试。'
-            if (rawData.code === 401) {
-                await handleUnauthorized(message)
-                return
-            }
+                if (rawData.code !== LOCKED && shouldShowErrorToast(options, context.options.method?.toString() || 'GET', rawData.code))
+                    addToast('error', message)
 
-            // 423 Locked: 需要二级密码，不展示 toast，由组件层处理
-            if (rawData.code === 423) {
                 throw createError({
-                    statusCode: 423,
+                    statusCode: rawData.code,
+                    statusMessage: context.response.statusText,
                     data: rawData,
                     message,
                 })
             }
 
-            showErrorToast(message, options, context.options.method?.toString())
-            throw createError({
-                statusCode: context.response.status || 400,
-                data: rawData,
-                message,
-            })
+            if (options?.showSuccessToast === true)
+                addToast('success', options.successMessage || rawData.message || '操作成功')
+
+            if (rawData.data !== undefined)
+                context.response._data = rawData.data
+        },
+        async onResponseError(context) {
+            stopGlobalLoading()
+
+            const options = context.options as ApiFetchOptions
+            const status = context.response.status
+            const rawData = context.response._data as ApiResponse | undefined
+            const isAppResponse = typeof rawData?.code === 'number'
+            const message = resolveMessage(rawData, context.response.statusText || '请求失败')
+
+            if (status === UNAUTHORIZED) {
+                await handleUnauthorized(isAppResponse ? message : undefined)
+                return
+            }
+
+            if (status === LOCKED)
+                return
+
+            if (shouldShowErrorToast(options, context.options.method?.toString() || 'GET', status))
+                addToast('error', status >= 500 && !isAppResponse ? '服务暂时不可用，请稍后重试。' : message)
         },
     })
 

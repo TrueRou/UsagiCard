@@ -75,12 +75,12 @@ async function handleVerify() {
         const password = digits.value.join('')
         const res = await useNuxtApp().$leporid<{ token: string, expires_in: number }>(
             `/api/artifacts/${props.artifactId}/verify-pin`,
-            { method: 'POST', body: { password }, showSuccessToast: false },
+            { method: 'POST', body: { password }, showSuccessToast: false, showErrorToast: false },
         )
         emit('verified', res.token)
     }
     catch (e: any) {
-        error.value = e?.data?.detail || '密码错误'
+        error.value = e?.data?.message || e?.message || '密码错误'
         triggerShake()
     }
     finally {
@@ -103,12 +103,12 @@ async function handleSetConfirm() {
     try {
         await useNuxtApp().$leporid(
             `/api/artifacts/${props.artifactId}/set-pin`,
-            { method: 'POST', body: { password: first }, showSuccessToast: true, successMessage: '二级密码设置成功' },
+            { method: 'POST', body: { password: first }, showSuccessToast: true, successMessage: '二级密码设置成功', showErrorToast: false },
         )
         emit('set')
     }
     catch (e: any) {
-        error.value = e?.data?.detail || '设置失败'
+        error.value = e?.data?.message || e?.message || '设置失败'
         triggerShake()
     }
     finally {
