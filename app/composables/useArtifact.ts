@@ -12,6 +12,15 @@ export type StorageSaveFn = <K extends StorageNamespace>(
 ) => Promise<void>
 
 export async function useArtifact(artifactId: string) {
+    const nuxtApp = useNuxtApp()
+    const secondaryTokenKey = `artifact:${artifactId}:secondary-pin-token`
+    const secondaryToken = useState<string | null>(secondaryTokenKey, () => null)
+    const { request: requestSecondaryPin } = useSecondaryPinDialog()
+
+    onMounted(() => {
+        secondaryToken.value = sessionStorage.getItem(secondaryTokenKey)
+    })
+
     /*
     / 工件元数据相关
     */
@@ -29,10 +38,6 @@ export async function useArtifact(artifactId: string) {
     /*
     / 工件二级密码相关
     */
-
-    const secondaryTokenKey = `artifact:${artifactId}:secondary-pin-token`
-    const secondaryToken = useState<string | null>(secondaryTokenKey, () => null)
-    const { request: requestSecondaryPin } = useSecondaryPinDialog()
 
     function setSecondaryToken(token: string | null) {
         secondaryToken.value = token
@@ -70,7 +75,7 @@ export async function useArtifact(artifactId: string) {
         try {
             for (let attempt = 0; attempt < 2; attempt++) {
                 try {
-                    data.value = await useNuxtApp().$leporid(`/api/artifacts/${artifactId}/storage`, {
+                    data.value = await nuxtApp.$leporid(`/api/artifacts/${artifactId}/storage`, {
                         method: 'PATCH',
                         body: { storage: fullStorage },
                         headers: secondaryToken.value
@@ -103,10 +108,6 @@ export async function useArtifact(artifactId: string) {
             setTimeout(() => storageSaving.value = false, 500)
         }
     }
-
-    onMounted(() => {
-        secondaryToken.value = sessionStorage.getItem(secondaryTokenKey)
-    })
 
     return {
         artifact,
