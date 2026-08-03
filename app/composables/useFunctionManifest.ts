@@ -1,5 +1,9 @@
 import type { Component } from 'vue'
-import MaimaiCNQuickUpdate from '~/components/function/maimai-cn/quick-action/update.vue'
+import { defineAsyncComponent } from 'vue'
+
+const MaimaiCNQuickUpdate = defineAsyncComponent(
+    () => import('~/components/function/maimai-cn/quick-action/update.vue'),
+)
 
 export interface FunctionPageMeta {
     key: string
