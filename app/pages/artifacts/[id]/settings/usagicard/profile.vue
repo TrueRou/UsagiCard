@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { UsagiCardStorage } from '~/types/api'
+
 const route = useRoute()
 const artifactId = route.params.id as string
 const { artifact, storageOf, storageSave, storageSaving } = await useArtifact(artifactId)
@@ -9,27 +11,6 @@ const storage = ref<UsagiCardStorage>({
     ...storageOf('UsagiCard').value,
 })
 storage.value.bio ??= {}
-
-const selectorOpen = ref(false)
-const selectorInitialFilters = ref<string[]>(['avatar'])
-const imageSelectorCtx: UseImageSelectorCtx = {
-    selectorOpen,
-    selectorInitialFilters,
-    selectorImageAspect: toRef('squares'),
-    openImageSelector: (_key: string) => { selectorOpen.value = true },
-    closeImageSelector: () => { selectorOpen.value = false },
-    handleImageSelect: async (image: ImageSimplePublic) => {
-        storage.value.bio ??= {}
-        storage.value.bio.card_avatar = image.id
-        selectorOpen.value = false
-        await saveProfile()
-    },
-    clearImageSelect: async (_key: string) => {
-        if (storage.value.bio)
-            storage.value.bio.card_avatar = null
-        await saveProfile()
-    },
-}
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -53,8 +34,6 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="p-4 space-y-4">
-        <ImageSelector v-if="selectorOpen" :selector-ctx="imageSelectorCtx" />
-
         <section class="space-y-2">
             <label class="text-sm font-medium text-base-content/60">头像</label>
             <div class="flex items-center gap-3">
@@ -65,18 +44,9 @@ onBeforeUnmount(() => {
                         alt="avatar"
                         class="w-full h-full object-cover"
                     >
-                </div>
-                <div class="flex gap-2">
-                    <button class="btn btn-outline" @click="imageSelectorCtx.openImageSelector('avatar')">
-                        更换
-                    </button>
-                    <button
-                        v-if="storage.bio?.card_avatar"
-                        class="btn btn-ghost text-error"
-                        @click="imageSelectorCtx.clearImageSelect('avatar')"
-                    >
-                        移除
-                    </button>
+                    <div v-else class="w-full h-full flex items-center justify-center text-base-content/30">
+                        <Icon name="mdi:account" class="w-8 h-8" />
+                    </div>
                 </div>
             </div>
         </section>
@@ -111,7 +81,7 @@ onBeforeUnmount(() => {
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-base-content/60">商品</label>
                     <p class="text-sm">
-                        {{ artifact.product.type.name }}
+                        {{ artifact.type.name }}
                     </p>
                 </div>
 

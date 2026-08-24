@@ -7,7 +7,7 @@ import type {
     TooltipComponentOption,
 } from 'echarts/components'
 import type { ComposeOption } from 'echarts/core'
-import type { StoreCurvesResponse, UserRegionSnapshot } from '~/composables/function/MaimaiCN/useMaimaiUserData'
+import type { StoreCurvesResponse, UserRegionSnapshot } from '~/composables/function/MaimaiCN/useMaimaiTypes'
 import { LineChart } from 'echarts/charts'
 import {
     DataZoomComponent,

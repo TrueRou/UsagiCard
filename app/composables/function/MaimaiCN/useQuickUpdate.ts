@@ -1,4 +1,5 @@
 import type { UpdatesChainResult } from './useMaimaiTypes'
+import type { MaimaiStorage } from '~/types/api'
 import { buildMaimaiUpdatePayload } from './useMaimaiUpdatePlan'
 
 export const QUICK_UPDATE_COOLDOWN_MS = 15 * 60 * 1000
@@ -7,11 +8,14 @@ export function applyMaimaiUpdateResult(storage: MaimaiStorage, result: UpdatesC
     const updatedStorage: MaimaiStorage = { ...storage }
     const bioUpdate: typeof updatedStorage.bio = { ...updatedStorage.bio }
     const playerData = result.stores?.user_player?.data
+    const targetRating = Object.values(result.target).find(entry => entry.scores_rating !== undefined && entry.scores_rating !== null)?.scores_rating
 
     if (playerData?.name)
         bioUpdate.player_name = playerData.name
     if (playerData?.rating !== undefined && playerData?.rating !== null)
         bioUpdate.player_rating = playerData.rating
+    else if (targetRating !== undefined)
+        bioUpdate.player_rating = targetRating
 
     updatedStorage.bio = bioUpdate
     updatedStorage.update = {
@@ -43,8 +47,8 @@ export function useQuickUpdate(
             return
 
         try {
-            const res = await useNuxtApp().$leporid<UpdatesChainResult>(
-                '/api/nuxt/maimai/update',
+            const res = await useNuxtApp().$leporidae<UpdatesChainResult>(
+                '/api/maimai/updates_chain',
                 {
                     method: 'POST',
                     body: payload,

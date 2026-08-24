@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { MaimaiBattleEnabledMode, MaimaiBattlePreferenceState } from '~/composables/function/MaimaiCN/useMaimaiTypes'
-import { createDefaultBattlePreference, normalizeBattlePreference, useBattle } from '~/composables/function/MaimaiCN/useBattle'
+import type { MaimaiStorage } from '~/types/api'
 import { QUICK_UPDATE_COOLDOWN_MS } from '~/composables/function/MaimaiCN/useQuickUpdate'
 
 const props = defineProps<{
@@ -11,24 +10,8 @@ const {
     storageSave,
     storageSaving,
 } = await useArtifact(props.artifactId)
-type MaimaiPreferenceStorage = Omit<MaimaiStorage, 'battle'> & { battle: ReturnType<typeof createDefaultBattlePreference> }
 
-const storage = ref<MaimaiPreferenceStorage>(buildStorageSnapshot())
-const {
-    expiresAtText: battleExpiresAtText,
-    formatRemainingDuration,
-    isExpired: isBattleExpired,
-    remainingSeconds: battleRemainingSeconds,
-    resolveAvailability,
-} = useBattle(props.artifactId, computed(() => storage.value))
-const originalBattlePreference = computed(() => normalizeBattlePreference(storageOf('MaimaiCN').value.battle))
-const battleEnabledMode = computed<MaimaiBattleEnabledMode>({
-    get: () => storage.value.battle.enabled_mode,
-    set: enabledMode => storage.value.battle = {
-        ...storage.value.battle,
-        enabled_mode: enabledMode,
-    },
-})
+const storage = ref<MaimaiStorage>(buildStorageSnapshot())
 
 const isInCooldown = computed(() => {
     if (storage.value.update?.enabled_mode !== 'on' || !storage.value.update?.last_updated_at)
@@ -44,58 +27,19 @@ const nextUpdateTime = computed(() => {
     return nextAt.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
 })
 
-const battleModeOptions = [
-    { value: 'off' as const, label: '关闭', description: '不参与附近的人对战' },
-    { value: 'nearby_15m' as const, label: '15 分钟', description: '在 15 分钟内允许随刷新触发 nearby 匹配' },
-    { value: 'nearby_1h' as const, label: '1 小时', description: '在 1 小时内允许随刷新触发 nearby 匹配' },
-]
-
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 let savingFromAutoSync = false
 
 function buildStorageSnapshot() {
     return {
-        update: { enabled_mode: 'off' as const, last_updated_at: null, strategy: { sources: [], targets: [] } },
-        battle: {
-            ...createDefaultBattlePreference(),
-            ...(storageOf('MaimaiCN').value.battle ?? {}),
-        },
+        update: { enabled_mode: 'off', last_updated_at: null, strategy: { sources: [], targets: [] } },
         ...storageOf('MaimaiCN').value,
-    } as MaimaiPreferenceStorage
-}
-
-function isBattleStillActive(battle: MaimaiBattlePreferenceState) {
-    if (battle.enabled_mode === 'off' || !battle.expires_at)
-        return false
-    const expiresAt = new Date(battle.expires_at).getTime()
-    return !Number.isNaN(expiresAt) && expiresAt > Date.now()
+    } as MaimaiStorage
 }
 
 async function saveAndSync() {
     savingFromAutoSync = true
     try {
-        const nextEnabledMode = storage.value.battle?.enabled_mode ?? 'off'
-        const previousBattle = originalBattlePreference.value
-        const currentBattle = normalizeBattlePreference(storage.value.battle)
-
-        if (nextEnabledMode === 'off') {
-            storage.value.battle = {
-                ...currentBattle,
-                enabled_mode: 'off',
-                expires_at: null,
-            }
-        }
-        else if (nextEnabledMode === previousBattle.enabled_mode && isBattleStillActive(previousBattle)) {
-            storage.value.battle = {
-                ...currentBattle,
-                enabled_mode: previousBattle.enabled_mode,
-                expires_at: previousBattle.expires_at,
-            }
-        }
-        else {
-            storage.value.battle = await resolveAvailability(nextEnabledMode)
-        }
-
         await storageSave('MaimaiCN', storage.value, { showSuccessToast: false })
         storage.value = buildStorageSnapshot()
         await nextTick()
@@ -122,16 +66,6 @@ watch(storage, () => {
 onBeforeUnmount(() => {
     if (saveTimer)
         clearTimeout(saveTimer)
-})
-
-watch(isBattleExpired, (expired) => {
-    if (!expired || !storage.value.battle || storage.value.battle.enabled_mode === 'off')
-        return
-    storage.value.battle = {
-        ...storage.value.battle,
-        enabled_mode: 'off',
-        expires_at: null,
-    }
 })
 </script>
 
@@ -217,43 +151,6 @@ watch(isBattleExpired, (expired) => {
                     冷却时间 15 分钟。快速更新会跳过临时节点，仅使用已保存凭据的节点执行。
                 </p>
             </template>
-        </section>
-
-        <section class="rounded-xl border border-base-300 p-4 space-y-3">
-            <div>
-                <p class="font-medium text-sm">
-                    附近的人对战
-                </p>
-                <p class="text-xs text-base-content/60">
-                    允许在更新成绩后触发附近匹配对战
-                </p>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-                <button
-                    v-for="opt in battleModeOptions"
-                    :key="opt.value"
-                    type="button"
-                    class="btn"
-                    :class="battleEnabledMode === opt.value ? 'btn-primary' : 'btn-ghost border border-base-300'"
-                    @click="battleEnabledMode = opt.value"
-                >
-                    {{ opt.label }}
-                </button>
-            </div>
-
-            <div v-if="battleEnabledMode !== 'off'" class="text-xs space-y-1">
-                <p v-if="battleExpiresAtText" class="text-base-content/60">
-                    当前周期到期: {{ battleExpiresAtText }}
-                    <span v-if="battleRemainingSeconds > 0" class="text-primary">(剩余 {{ formatRemainingDuration(battleRemainingSeconds) }})</span>
-                </p>
-                <p class="text-base-content/50">
-                    {{ battleModeOptions.find(o => o.value === battleEnabledMode)?.description }}
-                </p>
-                <p class="text-base-content/50">
-                    开启后会在匹配时请求浏览器位置权限以提高准确度；如果拒绝或不可用，将自动改用网络区域进行粗略匹配。
-                </p>
-            </div>
         </section>
 
         <section class="rounded-xl border border-base-300 p-4 space-y-3">

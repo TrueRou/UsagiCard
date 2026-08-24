@@ -10,7 +10,6 @@ const { artifactId, open, handleVerified, handleClose } = useSecondaryPinDialog(
     <SecondaryPinDialog
         v-if="open && artifactId"
         :artifact-id="artifactId"
-        mode="verify"
         @verified="handleVerified"
         @close="handleClose"
     />

@@ -28,5 +28,10 @@ export function useUtils() {
         return result
     }
 
-    return { img, imgPreview, toDBC }
+    const money = (value: string | number | null | undefined) => {
+        const num = Number(value ?? 0)
+        return `¥${num.toFixed(2)}`
+    }
+
+    return { img, imgPreview, toDBC, money }
 }

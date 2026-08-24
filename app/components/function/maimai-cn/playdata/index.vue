@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserDataSnapshot, UserRegionSnapshot } from '~/composables/function/MaimaiCN/useMaimaiUserData'
+import type { UserDataSnapshot, UserRegionSnapshot } from '~/composables/function/MaimaiCN/useMaimaiTypes'
 import { useMaimaiUserData, useMaimaiUserRegion } from '~/composables/function/MaimaiCN/useMaimaiUserData'
 import OverviewStats from './components/overview-stats.vue'
 

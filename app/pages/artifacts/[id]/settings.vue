@@ -8,7 +8,7 @@ const router = useRouter()
 const artifactId = route.params.id as string
 const { artifact } = await useArtifact(artifactId)
 
-const settingItems = computed(() => getEnabledFunctionSettings(artifact.value.product.type.function_types))
+const settingItems = computed(() => getEnabledFunctionSettings(artifact.value.type.function_types))
 const activeSetting = computed(() => settingItems.value.find(item => item.path(artifactId) === route.path))
 
 function goBack() {

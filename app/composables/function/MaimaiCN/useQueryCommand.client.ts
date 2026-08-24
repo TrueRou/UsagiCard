@@ -261,7 +261,7 @@ export function useQueryCommand(artifactId: string) {
     }
 
     const fetchBests = async () => {
-        return await useNuxtApp().$leporid<MaimaiBests>(`/api/otoge/maimai/usagicard/bests?uuid=${artifactId}`)
+        return await useNuxtApp().$leporidae<MaimaiBests>(`/api/maimai/usagicard/bests?uuid=${artifactId}`)
     }
 
     const fetchPlate = async (plate: string, attr: PlateAttr) => {
@@ -270,7 +270,7 @@ export function useQueryCommand(artifactId: string) {
             plate,
             attr,
         })
-        return await useNuxtApp().$leporid<PlateObject[]>(`/api/otoge/maimai/usagicard/plates?${params.toString()}`)
+        return await useNuxtApp().$leporidae<PlateObject[]>(`/api/maimai/usagicard/plates?${params.toString()}`)
     }
 
     const fetchAllScores = async () => {
@@ -279,7 +279,7 @@ export function useQueryCommand(artifactId: string) {
 
         if (!allScoresPromise) {
             const params = new URLSearchParams({ uuid: artifactId })
-            allScoresPromise = useNuxtApp().$leporid<ScoreExtend[]>(`/api/otoge/maimai/usagicard/scores?${params.toString()}`).then((data) => {
+            allScoresPromise = useNuxtApp().$leporidae<ScoreExtend[]>(`/api/maimai/usagicard/scores?${params.toString()}`).then((data) => {
                 allScoresCache = data
                 return data
             }).finally(() => {

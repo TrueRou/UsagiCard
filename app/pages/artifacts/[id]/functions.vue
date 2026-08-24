@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import BattleDialog from '~/components/function/maimai-cn/battle/dialog.vue'
-import { useBattle } from '~/composables/function/MaimaiCN/useBattle'
-
 definePageMeta({
     layout: 'full-page',
     pageTransition: {
@@ -13,30 +10,13 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const artifactId = route.params.id as string
-const { artifact, storageOf, storageSave } = await useArtifact(artifactId)
-
-const maimaiBattle = artifact.value.product.type.function_types.includes(ProductTypeFunction.MaimaiCN)
-    ? useBattle(artifactId, storageOf('MaimaiCN'), storageSave)
-    : {
-            activeBattle: ref(null),
-            attemptNearbyMatch: async () => null,
-            closeBattleDialog: () => {},
-            dialogOpen: ref(false),
-            resumeActiveBattle: async () => {},
-        }
-const {
-    activeBattle,
-    attemptNearbyMatch,
-    closeBattleDialog,
-    dialogOpen,
-    resumeActiveBattle,
-} = maimaiBattle
+const { artifact, storageOf } = await useArtifact(artifactId)
 
 useHead({
-    title: `${artifact.value.product.type.name} - 兔兔实验室`,
+    title: `${artifact.value.type.name} - 兔兔实验室`,
 })
 
-const pageItems = computed(() => getEnabledFunctionPages(artifact.value.product.type.function_types))
+const pageItems = computed(() => getEnabledFunctionPages(artifact.value.type.function_types))
 const usagiCardMenu = computed(() => storageOf('UsagiCard').value.menu)
 const { visibleNavItems } = useFunctionMenu(pageItems, usagiCardMenu)
 const swipeEnabled = computed(() => usagiCardMenu.value?.swipe?.enabled_mode === 'on')
@@ -51,14 +31,6 @@ const swipeStart = ref<{ x: number, y: number, pointerId: number } | null>(null)
 const swipeTracking = ref(false)
 const SWIPE_DISTANCE = 72
 const SWIPE_DIRECTION_RATIO = 1.5
-
-async function handleMaimaiUpdateComplete() {
-    await attemptNearbyMatch()
-}
-
-onMounted(() => {
-    void resumeActiveBattle()
-})
 
 function handlePageSwap(path: string) {
     router.push(path)
@@ -165,10 +137,10 @@ function goBack() {
             @pointercancel="onSwipePointerCancel"
         >
             <div class="min-h-full w-full lg:mx-auto lg:w-[min(100%,56rem)] xl:w-[min(100%,64rem)]">
-                <NuxtPage v-slot="{ Component, route: pageRoute }" @on-maimai-update-complete="handleMaimaiUpdateComplete">
+                <NuxtPage v-slot="{ Component, route: pageRoute }">
                     <Transition name="content-fade" mode="out-in">
                         <div :key="pageRoute.fullPath" class="min-h-full">
-                            <component :is="Component" @on-maimai-update-complete="handleMaimaiUpdateComplete" />
+                            <component :is="Component" />
                         </div>
                     </Transition>
                 </NuxtPage>
@@ -193,13 +165,6 @@ function goBack() {
                 </button>
             </div>
         </nav>
-
-        <BattleDialog
-            v-if="activeBattle"
-            :open="dialogOpen"
-            :battle="activeBattle"
-            @close="closeBattleDialog"
-        />
     </div>
 </template>
 

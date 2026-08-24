@@ -17,6 +17,9 @@ export default defineNuxtConfig({
         plugins: [
             tailwindcss(),
         ],
+        server: {
+            allowedHosts: true,
+        },
         build: {
             sourcemap: false,
         },
@@ -24,39 +27,50 @@ export default defineNuxtConfig({
     modules: [
         '@pinia/nuxt',
         '@nuxt/icon',
-        'nuxt-auth-utils',
         '@nuxt/eslint',
         '@vueuse/nuxt',
     ],
+    icon: {
+        localApiEndpoint: '/_nuxt_icon',
+    },
     eslint: {
         config: {
             standalone: false, // <---
         },
     },
     runtimeConfig: {
-        session: {
-            name: 'nuxt-session',
-            password: process.env.NUXT_SESSION_PASSWORD || '',
-            maxAge: 31536000,
-            cookie: {
-                sameSite: 'lax',
-            },
-        },
-        leporid: {
-            baseURL: 'https://api.turou.fun/leporid',
-            credentialKey: '',
-        },
-        otoge: {
-            baseURL: 'https://api.turou.fun/otoge',
-            developerToken: '',
-        },
         public: {
             URL: 'http://localhost:3000',
-            imageURL: 'https://cdn.assets.turou.fun/leporid/images',
-            imagePreviewURL: 'https://cdn.assets.turou.fun/leporid/thumbnails',
+            imageURL: 'https://static.turou.fun/leporidae/images',
+            imagePreviewURL: 'https://static.turou.fun/leporidae/images',
         },
     },
     nitro: {
         preset: 'bun',
+        routeRules: {
+            '/api/**': {
+                proxy: {
+                    to: `${process.env.NUXT_LEPORIDAE_BASE_URL || 'http://leporidae:8000'}/**`,
+                    headers: {
+                        'X-Developer-Token': process.env.NUXT_LEPORIDAE_DEVELOPER_TOKEN || '4616dd015b6139704d259ea9c1a0e29d',
+                    },
+                },
+            },
+        },
     },
+    hooks: {
+        'pages:extend': (pages) => {
+            const artifactIndex = pages.find(
+                page => page.name === 'artifacts-id',
+            )
+            if (artifactIndex) {
+                pages.push({
+                    ...artifactIndex,
+                    name: 'cards-id',
+                    path: '/cards/:id()',
+                })
+            }
+        },
+    },
+
 })

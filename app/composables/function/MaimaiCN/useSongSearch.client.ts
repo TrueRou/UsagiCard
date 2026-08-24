@@ -71,7 +71,8 @@ export function useSongSearch() {
         const lastRefresh = cache.load<number>(CACHE_KEYS.MAIMAI_INDEXING_TIME) || 0
         const version = cache.load<number>(CACHE_KEYS.MAIMAI_INDEXING_VERSION) || 0
         if (!songData || version < CURRENT_VERSION || Date.now() - lastRefresh > 24 * 60 * 60 * 1000) {
-            songData = await useNuxtApp().$leporid('/api/otoge/maimai/songs?page_size=1000000')
+            const songsUrl: string = '/api/maimai/songs'
+            songData = await useNuxtApp().$leporidae(songsUrl as never, { query: { page_size: 1000000 } })
             cache.save(CACHE_KEYS.MAIMAI_SONGS, songData)
             cache.save(CACHE_KEYS.MAIMAI_INDEXING_TIME, Date.now())
             cache.save(CACHE_KEYS.MAIMAI_INDEXING_VERSION, CURRENT_VERSION)

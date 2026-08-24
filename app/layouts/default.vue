@@ -1,6 +1,5 @@
 <template>
     <div>
-        <Navbar />
         <slot />
         <ClientOnly>
             <NuxtLoadingIndicator />

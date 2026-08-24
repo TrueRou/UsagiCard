@@ -1,3 +1,5 @@
+import type { ArtifactStorage, ArtifactUserResponse } from '~/types/api'
+
 type StorageNamespace = keyof ArtifactStorage
 
 interface StorageSaveOptions {
@@ -13,19 +15,19 @@ export type StorageSaveFn = <K extends StorageNamespace>(
 
 export async function useArtifact(artifactId: string) {
     const nuxtApp = useNuxtApp()
-    const secondaryTokenKey = `artifact:${artifactId}:secondary-pin-token`
-    const secondaryToken = useState<string | null>(secondaryTokenKey, () => null)
+    const secondaryPinKey = `artifact:${artifactId}:secondary-pin`
+    const secondaryPin = useState<string | null>(secondaryPinKey, () => null)
     const { request: requestSecondaryPin } = useSecondaryPinDialog()
 
     onMounted(() => {
-        secondaryToken.value = sessionStorage.getItem(secondaryTokenKey)
+        secondaryPin.value = sessionStorage.getItem(secondaryPinKey)
     })
 
     /*
     / 工件元数据相关
     */
 
-    const artifactAsyncData = await useLeporid<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
+    const artifactAsyncData = await useLeporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}`)
     const { data, error } = artifactAsyncData
 
     const artifact = computed((): ArtifactUserResponse & { storage: ArtifactStorage } => {
@@ -39,14 +41,14 @@ export async function useArtifact(artifactId: string) {
     / 工件二级密码相关
     */
 
-    function setSecondaryToken(token: string | null) {
-        secondaryToken.value = token
+    function setSecondaryPin(pin: string | null) {
+        secondaryPin.value = pin
         if (!import.meta.client)
             return
-        if (token)
-            sessionStorage.setItem(secondaryTokenKey, token)
+        if (pin)
+            sessionStorage.setItem(secondaryPinKey, pin)
         else
-            sessionStorage.removeItem(secondaryTokenKey)
+            sessionStorage.removeItem(secondaryPinKey)
     }
 
     /*
@@ -75,15 +77,16 @@ export async function useArtifact(artifactId: string) {
         try {
             for (let attempt = 0; attempt < 2; attempt++) {
                 try {
-                    data.value = await nuxtApp.$leporid(`/api/artifacts/${artifactId}/storage`, {
+                    // 自定义拦截器选项（ofetch 不认识，内联字面量会触发 excess-property 检查），先放入变量再展开
+                    const feedback = { showSuccessToast: options?.showSuccessToast ?? true, successMessage: options?.successMessage ?? '保存成功' }
+                    data.value = await nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
                         method: 'PATCH',
                         body: { storage: fullStorage },
-                        headers: secondaryToken.value
-                            ? { 'X-Secondary-Password': secondaryToken.value }
+                        headers: secondaryPin.value
+                            ? { 'X-Pin': secondaryPin.value }
                             : {},
-                        showSuccessToast: options?.showSuccessToast ?? true,
-                        successMessage: options?.successMessage ?? '保存成功',
-                    } as any)
+                        ...feedback,
+                    })
                     saved = true
                     return
                 }
@@ -91,11 +94,11 @@ export async function useArtifact(artifactId: string) {
                     if (error?.statusCode !== 423 || attempt > 0)
                         throw error
 
-                    setSecondaryToken(null)
-                    const token = await requestSecondaryPin(artifactId)
-                    if (!token)
+                    setSecondaryPin(null)
+                    const pin = await requestSecondaryPin(artifactId)
+                    if (!pin)
                         return
-                    setSecondaryToken(token)
+                    setSecondaryPin(pin)
                 }
             }
         }
@@ -116,9 +119,8 @@ export async function useArtifact(artifactId: string) {
         storageSave,
         storageSaving,
         useDesignCtx: useDesign(
-            computed(() => artifact.value.product.design),
-            computed(() => artifact.value.product.type.design_type),
-            computed(() => artifact.value.product),
+            computed(() => artifact.value.design),
+            computed(() => artifact.value.type.design_type),
             computed(() => artifact.value),
         ),
     }

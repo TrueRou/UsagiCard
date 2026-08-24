@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { UpdatesChainResult } from '~/composables/function/MaimaiCN/useMaimaiTypes'
 import type { MaimaiUpdateServer } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
+import type { MaimaiStorage } from '~/types/api'
 import {
     buildMaimaiUpdatePayload,
     getMaimaiUpdateNode,
@@ -122,7 +123,7 @@ function openQrDialog() {
 }
 
 async function fetchArcadeLegacyCredential(sgwcmaid: string) {
-    const identifier = await useNuxtApp().$leporid<MaimaiArcadeLegacyIdentifier>('/api/otoge/maimai/arcade_legacy/identifiers', {
+    const identifier = await useNuxtApp().$leporidae<MaimaiArcadeLegacyIdentifier>('/api/maimai/arcade_legacy/identifiers', {
         query: { code: sgwcmaid },
         showErrorToast: false,
     } as any)
@@ -165,8 +166,8 @@ async function doSubmit(latestQr: string | null, skippedQr: boolean) {
     try {
         const payload = buildMaimaiUpdatePayload(storage.value.update?.strategy, props.artifactId, { latestQrCredential: latestQr })
         updateTargetNames.value = getMaimaiUpdateTargetNames(payload.target)
-        const result = await useNuxtApp().$leporid<UpdatesChainResult>(
-            `/api/nuxt/maimai/update`,
+        const result = await useNuxtApp().$leporidae<UpdatesChainResult>(
+            `/api/maimai/updates_chain`,
             { method: 'POST', body: payload, showSuccessToast: false } as any,
         )
         const updatedStorage = applyMaimaiUpdateResult(storage.value, result)

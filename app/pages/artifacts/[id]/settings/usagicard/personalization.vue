@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { UsagiCardStorage } from '~/types/api'
+
 const route = useRoute()
 const artifactId = route.params.id as string
 const { artifact, storageOf, storageSave, storageSaving } = await useArtifact(artifactId)
@@ -14,7 +16,7 @@ else if (!storage.value.menu.swipe) {
 }
 const menuStorage = computed(() => storage.value.menu!)
 
-const functionTypes = computed(() => artifact.value.product.type.function_types)
+const functionTypes = computed(() => artifact.value.type.function_types)
 const functionPages = computed(() => getEnabledFunctionPages(functionTypes.value))
 const { configurablePageItems, customMenuKeys, userCustomized } = useFunctionMenu(functionPages, computed(() => menuStorage.value))
 

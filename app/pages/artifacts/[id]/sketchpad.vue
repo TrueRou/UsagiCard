@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ArtifactDisplayMode } from '~/types/api'
+
 definePageMeta({
     layout: 'full-page',
 })

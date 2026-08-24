@@ -12,10 +12,9 @@ interface ApiResponse<T = unknown> {
     detail?: string
 }
 
-const UNAUTHORIZED = 401
 const LOCKED = 423
 
-export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((nuxtApp) => {
+export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>(() => {
     let pendingRequestCount = 0
 
     const startGlobalLoading = () => {
@@ -57,32 +56,7 @@ export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((
         return rawData?.message || rawData?.detail || fallback
     }
 
-    const handleUnauthorized = async (message?: string) => {
-        const msg = message || '登录状态过期，请重新登录。'
-
-        if (import.meta.server) {
-            throw createError({
-                statusCode: UNAUTHORIZED,
-                statusMessage: '需要登录',
-                message: msg,
-                data: { to: '/auth/login', hint: '重新登录', clear: true },
-            })
-        }
-
-        const route = useRoute()
-
-        if (route.path === '/auth/login') {
-            addToast('error', msg)
-            return
-        }
-
-        await useUserSession().clear()
-        addToast('error', msg)
-        const redirect = encodeURIComponent(route.fullPath || '/')
-        await nuxtApp.runWithContext(() => navigateTo(`/auth/login?redirect=${redirect}&clear=1`))
-    }
-
-    const leporid = $fetch.create({
+    const leporidae = $fetch.create({
         onRequest(context) {
             if (import.meta.server) {
                 const reqHeaders = useRequestHeaders(['cookie'])
@@ -113,17 +87,6 @@ export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((
             if (rawData.code !== 200) {
                 const message = resolveMessage(rawData, context.response.statusText || '请求失败')
 
-                if (rawData.code === UNAUTHORIZED) {
-                    if (import.meta.client)
-                        handleUnauthorized(message).catch(() => {})
-                    throw createError({
-                        statusCode: UNAUTHORIZED,
-                        statusMessage: '需要登录',
-                        message,
-                        data: rawData,
-                    })
-                }
-
                 if (rawData.code !== LOCKED && shouldShowErrorToast(options, context.options.method?.toString() || 'GET', rawData.code))
                     addToast('error', message)
 
@@ -150,11 +113,6 @@ export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((
             const isAppResponse = typeof rawData?.code === 'number'
             const message = resolveMessage(rawData, context.response.statusText || '请求失败')
 
-            if (status === UNAUTHORIZED) {
-                await handleUnauthorized(isAppResponse ? message : undefined)
-                return
-            }
-
             if (status === LOCKED)
                 return
 
@@ -165,7 +123,7 @@ export default defineNuxtPlugin<{ leporid: ReturnType<typeof $fetch.create> }>((
 
     return {
         provide: {
-            leporid,
+            leporidae,
         },
     }
 })

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ProductTypeFunction } from '~/types/api'
+
 const props = defineProps<{
     artifactId: string
 }>()
@@ -7,10 +9,10 @@ const { artifact, storageOf } = await useArtifact(props.artifactId)
 const { img } = useUtils()
 
 const usagiCardStorage = storageOf('UsagiCard')
-const hasMaimaiCN = computed(() => artifact.value.product.type.function_types.includes(ProductTypeFunction.MaimaiCN))
+const hasMaimaiCN = computed(() => artifact.value.type.function_types.includes(ProductTypeFunction.MAIMAI_CN))
 const maimaiStorage = computed(() => artifact.value.storage.MaimaiCN)
 
-const pageItems = computed(() => getEnabledFunctionPages(artifact.value.product.type.function_types))
+const pageItems = computed(() => getEnabledFunctionPages(artifact.value.type.function_types))
 const { visibleNavItems } = useFunctionMenu(pageItems, computed(() => usagiCardStorage.value.menu))
 const functionPageItems = computed(() => visibleNavItems.value.filter(item => item.key !== 'uc-me'))
 
@@ -67,7 +69,7 @@ function formatDate(dateStr: string | null | undefined) {
                 </div>
                 <div class="flex-1 min-w-0">
                     <h2 class="text-base font-semibold truncate">
-                        {{ usagiCardStorage.bio?.card_title || artifact.product.type.name }}
+                        {{ usagiCardStorage.bio?.card_title || artifact.type.name }}
                     </h2>
                 </div>
                 <!-- 设置入口 -->

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { MaimaiUpdateNode, MaimaiUpdateServer } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
+import type { MaimaiStorage } from '~/types/api'
 import {
     getMaimaiUpdateSourceColor,
     getMaimaiUpdateSourceDef,

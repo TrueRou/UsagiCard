@@ -1,6 +1,8 @@
+import type { ArtifactUserResponse, ProductTypeFunction } from '~/types/api'
+
 export function useQButton(artifact: Ref<ArtifactUserResponse>): UseQButtonCtx {
     const functionTypes: ComputedRef<ProductTypeFunction[]> = computed(() => {
-        return artifact.value.product.type.function_types
+        return artifact.value.type.function_types
     })
 
     const quickActions = computed(() => {

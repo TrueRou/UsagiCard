@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import PasswordSettings from '~/components/function/usagi-card/me/password-settings.vue'
+import type { UsagiCardStorage } from '~/types/api'
 import UsagiCardNfc from '~/components/function/usagi-card/settings/nfc.vue'
 
 const route = useRoute()
@@ -35,7 +35,9 @@ async function setDerivedMode(enabledMode: 'off' | 'redirect') {
                     保护卡片写入操作和隐私设置
                 </p>
             </div>
-            <PasswordSettings :artifact-id="artifactId" />
+            <p class="text-xs text-base-content/50">
+                二级密码的设置与删除暂未开放，将在后续版本中恢复。已设置的卡片在保存设置、更新数据时仍需验证密码。
+            </p>
         </section>
 
         <section class="rounded-xl border border-base-300 p-4 space-y-4">

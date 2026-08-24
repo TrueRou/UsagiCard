@@ -6,7 +6,7 @@ import type {
     VisualMapComponentOption,
 } from 'echarts/components'
 import type { ComposeOption } from 'echarts/core'
-import type { UserRegionSnapshot } from '~/composables/function/MaimaiCN/useMaimaiUserData'
+import type { UserRegionSnapshot } from '~/composables/function/MaimaiCN/useMaimaiTypes'
 import { MapChart } from 'echarts/charts'
 import {
     GeoComponent,

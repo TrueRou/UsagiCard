@@ -1,16 +1,16 @@
 import type { StoreCurvesResponse, StoreFieldsResponse, StoreLatestResponse } from './useMaimaiTypes'
 
 export async function useMaimaiUserData(artifactId: string) {
-    const { data, error } = await useLeporid<StoreLatestResponse>(
-        '/api/otoge/maimai/usagicard/user_data/latest',
+    const { data, error } = await useLeporidae<StoreLatestResponse>(
+        '/api/maimai/usagicard/user_data/latest',
         { query: { uuid: artifactId } },
     )
     return { userData: data, userDataError: error }
 }
 
 export async function useMaimaiUserRegion(artifactId: string) {
-    const { data, error } = await useLeporid<StoreLatestResponse>(
-        '/api/otoge/maimai/usagicard/user_region/latest',
+    const { data, error } = await useLeporidae<StoreLatestResponse>(
+        '/api/maimai/usagicard/user_region/latest',
         { query: { uuid: artifactId } },
     )
     return { regionData: data, regionError: error }
@@ -22,8 +22,8 @@ export async function fetchUserDataCurves(
     startTime?: string,
     endTime?: string,
 ): Promise<StoreCurvesResponse> {
-    const { $leporid } = useNuxtApp()
-    return $leporid<StoreCurvesResponse>('/api/otoge/maimai/usagicard/user_data/curves', {
+    const { $leporidae } = useNuxtApp()
+    return $leporidae<StoreCurvesResponse>('/api/maimai/usagicard/user_data/curves', {
         method: 'POST',
         body: {
             uuid: artifactId,
@@ -39,8 +39,8 @@ export async function fetchUserRegionCurves(
     startTime?: string,
     endTime?: string,
 ): Promise<StoreCurvesResponse> {
-    const { $leporid } = useNuxtApp()
-    return $leporid<StoreCurvesResponse>('/api/otoge/maimai/usagicard/user_region/curves', {
+    const { $leporidae } = useNuxtApp()
+    return $leporidae<StoreCurvesResponse>('/api/maimai/usagicard/user_region/curves', {
         method: 'POST',
         body: {
             uuid: artifactId,
@@ -51,7 +51,7 @@ export async function fetchUserRegionCurves(
 }
 
 export async function fetchUserRegionFields(): Promise<string[]> {
-    const { $leporid } = useNuxtApp()
-    const response = await $leporid<StoreFieldsResponse>('/api/otoge/maimai/usagicard/user_region/fields')
+    const { $leporidae } = useNuxtApp()
+    const response = await $leporidae<StoreFieldsResponse>('/api/maimai/usagicard/user_region/fields')
     return response.fields
 }

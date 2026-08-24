@@ -1,16 +1,4 @@
-export interface UseImageSelectorCtx {
-    selectorOpen: Ref<boolean>
-    selectorImageKey?: Ref<string | undefined>
-    selectorImageAspect?: Ref<string | undefined>
-    selectorInitialFilters: Ref<string[]>
-    selectorDefaultPageSize?: number
-    selectorConfirmLabel?: string
-    selectorReadonlyMode?: boolean
-    openImageSelector: (key: string, overrideFilter?: string) => void
-    closeImageSelector: () => void
-    handleImageSelect: (image: ImageSimplePublic) => void
-    clearImageSelect: (key: string) => void
-}
+import type { ArtifactUserResponse } from '~/types/api'
 
 export interface UseQButtonCtx {
     artifact: Ref<ArtifactUserResponse>

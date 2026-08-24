@@ -7,7 +7,7 @@ const route = useRoute()
 const artifactId = route.params.id as string
 const { artifact } = await useArtifact(artifactId)
 
-const functionTypes = artifact.value.product.type.function_types
+const functionTypes = artifact.value.type.function_types
 const defaultPage = getEnabledFunctionPages(functionTypes)[0]
 if (!defaultPage) {
     throw createError({ statusCode: 404, statusMessage: '暂无可用功能' })

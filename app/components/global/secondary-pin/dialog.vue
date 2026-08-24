@@ -1,130 +1,29 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
     artifactId: string
-    mode?: 'verify' | 'set'
 }>()
 
 const emit = defineEmits<{
-    verified: [token: string]
-    set: []
+    verified: [pin: string]
     close: []
 }>()
 
-const mode = props.mode ?? 'verify'
-
 const digits = ref<string[]>([])
 const maxLength = 6
-const loading = ref(false)
-const error = ref('')
 const shaking = ref(false)
 
-const confirmDigits = ref<string[]>([])
-const setStep = ref<'input' | 'confirm'>('input')
-
-const displayDigits = computed(() => {
-    if (mode === 'set' && setStep.value === 'confirm') {
-        return confirmDigits.value
-    }
-    return digits.value
-})
-
-const title = computed(() => {
-    if (mode === 'set') {
-        return setStep.value === 'input' ? '设置二级密码' : '确认密码'
-    }
-    return '输入二级密码'
-})
-
 function appendDigit(d: string) {
-    if (displayDigits.value.length >= maxLength)
+    if (digits.value.length >= maxLength)
         return
-    if (mode === 'set' && setStep.value === 'confirm') {
-        confirmDigits.value.push(d)
-        if (confirmDigits.value.length === maxLength) {
-            handleSetConfirm()
-        }
-    }
-    else {
-        digits.value.push(d)
-        if (digits.value.length === maxLength) {
-            if (mode === 'verify') {
-                handleVerify()
-            }
-            else {
-                // set mode: 进入确认步骤
-                setStep.value = 'confirm'
-            }
-        }
+    digits.value.push(d)
+    if (digits.value.length === maxLength) {
+        // PIN 由后续写请求携带至后端校验（X-Pin header），此处直接返回
+        emit('verified', digits.value.join(''))
     }
 }
 
 function deleteDigit() {
-    if (mode === 'set' && setStep.value === 'confirm') {
-        confirmDigits.value.pop()
-    }
-    else {
-        digits.value.pop()
-    }
-    error.value = ''
-}
-
-async function handleVerify() {
-    loading.value = true
-    error.value = ''
-    try {
-        const password = digits.value.join('')
-        const res = await useNuxtApp().$leporid<{ token: string, expires_in: number }>(
-            `/api/artifacts/${props.artifactId}/verify-pin`,
-            { method: 'POST', body: { password }, showSuccessToast: false, showErrorToast: false },
-        )
-        emit('verified', res.token)
-    }
-    catch (e: any) {
-        error.value = e?.data?.message || e?.message || '密码错误'
-        triggerShake()
-    }
-    finally {
-        loading.value = false
-    }
-}
-
-async function handleSetConfirm() {
-    const first = digits.value.join('')
-    const second = confirmDigits.value.join('')
-    if (first !== second) {
-        error.value = '两次密码不一致'
-        confirmDigits.value = []
-        triggerShake()
-        return
-    }
-
-    loading.value = true
-    error.value = ''
-    try {
-        await useNuxtApp().$leporid(
-            `/api/artifacts/${props.artifactId}/pin`,
-            { method: 'PATCH', body: { password: first }, showSuccessToast: true, successMessage: '二级密码设置成功', showErrorToast: false },
-        )
-        emit('set')
-    }
-    catch (e: any) {
-        error.value = e?.data?.message || e?.message || '设置失败'
-        triggerShake()
-    }
-    finally {
-        loading.value = false
-    }
-}
-
-function triggerShake() {
-    shaking.value = true
-    digits.value = []
-    confirmDigits.value = []
-    if (mode === 'set')
-        setStep.value = 'input'
-    setTimeout(() => {
-        shaking.value = false
-    }, 500)
+    digits.value.pop()
 }
 
 const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del']
@@ -142,7 +41,7 @@ const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del']
 
         <!-- 标题 -->
         <h2 class="text-lg font-semibold mb-8">
-            {{ title }}
+            输入二级密码
         </h2>
 
         <!-- 6位圆点指示器 -->
@@ -155,19 +54,15 @@ const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del']
                 :key="i"
                 class="w-3.5 h-3.5 rounded-full border-2 transition-all duration-150"
                 :class="[
-                    i <= displayDigits.length
+                    i <= digits.length
                         ? 'bg-primary border-primary scale-110'
                         : 'border-base-content/30',
                 ]"
             />
         </div>
 
-        <!-- 错误提示 -->
-        <p v-if="error" class="text-error text-sm mb-4">
-            {{ error }}
-        </p>
-        <p v-else class="text-base-content/40 text-sm mb-4">
-            {{ mode === 'set' && setStep === 'confirm' ? '请再次输入密码' : '请输入6位数字密码' }}
+        <p class="text-base-content/40 text-sm mb-4">
+            请输入6位数字密码
         </p>
 
         <!-- 数字键盘 -->
@@ -176,7 +71,6 @@ const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del']
                 <button
                     v-if="key === 'del'"
                     class="h-14 rounded-xl flex items-center justify-center active:bg-base-300 transition-colors"
-                    :disabled="loading"
                     @click="deleteDigit"
                 >
                     <Icon name="mdi:backspace-outline" class="w-6 h-6" />
@@ -185,17 +79,11 @@ const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del']
                 <button
                     v-else
                     class="h-14 rounded-xl bg-base-200 hover:bg-base-300 active:bg-base-300 transition-colors text-xl font-medium"
-                    :disabled="loading"
                     @click="appendDigit(key)"
                 >
                     {{ key }}
                 </button>
             </template>
-        </div>
-
-        <!-- Loading -->
-        <div v-if="loading" class="mt-6">
-            <span class="loading loading-spinner loading-sm" />
         </div>
     </div>
 </template>

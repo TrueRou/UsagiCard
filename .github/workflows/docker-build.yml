@@ -5,21 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "docs/**"
       - "app/**"
-      - "server/**"
-      - "shared/**"
       - "public/**"
+      - "bun.lock"
       - "package.json"
-      - "pnpm-lock.yaml"
       - "nuxt.config.ts"
   workflow_dispatch:
-
-env:
-  REGISTRY: ${{ secrets.DOCKER_REGISTRY_URL }}
-  REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
-  REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -32,18 +23,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3.6.0
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ env.REGISTRY_USERNAME }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5.9.0
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: turou/usagicard
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v6.18.0
@@ -52,3 +42,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest@v4
+        with:
+          subject-name: index.docker.io/turou/usagicard
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

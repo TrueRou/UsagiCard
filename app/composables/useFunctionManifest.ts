@@ -1,5 +1,7 @@
 import type { Component } from 'vue'
+import type { ArtifactUserResponse } from '~/types/api'
 import { defineAsyncComponent } from 'vue'
+import { ProductTypeFunction } from '~/types/api'
 
 const MaimaiCNQuickUpdate = defineAsyncComponent(
     () => import('~/components/function/maimai-cn/quick-action/update.vue'),
@@ -47,14 +49,14 @@ export interface FunctionManifest {
 
 export const functionManifests: FunctionManifest[] = [
     {
-        type: ProductTypeFunction.UsagiCard,
+        type: ProductTypeFunction.USAGI_CARD,
         key: 'usagicard',
         label: 'UsagiCard',
         icon: 'mdi:account-circle-outline',
         pages: [
             {
                 key: 'uc-me',
-                functionType: ProductTypeFunction.UsagiCard,
+                functionType: ProductTypeFunction.USAGI_CARD,
                 label: '我的卡片',
                 icon: 'mdi:account-circle-outline',
                 path: artifactId => `/artifacts/${artifactId}/functions/usagicard/me`,
@@ -66,7 +68,7 @@ export const functionManifests: FunctionManifest[] = [
         settings: [
             {
                 key: 'uc-profile',
-                functionType: ProductTypeFunction.UsagiCard,
+                functionType: ProductTypeFunction.USAGI_CARD,
                 label: '卡片资料',
                 description: '头像、简介和卡片信息',
                 icon: 'mdi:card-account-details-outline',
@@ -75,7 +77,7 @@ export const functionManifests: FunctionManifest[] = [
             },
             {
                 key: 'uc-security',
-                functionType: ProductTypeFunction.UsagiCard,
+                functionType: ProductTypeFunction.USAGI_CARD,
                 label: '安全与隐私',
                 description: '二级密码、NFC 和派生行为',
                 icon: 'mdi:lock-outline',
@@ -84,7 +86,7 @@ export const functionManifests: FunctionManifest[] = [
             },
             {
                 key: 'uc-personalization',
-                functionType: ProductTypeFunction.UsagiCard,
+                functionType: ProductTypeFunction.USAGI_CARD,
                 label: '个性化设置',
                 description: '菜单栏和快捷入口',
                 icon: 'mdi:tune-variant',
@@ -95,7 +97,7 @@ export const functionManifests: FunctionManifest[] = [
         quickActions: [
             // {
             //     key: 'uc-me',
-            //     functionType: ProductTypeFunction.UsagiCard,
+            //     functionType: ProductTypeFunction.USAGI_CARD,
             //     label: '我的卡片',
             //     icon: 'mdi:account-circle-outline',
             //     component: UsagiCardQuickMe,
@@ -104,14 +106,14 @@ export const functionManifests: FunctionManifest[] = [
         ],
     },
     {
-        type: ProductTypeFunction.MaimaiCN,
+        type: ProductTypeFunction.MAIMAI_CN,
         key: 'maimai-cn',
         label: 'MaiCN',
         icon: 'mdi:music-circle-outline',
         pages: [
             {
                 key: 'maicn-query',
-                functionType: ProductTypeFunction.MaimaiCN,
+                functionType: ProductTypeFunction.MAIMAI_CN,
                 label: '歌曲成绩',
                 icon: 'mdi:music-note',
                 path: artifactId => `/artifacts/${artifactId}/functions/maimai-cn/query`,
@@ -120,7 +122,7 @@ export const functionManifests: FunctionManifest[] = [
             },
             {
                 key: 'maicn-playdata',
-                functionType: ProductTypeFunction.MaimaiCN,
+                functionType: ProductTypeFunction.MAIMAI_CN,
                 label: '游玩数据',
                 icon: 'mdi:chart-line',
                 path: artifactId => `/artifacts/${artifactId}/functions/maimai-cn/playdata`,
@@ -131,7 +133,7 @@ export const functionManifests: FunctionManifest[] = [
         settings: [
             {
                 key: 'maicn-preferences',
-                functionType: ProductTypeFunction.MaimaiCN,
+                functionType: ProductTypeFunction.MAIMAI_CN,
                 label: 'MaiCN 偏好',
                 description: '快速更新、玩家资料和附近的人对战',
                 icon: 'mdi:music-circle-outline',
@@ -142,7 +144,7 @@ export const functionManifests: FunctionManifest[] = [
         quickActions: [
             {
                 key: 'maicn-update',
-                functionType: ProductTypeFunction.MaimaiCN,
+                functionType: ProductTypeFunction.MAIMAI_CN,
                 label: '查分更新',
                 icon: 'mdi:sync',
                 component: MaimaiCNQuickUpdate,
@@ -151,13 +153,13 @@ export const functionManifests: FunctionManifest[] = [
         ],
     },
     {
-        type: ProductTypeFunction.MaimaiAqua,
+        type: ProductTypeFunction.MAIMAI_AQUA,
         key: 'maimai-aqua',
         label: 'MaiAqua',
         pages: [
             {
                 key: 'maiaqua-home',
-                functionType: ProductTypeFunction.MaimaiAqua,
+                functionType: ProductTypeFunction.MAIMAI_AQUA,
                 label: '卡片主页',
                 path: artifactId => `/artifacts/${artifactId}/functions/maimai-aqua/home`,
                 configurable: true,
@@ -203,11 +205,11 @@ export function findQuickActionByKey(functionTypes: ProductTypeFunction[], key?:
 }
 
 export function hasFunctionType(artifact: Ref<ArtifactUserResponse>, functionType: ProductTypeFunction) {
-    return computed(() => artifact.value.product.type.function_types.includes(functionType))
+    return computed(() => artifact.value.type.function_types.includes(functionType))
 }
 
 export function requireFunctionType(artifact: Ref<ArtifactUserResponse>, functionType: ProductTypeFunction) {
-    if (!artifact.value.product.type.function_types.includes(functionType)) {
+    if (!artifact.value.type.function_types.includes(functionType)) {
         throw createError({ statusCode: 404, statusMessage: '功能未启用' })
     }
 }

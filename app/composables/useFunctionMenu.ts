@@ -1,3 +1,5 @@
+import type { UsagiCardStorage } from '~/types/api'
+
 interface FunctionNavItem extends FunctionPageMeta {
     configurable: boolean
 }

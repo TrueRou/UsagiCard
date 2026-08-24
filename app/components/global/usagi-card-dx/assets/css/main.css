@@ -1,0 +1,8 @@
+@font-face {
+  font-family: "SEGA_MARUGOTHICDB";
+  src: url("https://cdn.assets.turou.fun/static/SEGAMaruGothicDB.woff2");
+}
+
+.font-sega {
+  font-family: "SEGA_MARUGOTHICDB";
+}

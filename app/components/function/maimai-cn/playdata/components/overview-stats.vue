@@ -2,7 +2,7 @@
 import type { PieSeriesOption } from 'echarts/charts'
 import type { LegendComponentOption, TooltipComponentOption } from 'echarts/components'
 import type { ComposeOption } from 'echarts/core'
-import type { UserDataSnapshot, UserRegionSnapshot } from '~/composables/function/MaimaiCN/useMaimaiUserData'
+import type { UserDataSnapshot, UserRegionSnapshot } from '~/composables/function/MaimaiCN/useMaimaiTypes'
 import { PieChart } from 'echarts/charts'
 import { LegendComponent, TooltipComponent } from 'echarts/components'
 import { use } from 'echarts/core'
