@@ -13,6 +13,7 @@ import {
     sanitizeMaimaiUpdateStrategy,
     upsertMaimaiUpdateNode,
 } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
+import { applyMaimaiUpdateResult } from '~/composables/function/MaimaiCN/useQuickUpdate'
 
 const props = defineProps<{
     artifactId: string
@@ -168,6 +169,11 @@ async function doSubmit(latestQr: string | null, skippedQr: boolean) {
             `/api/nuxt/maimai/update`,
             { method: 'POST', body: payload, showSuccessToast: false } as any,
         )
+        const updatedStorage = applyMaimaiUpdateResult(storage.value, result)
+        const targetRating = Object.values(result.target).find(entry => entry.scores_rating)?.scores_rating
+        await storageSave('MaimaiCN', updatedStorage, {
+            successMessage: `更新完成（Rating -> ${targetRating}）`,
+        })
         updateResult.value = result
         if (latestQr && rememberUid.value)
             await rememberArcadeLegacyUid(latestQr)
