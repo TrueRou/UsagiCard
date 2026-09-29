@@ -32,7 +32,7 @@ type ChartOption = ComposeOption<
 
 const mapReady = ref(false)
 
-const CHINA_GEOJSON_URL = 'https://cdn.assets.turou.fun/static/china_geo.json'
+const CHINA_GEOJSON_URL = 'https://eo.assets.turou.fun/static/china_geo.json'
 
 const mapData = computed(() => {
     return Object.entries(props.regionSnapshot)
