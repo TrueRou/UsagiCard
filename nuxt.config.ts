@@ -8,8 +8,8 @@ export default defineNuxtConfig({
     app: {
         head: {
             link: [
-                { rel: 'dns-prefetch', href: 'https://cdn.assets.turou.fun' },
-                { rel: 'preconnect', href: 'https://cdn.assets.turou.fun', crossorigin: '' },
+                { rel: 'dns-prefetch', href: 'https://static.turou.fun' },
+                { rel: 'preconnect', href: 'https://static.turou.fun', crossorigin: '' },
             ],
         },
     },
@@ -50,7 +50,7 @@ export default defineNuxtConfig({
         routeRules: {
             '/api/**': {
                 proxy: {
-                    to: `${process.env.NUXT_LEPORIDAE_BASE_URL || 'http://leporidae:8000'}/**`,
+                    to: `${process.env.NUXT_LEPORIDAE_BASE_URL || 'https://api.turou.fun/leporidae'}/**`,
                     headers: {
                         'X-Developer-Token': process.env.NUXT_LEPORIDAE_DEVELOPER_TOKEN || '4616dd015b6139704d259ea9c1a0e29d',
                     },

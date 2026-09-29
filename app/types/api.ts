@@ -18,12 +18,6 @@ export enum ProductTypeDesign {
     USAGI_CARD_DX = 'USAGI_CARD_DX',
     USAGI_CARD_WARS = 'USAGI_CARD_WARS',
 }
-export enum RoleName {
-    ADMIN = 'admin',
-    SUPPORT = 'support',
-    OPERATIONS = 'operations',
-    MANUFACTURING = 'manufacturing',
-}
 
 // ===== 分页 =====
 
