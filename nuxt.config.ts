@@ -40,13 +40,16 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         public: {
-            URL: 'http://localhost:3000',
-            imageURL: 'https://static.turou.fun/leporidae/images',
-            imagePreviewURL: 'https://static.turou.fun/leporidae/images',
+            URL: 'https://uc.turou.fun',
+            imageURL: 'https://eo.assets.turou.fun/leporidae/images',
+            imagePreviewURL: 'https://eo.assets.turou.fun/leporidae/thumbnails/',
         },
     },
     nitro: {
         preset: 'bun',
+        externals: {
+            inline: ['vue', 'vue-router', 'vue-bundle-renderer', '@vue/server-renderer', '@vueuse', 'pinia', 'unhead'],
+        },
         routeRules: {
             '/api/**': {
                 proxy: {
