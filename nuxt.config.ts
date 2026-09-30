@@ -39,6 +39,10 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
+        leporidae: {
+            baseURL: 'https://api.turou.fun/leporidae',
+            developerToken: '',
+        },
         public: {
             URL: 'https://uc.turou.fun',
             imageURL: 'https://eo.assets.turou.fun/leporidae/images',
@@ -49,16 +53,6 @@ export default defineNuxtConfig({
         preset: 'bun',
         externals: {
             inline: ['vue', 'vue-router', 'vue-bundle-renderer', '@vue/server-renderer', '@vueuse', 'pinia', 'unhead'],
-        },
-        routeRules: {
-            '/api/**': {
-                proxy: {
-                    to: `${process.env.NUXT_LEPORIDAE_BASE_URL || 'https://api.turou.fun/leporidae'}/**`,
-                    headers: {
-                        'X-Developer-Token': process.env.NUXT_LEPORIDAE_DEVELOPER_TOKEN || '4616dd015b6139704d259ea9c1a0e29d',
-                    },
-                },
-            },
         },
     },
     hooks: {

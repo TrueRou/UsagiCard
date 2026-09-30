@@ -7,6 +7,7 @@ on:
       - develop
     paths:
       - "app/**"
+      - "server/**"
       - "public/**"
       - "bun.lock"
       - "package.json"
