@@ -48,7 +48,7 @@ export const MAIMAI_UPDATE_DATA_SOURCES: MaimaiUpdateDataSourceDef[] = [
     {
         id: 'arcade_legacy',
         chainLabel: 'arcade_legacy',
-        name: '记住的 UID',
+        name: '机台（快速更新）',
         description: '使用 SGWCMAID 换取的旧版机台凭据进行快速更新',
         credentialLabel: '凭据',
         isTransient: false,

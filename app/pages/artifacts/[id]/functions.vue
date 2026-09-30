@@ -98,10 +98,12 @@ function onSwipePointerCancel() {
 function goBack() {
     router.push({ path: `/artifacts/${artifactId}` })
 }
+
+const activePageLabel = computed(() => visibleNavItems.value.find(item => item.key === activePageKey.value)?.label ?? '')
 </script>
 
 <template>
-    <div class="h-full w-full flex flex-col lg:flex-row">
+    <div class="h-full w-full flex flex-col">
         <aside class="hidden lg:flex flex-col items-center w-16 h-full bg-base-200/50 border-r border-base-300/50 py-4 gap-1 fixed left-0 top-0 z-40">
             <button
                 class="btn btn-ghost btn-sm btn-square mb-3 tooltip tooltip-right"
@@ -129,8 +131,24 @@ function goBack() {
             </button>
         </aside>
 
+        <header class="sticky top-0 z-30 flex items-center gap-2 h-14 px-2 lg:pl-20 pr-3 border-b border-base-300/50 bg-base-100/90 backdrop-blur shrink-0">
+            <button
+                class="btn btn-ghost btn-sm btn-square shrink-0"
+                title="返回主页"
+                aria-label="返回主页"
+                @click="goBack"
+            >
+                <Icon name="mdi:arrow-left" class="w-5 h-5" />
+            </button>
+            <div id="functions-header-slot" class="functions-header-slot flex-1 min-w-0 flex items-center gap-2">
+                <span v-if="activePageLabel" class="functions-header-fallback text-base font-semibold truncate">
+                    {{ activePageLabel }}
+                </span>
+            </div>
+        </header>
+
         <main
-            class="flex-1 h-full overflow-y-auto pb-18 lg:pb-0 lg:ml-16 touch-pan-y"
+            class="flex-1 min-h-0 overflow-y-auto pb-18 lg:pb-0 lg:ml-16 touch-pan-y"
             @pointerdown="onSwipePointerDown"
             @pointermove="onSwipePointerMove"
             @pointerup="onSwipePointerEnd"
@@ -186,5 +204,12 @@ function goBack() {
 .content-fade-leave-to {
     opacity: 0;
     transform: translateY(-8px);
+}
+</style>
+
+<style>
+/* 子页面注入 header 内容时隐藏默认标题 */
+.functions-header-slot:has(> .functions-header-injected) .functions-header-fallback {
+    display: none;
 }
 </style>

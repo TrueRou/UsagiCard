@@ -7,6 +7,7 @@ const props = defineProps<{
     hint?: QueryHint
     previewCount?: number
     scoreFilter?: QueryScoreFilter | null
+    hideInput?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -137,7 +138,7 @@ function updateLevelRange(boundary: 'levelValueMin' | 'levelValueMax', event: Ev
 
 <template>
     <section class="space-y-3">
-        <div class="border border-base-300/70 bg-base-100 transition-all duration-200" :class="isFocused ? 'border-primary/35' : ''">
+        <div v-if="!hideInput" class="border border-base-300/70 bg-base-100 transition-all duration-200" :class="isFocused ? 'border-primary/35' : ''">
             <label class="flex items-center gap-3 px-3 py-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-base-content/45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />

@@ -52,60 +52,62 @@ function formatDate(dateStr: string | null | undefined) {
 
 <template>
     <div class="p-4 space-y-5">
-        <!-- 上半部分: Function 摘要小组件 -->
-        <div class="space-y-3">
+        <!-- 设置按钮注入到页面头部 -->
+        <ClientOnly>
+            <Teleport to="#functions-header-slot">
+                <span class="functions-header-injected flex-1 min-w-0 text-base font-semibold truncate">我的卡片</span>
+                <button
+                    class="btn btn-ghost btn-sm btn-square shrink-0"
+                    title="设置"
+                    aria-label="设置"
+                    @click="openSettings"
+                >
+                    <Icon name="mdi:cog-outline" class="w-5 h-5" />
+                </button>
+            </Teleport>
+        </ClientOnly>
+
+        <!-- 上半部分: 深色卡片摘要 -->
+        <div class="rounded-2xl bg-neutral text-neutral-content p-4 space-y-4 shadow-lg">
             <!-- UsagiCard 摘要: 头像 + 标题 -->
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full overflow-hidden bg-base-200 shrink-0">
+                <div class="w-12 h-12 rounded-full overflow-hidden bg-neutral-content/10 ring-2 ring-neutral-content/15 shrink-0">
                     <img
                         v-if="usagiCardStorage.bio?.card_avatar"
                         :src="img(usagiCardStorage.bio.card_avatar)"
                         alt="avatar"
                         class="w-full h-full object-cover"
                     >
-                    <div v-else class="w-full h-full flex items-center justify-center text-base-content/30">
-                        <Icon name="mdi:account" class="w-6 h-6" />
+                    <div v-else class="w-full h-full flex items-center justify-center text-neutral-content/40">
+                        <Icon name="mdi:account" class="w-7 h-7" />
                     </div>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h2 class="text-base font-semibold truncate">
+                    <h2 class="text-lg font-semibold truncate">
                         {{ usagiCardStorage.bio?.card_title || artifact.type.name }}
                     </h2>
+                    <p class="text-xs text-neutral-content/60 truncate">
+                        {{ artifact.type.name }}
+                    </p>
                 </div>
-                <!-- 设置入口 -->
-                <button
-                    class="btn btn-ghost btn-sm btn-square"
-                    title="设置"
-                    @click="openSettings"
-                >
-                    <Icon name="mdi:cog-outline" class="w-5 h-5" />
-                </button>
             </div>
 
             <!-- MaimaiCN 摘要: Rating + 最近更新 -->
-            <div v-if="hasMaimaiCN" class="grid grid-cols-2 gap-3">
-                <div class="bg-base-200/50 rounded-xl px-3 py-2.5">
-                    <p class="text-xs text-base-content/50 mb-0.5">
+            <div v-if="hasMaimaiCN" class="grid grid-cols-2 gap-2.5">
+                <div class="rounded-xl bg-neutral-content/8 px-3 py-2.5">
+                    <p class="text-xs text-neutral-content/55 mb-0.5">
                         Rating
                     </p>
                     <p class="text-lg font-bold tabular-nums">
                         {{ maimaiStorage?.bio.player_rating ?? '—' }}
                     </p>
                 </div>
-                <div class="bg-base-200/50 rounded-xl px-3 py-2.5">
-                    <p class="text-xs text-base-content/50 mb-0.5">
+                <div class="rounded-xl bg-neutral-content/8 px-3 py-2.5">
+                    <p class="text-xs text-neutral-content/55 mb-0.5">
                         最近更新
                     </p>
                     <p class="text-sm font-medium">
                         {{ formatDate(maimaiStorage?.update.last_updated_at) }}
-                    </p>
-                </div>
-                <div class="bg-base-200/50 rounded-xl px-3 py-2.5">
-                    <p class="text-xs text-base-content/50 mb-0.5">
-                        这里有点丑
-                    </p>
-                    <p class="text-sm font-medium">
-                        后面会改的
                     </p>
                 </div>
             </div>

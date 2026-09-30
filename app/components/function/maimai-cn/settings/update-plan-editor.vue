@@ -94,7 +94,7 @@ const placedIds = computed(() => {
     return ids
 })
 
-const visibleDataSources = computed(() => MAIMAI_UPDATE_DATA_SOURCES.filter(source => source.visibleInPicker || source.id === 'arcade' || source.id === 'arcade_legacy'))
+const visibleDataSources = computed(() => MAIMAI_UPDATE_DATA_SOURCES.filter(source => source.visibleInPicker || source.id === 'arcade_legacy'))
 
 function getSourceDef(id: string) {
     return getMaimaiUpdateSourceDef(id)!
