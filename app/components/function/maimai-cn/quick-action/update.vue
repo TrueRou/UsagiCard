@@ -15,6 +15,7 @@ import {
     upsertMaimaiUpdateNode,
 } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
 import { applyMaimaiUpdateResult } from '~/composables/function/MaimaiCN/useQuickUpdate'
+import ErrorMessage from './error-message.vue'
 
 const props = defineProps<{
     artifactId: string
@@ -299,9 +300,7 @@ function resetResult() {
                             <p class="text-sm font-medium mb-1">
                                 {{ maimaiUpdateChainLabelToName(key as string) }}
                             </p>
-                            <p v-if="entry.errors" class="text-xs text-error">
-                                {{ entry.errors }}
-                            </p>
+                            <ErrorMessage v-if="entry.errors" :message="entry.errors" />
                             <template v-else>
                                 <p class="text-xs text-base-content/70">
                                     曲目数：{{ entry.scores_num }}
@@ -327,9 +326,7 @@ function resetResult() {
                             <p class="text-sm font-medium mb-1">
                                 {{ maimaiUpdateChainLabelToName(key as string) }}
                             </p>
-                            <p v-if="entry.errors" class="text-xs text-error">
-                                {{ entry.errors }}
-                            </p>
+                            <ErrorMessage v-if="entry.errors" :message="entry.errors" />
                             <template v-else>
                                 <p class="text-xs text-base-content/70">
                                     曲目数：{{ entry.scores_num }}
