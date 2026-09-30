@@ -89,7 +89,7 @@ function formatDate(dateStr: string | null | undefined) {
                         Rating
                     </p>
                     <p class="text-lg font-bold tabular-nums">
-                        {{ maimaiStorage.bio?.player_rating ?? '—' }}
+                        {{ maimaiStorage?.bio.player_rating ?? '—' }}
                     </p>
                 </div>
                 <div class="bg-base-200/50 rounded-xl px-3 py-2.5">
@@ -97,7 +97,7 @@ function formatDate(dateStr: string | null | undefined) {
                         最近更新
                     </p>
                     <p class="text-sm font-medium">
-                        {{ formatDate(maimaiStorage.update?.last_updated_at) }}
+                        {{ formatDate(maimaiStorage?.update.last_updated_at) }}
                     </p>
                 </div>
                 <div class="bg-base-200/50 rounded-xl px-3 py-2.5">

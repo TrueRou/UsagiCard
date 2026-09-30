@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
     artifactId: string
+    errorMessage?: string
 }>()
 
 const emit = defineEmits<{
@@ -62,7 +63,7 @@ const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del']
         </div>
 
         <p class="text-base-content/40 text-sm mb-4">
-            请输入6位数字密码
+            {{ errorMessage || '请输入6位数字密码' }}
         </p>
 
         <!-- 数字键盘 -->

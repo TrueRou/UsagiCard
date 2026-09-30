@@ -15,13 +15,7 @@ export type StorageSaveFn = <K extends StorageNamespace>(
 
 export async function useArtifact(artifactId: string) {
     const nuxtApp = useNuxtApp()
-    const secondaryPinKey = `artifact:${artifactId}:secondary-pin`
-    const secondaryPin = useState<string | null>(secondaryPinKey, () => null)
-    const { request: requestSecondaryPin } = useSecondaryPinDialog()
-
-    onMounted(() => {
-        secondaryPin.value = sessionStorage.getItem(secondaryPinKey)
-    })
+    const { withSecondaryPin } = useArtifactPin(artifactId)
 
     /*
     / 工件元数据相关
@@ -31,25 +25,11 @@ export async function useArtifact(artifactId: string) {
     const { data, error } = artifactAsyncData
 
     const artifact = computed((): ArtifactUserResponse & { storage: ArtifactStorage } => {
-        if (data.value === undefined) {
+        if (!data.value) {
             throw createError({ statusCode: error.value?.statusCode || 404, statusMessage: '工件获取失败', message: error.value?.message })
         }
         return data.value as ArtifactUserResponse & { storage: ArtifactStorage }
     })
-
-    /*
-    / 工件二级密码相关
-    */
-
-    function setSecondaryPin(pin: string | null) {
-        secondaryPin.value = pin
-        if (!import.meta.client)
-            return
-        if (pin)
-            sessionStorage.setItem(secondaryPinKey, pin)
-        else
-            sessionStorage.removeItem(secondaryPinKey)
-    }
 
     /*
     / 工件存储相关
@@ -63,7 +43,12 @@ export async function useArtifact(artifactId: string) {
     }
 
     const storageOf = <K extends StorageNamespace>(ns: K) => {
-        return computed(() => cloneStorageData(artifact.value.storage[ns]))
+        return computed(() => {
+            const storage = artifact.value.storage[ns]
+            if (!storage)
+                throw createError({ statusCode: 404, message: `卡片未启用 ${ns} 功能` })
+            return cloneStorageData(storage)
+        })
     }
 
     const storageSaving = ref(false)
@@ -75,37 +60,22 @@ export async function useArtifact(artifactId: string) {
 
         storageSaving.value = true
         try {
-            for (let attempt = 0; attempt < 2; attempt++) {
-                try {
-                    // 自定义拦截器选项（ofetch 不认识，内联字面量会触发 excess-property 检查），先放入变量再展开
-                    const feedback = { showSuccessToast: options?.showSuccessToast ?? true, successMessage: options?.successMessage ?? '保存成功' }
-                    data.value = await nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
-                        method: 'PATCH',
-                        body: { storage: fullStorage },
-                        headers: secondaryPin.value
-                            ? { 'X-Pin': secondaryPin.value }
-                            : {},
-                        ...feedback,
-                    })
-                    saved = true
-                    return
-                }
-                catch (error: any) {
-                    if (error?.statusCode !== 423 || attempt > 0)
-                        throw error
-
-                    setSecondaryPin(null)
-                    const pin = await requestSecondaryPin(artifactId)
-                    if (!pin)
-                        return
-                    setSecondaryPin(pin)
-                }
-            }
+            const feedback = { showSuccessToast: options?.showSuccessToast ?? true, successMessage: options?.successMessage ?? '保存成功' }
+            const result = await withSecondaryPin(headers => nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
+                method: 'PATCH',
+                body: { storage: fullStorage },
+                headers,
+                ...feedback,
+            }))
+            if (!result)
+                return
+            data.value = result
+            saved = true
         }
         finally {
             if (!saved) {
-                for (const key of Object.keys(newData) as Array<keyof typeof newData>)
-                    delete newData[key]
+                for (const key of Object.keys(newData))
+                    Reflect.deleteProperty(newData, key)
                 Object.assign(newData, currentStorage)
             }
             setTimeout(() => storageSaving.value = false, 500)

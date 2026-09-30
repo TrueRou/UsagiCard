@@ -79,7 +79,7 @@ export const functionManifests: FunctionManifest[] = [
                 key: 'uc-security',
                 functionType: ProductTypeFunction.USAGI_CARD,
                 label: '安全与隐私',
-                description: '二级密码、NFC 和派生行为',
+                description: 'NFC 和派生行为',
                 icon: 'mdi:lock-outline',
                 path: artifactId => `/artifacts/${artifactId}/settings/usagicard/security`,
                 order: 20,

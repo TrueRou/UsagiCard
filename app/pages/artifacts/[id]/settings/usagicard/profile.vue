@@ -10,7 +10,6 @@ const { copy, copied } = useClipboard()
 const storage = ref<UsagiCardStorage>({
     ...storageOf('UsagiCard').value,
 })
-storage.value.bio ??= {}
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 

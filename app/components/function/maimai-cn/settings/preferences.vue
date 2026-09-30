@@ -31,10 +31,7 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null
 let savingFromAutoSync = false
 
 function buildStorageSnapshot() {
-    return {
-        update: { enabled_mode: 'off', last_updated_at: null, strategy: { sources: [], targets: [] } },
-        ...storageOf('MaimaiCN').value,
-    } as MaimaiStorage
+    return storageOf('MaimaiCN').value
 }
 
 async function saveAndSync() {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { artifactId, open, handleVerified, handleClose } = useSecondaryPinDialog()
+const { artifactId, open, requestId, errorMessage, handleVerified, handleClose } = useSecondaryPinDialog()
 </script>
 
 <template>
@@ -9,7 +9,9 @@ const { artifactId, open, handleVerified, handleClose } = useSecondaryPinDialog(
 
     <SecondaryPinDialog
         v-if="open && artifactId"
+        :key="requestId"
         :artifact-id="artifactId"
+        :error-message="errorMessage"
         @verified="handleVerified"
         @close="handleClose"
     />

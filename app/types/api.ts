@@ -1,8 +1,7 @@
 /**
  * leporidae 后端显式类型声明（替代 hey-api 生成的 leporidae.gen.ts）
  *
- * 依据 FRONTEND_MIGRATION.md（后端 9385480 重构版本）。
- * 仅声明 leporidae-fe 实际消费的模型。
+ * Storage 与后端 core/validation/schemas/storage 保持一致。
  */
 
 // ===== 枚举（IntEnum → StrEnum，值为大写字符串）=====
@@ -54,7 +53,7 @@ export interface ProductTypeResponse {
 export interface ArtifactUserResponse {
     id: string
     status: ArtifactStatus
-    storage: Record<string, unknown>
+    storage: ArtifactStorage
     order_id: string | null
     design_vid: string
     design: Record<string, unknown>
@@ -64,11 +63,7 @@ export interface ArtifactUserResponse {
 }
 
 export interface ArtifactStorageUpdateRequest {
-    storage: Record<string, unknown>
-}
-
-export interface SecondaryPinRequest {
-    password: string
+    storage: ArtifactStorage
 }
 
 // ===== 图片（公开读）=====
@@ -148,55 +143,55 @@ export interface UsagiCardWarsDesign {
 // ===== 工件存储（按功能命名空间）=====
 
 export interface MaimaiStorage {
-    bio?: {
-        player_name?: string | null
-        player_rating?: number | null
-        friend_code?: string | null
+    bio: {
+        player_name: string | null
+        player_rating: number | null
+        friend_code: string | null
     }
-    update?: {
-        enabled_mode?: 'off' | 'on'
-        last_updated_at?: string | null
-        strategy?: {
-            sources?: Array<{
+    update: {
+        enabled_mode: 'off' | 'on'
+        last_updated_at: string | null
+        strategy: {
+            sources: Array<{
                 server: 'diving_fish' | 'lxns' | 'arcade_legacy' | 'arcade' | 'usagi_card'
-                credential?: string | null
-                transient?: boolean
+                credential: string | null
+                transient: boolean
             }>
-            targets?: Array<{
+            targets: Array<{
                 server: 'diving_fish' | 'lxns' | 'arcade_legacy' | 'arcade' | 'usagi_card'
-                credential?: string | null
-                transient?: boolean
+                credential: string | null
+                transient: boolean
             }>
         }
     }
 }
 
 export interface MaimaiAquaStorage {
-    access_code?: string | null
+    access_code: string | null
 }
 
 export interface UsagiCardStorage {
-    bio?: {
-        card_title?: string | null
-        card_avatar?: string | null
-        card_profile?: string | null
+    bio: {
+        card_title: string | null
+        card_avatar: string | null
+        card_profile: string | null
     }
-    menu?: {
-        menu_tabs?: string[]
-        swipe?: {
-            enabled_mode?: 'off' | 'on'
+    menu: {
+        menu_tabs: string[]
+        swipe: {
+            enabled_mode: 'off' | 'on'
         }
     }
-    derived?: {
-        enabled_mode?: 'off' | 'redirect'
-        derived_from?: string | null
+    derived: {
+        enabled_mode: 'off' | 'redirect'
+        derived_from: string | null
     }
 }
 
 export interface ArtifactStorage {
-    UsagiCard: UsagiCardStorage
-    MaimaiCN: MaimaiStorage
-    MaimaiAqua: MaimaiAquaStorage
+    UsagiCard?: UsagiCardStorage
+    MaimaiCN?: MaimaiStorage
+    MaimaiAqua?: MaimaiAquaStorage
 }
 
 // ===== 前端本地枚举（与后端无关）=====

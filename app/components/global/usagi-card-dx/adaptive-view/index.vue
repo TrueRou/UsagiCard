@@ -24,22 +24,22 @@ const maimaiStorage = computed(() => artifact.value!.storage.MaimaiCN)
 const useQButtonCtx = useQButton(artifact as Ref<ArtifactUserResponse>)
 
 if (props.storageSave && artifact.value && hasMaimaiCN.value)
-    useQuickUpdate(artifact.value.id, maimaiStorage, props.storageSave, props.onMaimaiRefreshComplete)
+    useQuickUpdate(artifact.value.id, computed(() => maimaiStorage.value!), props.storageSave, props.onMaimaiRefreshComplete)
 
 const dxRating = computed(() => {
-    if (hasMaimaiCN.value && maimaiStorage.value.bio?.player_rating)
+    if (hasMaimaiCN.value && maimaiStorage.value?.bio.player_rating)
         return String(maimaiStorage.value.bio.player_rating)
     return design.value.dx_rating
 })
 
 const friendCode = computed(() => {
-    if (hasMaimaiCN.value && maimaiStorage.value.bio?.friend_code)
+    if (hasMaimaiCN.value && maimaiStorage.value?.bio.friend_code)
         return String(maimaiStorage.value.bio.friend_code)
     return design.value.friend_code
 })
 
 const displayName = computed(() => {
-    if (hasMaimaiCN.value && maimaiStorage.value.bio?.player_name)
+    if (hasMaimaiCN.value && maimaiStorage.value?.bio.player_name)
         return String(maimaiStorage.value.bio.player_name)
     return design.value.display_name
 })
