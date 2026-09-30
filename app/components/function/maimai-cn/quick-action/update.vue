@@ -390,11 +390,11 @@ function resetResult() {
                         输入 SGWCMAID
                     </h3>
                     <textarea v-model="latestQrCredential" class="textarea textarea-bordered w-full min-h-28" placeholder="微信二维码识别内容（SGWCMAID）" />
-                    <label class="flex items-start gap-3 rounded-lg bg-base-200/60 p-3 text-sm">
+                    <label v-if="!hasRememberedUid" class="flex items-start gap-3 rounded-lg bg-base-200/60 p-3 text-sm">
                         <input v-model="rememberUid" type="checkbox" class="checkbox checkbox-primary checkbox-sm mt-0.5" :disabled="!latestQrCredential.trim()">
                         <span>
                             <span class="font-medium">记住 UID</span>
-                            <span class="block text-xs text-base-content/60 mt-1">使用本次 SGWCMAID 获取旧版机台 UID 并保存，可以用于之后快速更新。</span>
+                            <span class="block text-xs text-base-content/60 mt-1">保存您的机台凭据，可用于快速更新。</span>
                         </span>
                     </label>
                     <div class="flex flex-wrap gap-2 justify-end">

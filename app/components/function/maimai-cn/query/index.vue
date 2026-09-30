@@ -32,37 +32,11 @@ function handleSelectSong(song: Song) {
 
 <template>
     <div class="max-w-5xl mx-auto p-2 space-y-4">
-        <!-- 搜索框注入到页面头部 -->
-        <ClientOnly>
-            <Teleport to="#functions-header-slot">
-                <label class="functions-header-injected flex items-center gap-2 flex-1 min-w-0 h-9 px-3 rounded-full bg-base-200/70 border border-transparent focus-within:border-primary/40 focus-within:bg-base-100 transition-colors">
-                    <Icon name="mdi:magnify" class="w-4 h-4 shrink-0 text-base-content/45" />
-                    <input
-                        :value="state.draft"
-                        type="text"
-                        class="grow min-w-0 bg-transparent outline-none text-sm"
-                        placeholder="输入命令或筛选条件"
-                        @input="updateDraft(($event.target as HTMLInputElement).value)"
-                    >
-                    <button
-                        v-if="state.draft"
-                        class="btn btn-ghost btn-xs btn-circle shrink-0"
-                        type="button"
-                        aria-label="清空查询"
-                        @click="updateDraft('')"
-                    >
-                        <Icon name="mdi:close" class="w-3.5 h-3.5" />
-                    </button>
-                </label>
-            </Teleport>
-        </ClientOnly>
-
         <CommandBar
             :model-value="state.draft"
             :hint="state.hint"
             :preview-count="state.previewResults.length"
             :score-filter="state.scoreFilter"
-            hide-input
             @update:model-value="updateDraft"
             @apply-score-filter="applyScoreFilterToken($event.key, $event.value)"
             @reset-score-filter="resetScoreFilter()"

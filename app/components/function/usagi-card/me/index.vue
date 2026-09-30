@@ -55,9 +55,8 @@ function formatDate(dateStr: string | null | undefined) {
         <!-- 设置按钮注入到页面头部 -->
         <ClientOnly>
             <Teleport to="#functions-header-slot">
-                <span class="functions-header-injected flex-1 min-w-0 text-base font-semibold truncate">我的卡片</span>
                 <button
-                    class="btn btn-ghost btn-sm btn-square shrink-0"
+                    class="btn btn-ghost btn-sm btn-square"
                     title="设置"
                     aria-label="设置"
                     @click="openSettings"

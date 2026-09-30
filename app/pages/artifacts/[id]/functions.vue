@@ -131,7 +131,7 @@ const activePageLabel = computed(() => visibleNavItems.value.find(item => item.k
             </button>
         </aside>
 
-        <header class="sticky top-0 z-30 flex items-center gap-2 h-14 px-2 lg:pl-20 pr-3 border-b border-base-300/50 bg-base-100/90 backdrop-blur shrink-0">
+        <header class="sticky top-0 z-30 relative flex items-center h-14 px-2 lg:pl-20 pr-3 border-b border-base-300/50 bg-base-100/90 backdrop-blur shrink-0">
             <button
                 class="btn btn-ghost btn-sm btn-square shrink-0"
                 title="返回主页"
@@ -140,11 +140,13 @@ const activePageLabel = computed(() => visibleNavItems.value.find(item => item.k
             >
                 <Icon name="mdi:arrow-left" class="w-5 h-5" />
             </button>
-            <div id="functions-header-slot" class="functions-header-slot flex-1 min-w-0 flex items-center gap-2">
-                <span v-if="activePageLabel" class="functions-header-fallback text-base font-semibold truncate">
-                    {{ activePageLabel }}
-                </span>
-            </div>
+            <span
+                v-if="activePageLabel"
+                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[calc(100%-8rem)] text-base font-semibold truncate pointer-events-none"
+            >
+                {{ activePageLabel }}
+            </span>
+            <div id="functions-header-slot" class="functions-header-slot ml-auto flex items-center gap-1" />
         </header>
 
         <main
@@ -204,12 +206,5 @@ const activePageLabel = computed(() => visibleNavItems.value.find(item => item.k
 .content-fade-leave-to {
     opacity: 0;
     transform: translateY(-8px);
-}
-</style>
-
-<style>
-/* 子页面注入 header 内容时隐藏默认标题 */
-.functions-header-slot:has(> .functions-header-injected) .functions-header-fallback {
-    display: none;
 }
 </style>
