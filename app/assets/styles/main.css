@@ -1,8 +1,23 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-html, 
+/* 舞萌难度色，与 useMaimaiUtils 中 DifficultyColors 保持一致 */
+@theme {
+    --color-diff-basic: #2DBE64;
+    --color-diff-advanced: #FBAD37;
+    --color-diff-expert: #F75066;
+    --color-diff-master: #B04CE6;
+    --color-diff-remaster: #E1A8FF;
+    --color-diff-utage: #EB46E9;
+}
+
+html,
 body,
 #__nuxt {
     height: 100%;
+}
+
+@utility scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
 }

@@ -96,6 +96,7 @@ export const MaimaiVersionLabelMap: Record<number, string> = {
     23000: 'FESTiVAL',
     24000: 'BUDDiES',
     25000: 'PRiSM',
+    25500: 'PRiSM PLUS',
 }
 
 export const MaimaiVersionAliasMap: Record<number, string[]> = {
@@ -117,7 +118,8 @@ export const MaimaiVersionAliasMap: Record<number, string[]> = {
     22000: ['星', '宙'],
     23000: ['祭', '祝'],
     24000: ['双', '宴'],
-    25000: ['镜', '彩'],
+    25000: ['镜'],
+    25500: ['彩'],
 }
 
 export const MaimaiVersionAliasOptions = Object.entries(MaimaiVersionAliasMap)
@@ -127,35 +129,86 @@ export const MaimaiVersionOptions = Object.entries(MaimaiVersionLabelMap)
     .map(([value, label]) => ({ value: Number(value), label }))
     .sort((a, b) => a.value - b.value)
 
-export enum ViewMode {
-    LIST = 'list',
-    TILE = 'tile',
+/** MSCW 风格难度色（与 main.css 中 --color-diff-* 保持一致） */
+export const DifficultyColors = {
+    0: '#2DBE64', // BASIC
+    1: '#FBAD37', // ADVANCED
+    2: '#F75066', // EXPERT
+    3: '#B04CE6', // MASTER
+    4: '#E1A8FF', // Re:MASTER
+    [-1]: '#EB46E9', // UTAGE
+} as Record<number, string>
+
+export const DifficultyNames: Record<number, string> = {
+    0: 'BASIC',
+    1: 'ADVANCED',
+    2: 'EXPERT',
+    3: 'MASTER',
+    4: 'Re:MASTER',
+    [-1]: 'U·TA·GE',
 }
 
-export enum TileDisplayMode {
-    NONE = 'none',
-    RATING = 'rating',
-    ACHIEVEMENT = 'achievement',
-    FC = 'fc',
-    FS = 'fs',
-    DX_RATING = 'dx_rating',
-    LEVEL_VALUE = 'level_value',
-    PLAY_COUNT = 'play_count',
+export const DifficultyShortNames: Record<number, string> = {
+    0: 'BAS',
+    1: 'ADV',
+    2: 'EXP',
+    3: 'MAS',
+    4: 'ReM',
+    [-1]: '宴',
+}
+
+const DX_STAR_THRESHOLDS = [0.85, 0.90, 0.93, 0.95, 0.97]
+
+/** DX 星级：0–5，边界统一使用 >= */
+export function getDxStar(dxScore: number | null | undefined, maxDxScore: number): number {
+    if (!dxScore || maxDxScore <= 0)
+        return 0
+    const ratio = dxScore / maxDxScore
+    let star = 0
+    for (const threshold of DX_STAR_THRESHOLDS) {
+        if (ratio >= threshold)
+            star++
+    }
+    return star
+}
+
+/** 按达成率推导评级，和游戏阈值一致 */
+export function getRateByAchievement(achievement: number): RateType {
+    const steps: [number, RateType][] = [
+        [100.5, RateType.SSSP],
+        [100, RateType.SSS],
+        [99.5, RateType.SSP],
+        [99, RateType.SS],
+        [98, RateType.SP],
+        [97, RateType.S],
+        [94, RateType.AAA],
+        [90, RateType.AA],
+        [80, RateType.A],
+        [75, RateType.BBB],
+        [70, RateType.BB],
+        [60, RateType.B],
+        [50, RateType.C],
+    ]
+    for (const [threshold, rate] of steps) {
+        if (achievement >= threshold)
+            return rate
+    }
+    return RateType.D
 }
 
 export function useMaimaiUtils() {
     // 获取成绩难度颜色
     const getDifficultyColor = (levelIndex: number, songType?: SongType): string => {
-        if (songType === 'utage')
-            return '#aa42b1' // UTAGE类型统一使用橙色
-        const colors: { [key: number]: string } = {
-            0: '#6fe163', // BASIC
-            1: '#ffd653', // ADVANCED
-            2: '#ff7b7b', // EXPERT
-            3: '#9f51dc', // MASTER
-            4: '#dbaaff', // Re:MASTER
-        }
-        return colors[levelIndex] || '#26c9fc'
+        if (songType === 'utage' || levelIndex === -1)
+            return DifficultyColors[-1]!
+        return DifficultyColors[levelIndex] ?? '#26c9fc'
+    }
+
+    // 难度色底上的文字颜色：Re:MASTER 底色过浅，用深色文字保证对比度
+    const getDifficultyTextClass = (levelIndex: number, songType?: SongType): string => {
+        if (songType !== 'utage' && levelIndex === LevelIndex.ReMASTER)
+            return 'text-purple-950'
+        return 'text-white'
     }
 
     // 获取成绩评级样式
@@ -275,6 +328,20 @@ export function useMaimaiUtils() {
         return fsIcons[fs]
     }
 
+    // 获取 DX 星级图标的URL
+    const getDxStarIconSrc = (star: number) => {
+        if (star <= 0)
+            return undefined
+        const icons: Record<number, string> = {
+            1: new URL('@/assets/images/maimai/UI_GAM_Gauge_DXScoreIcon_01.png', import.meta.url).href,
+            2: new URL('@/assets/images/maimai/UI_GAM_Gauge_DXScoreIcon_02.png', import.meta.url).href,
+            3: new URL('@/assets/images/maimai/UI_GAM_Gauge_DXScoreIcon_03.png', import.meta.url).href,
+            4: new URL('@/assets/images/maimai/UI_GAM_Gauge_DXScoreIcon_04.png', import.meta.url).href,
+            5: new URL('@/assets/images/maimai/UI_GAM_Gauge_DXScoreIcon_05.png', import.meta.url).href,
+        }
+        return icons[Math.min(star, 5)]
+    }
+
     // 处理封面图加载错误
     const handleImageError = (event: Event) => {
         const target = event.target as HTMLImageElement
@@ -303,6 +370,8 @@ export function useMaimaiUtils() {
 
     return {
         getDifficultyColor,
+        getDifficultyTextClass,
+        getDxStarIconSrc,
         getAchievementStyle,
         getAchievementIconSrc,
         getSongTypeLabel,

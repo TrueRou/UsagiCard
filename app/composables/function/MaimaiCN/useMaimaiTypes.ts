@@ -149,42 +149,79 @@ export interface UpdatesChainResult {
     stores: Record<string, { message: string, data: any | null }>
 }
 
-export type QueryType = 'idle' | 'typing' | 'bests' | 'plate' | 'scores' | 'song' | 'song-select'
-export type QueryHint = 'idle' | 'song' | 'b50' | 'plate' | 'score-filter' | 'score-top'
-export type ScoreFilterKey = 'level' | 'levelValueMin' | 'levelValueMax' | 'version' | 'fc' | 'fs' | 'rate'
 export type PlateAttr = 'remained' | 'cleared' | 'played' | 'all'
 
-export interface QueryScoreFilter {
-    level?: string
-    levelValueMin?: number
-    levelValueMax?: number
-    version?: number
-    fc?: FCType
-    fs?: FSType
-    rate?: RateType
+/** 单张谱面：歌曲 + 难度 + 可能存在的成绩 */
+export interface ChartEntry {
+    /** `${songId}_${type}_${levelIndex}`，utage 使用 diff_id 作为最后一段 */
+    key: string
+    song: Song
+    type: SongType
+    difficulty: SongDifficulty
+    /** utage 难度时为 -1 */
+    levelIndex: number
+    score: ScoreExtend | null
+    /** 物量 * 3 */
+    maxDxScore: number
 }
 
-export interface QueryState {
-    type: QueryType
-    data: MaimaiBests | PlateObject[] | ScoreExtend[] | Song | Song[] | null
-    meta: { plateName?: string, queryLabel?: string }
-    loading: boolean
-    error: string | null
-    draft: string
-    hint: QueryHint
-    previewResults: Song[]
-    scoreFilter: QueryScoreFilter | null
-    plateAttr: PlateAttr
+export type FilterDifficulty = 0 | 1 | 2 | 3 | 4 | -1
+/** 'none' 表示未达成 FC/FS */
+export type FilterFC = FCType | 'none'
+export type FilterFS = FSType | 'none'
+/** 'unplayed' 不在评级档内 */
+export type FilterRank = RateType
+
+export interface ScoreFilterState {
+    difficulties: FilterDifficulty[]
+    levelRange: [number, number]
+    versions: number[]
+    genres: string[]
+    types: SongType[]
+    rates: FilterRank[]
+    fc: FilterFC[]
+    fs: FilterFS[]
+    dxStars: number[]
+    showUnplayed: boolean
 }
 
-export interface ParsedQueryCommand {
-    mode: QueryHint | 'invalid'
-    raw: string
-    displayLabel: string
-    plate?: {
-        version: string
-        plan: string
-    }
-    scoreFilter?: QueryScoreFilter
-    topCommand?: 'pc50' | 'fc50' | 'ap50'
+export type SortField = 'level' | 'achievement' | 'rating' | 'dxScore' | 'playCount' | 'title'
+export type SortDirection = 'asc' | 'desc'
+
+export interface ScoreSortState {
+    primary: SortField
+    primaryDir: SortDirection
+    secondary: SortField
+    secondaryDir: SortDirection
+    unplayedToBottom: boolean
+    /** 排序后仅保留前 N 条，null 表示不限制 */
+    limit: number | null
+}
+
+export interface ScoreMetrics {
+    total: number
+    played: number
+    avgAchievement: number
+    aboveAvg: number
+    sssp: number
+    sss: number
+    ap: number
+    fc: number
+    playCount: number
+}
+
+export interface DistributionBucket {
+    key: string
+    label: string
+    count: number
+    pct: number
+    color: string
+}
+
+export interface ScoreAnalytics {
+    metrics: ScoreMetrics
+    ranks: DistributionBucket[]
+    fc: DistributionBucket[]
+    fs: DistributionBucket[]
+    dxStars: DistributionBucket[]
 }

@@ -162,9 +162,45 @@ export function useSongSearch() {
         return songsToShow
     }
 
+    /**
+     * 返回匹配关键词的全部歌曲 ID（不受 MAX_SEARCH_NUMBER 限制），供成绩筛选使用。
+     * 关键词为空时返回 null，表示不限制。
+     */
+    const matchSongIds = (keyword: string): Set<number> | null => {
+        const trimmed = keyword.trim()
+        if (!trimmed)
+            return null
+        const ids = new Set<number>()
+        if (/^\d+$/.test(trimmed)) {
+            const id = toLXNSStyleId(Number(trimmed))
+            if (songMap.has(id))
+                ids.add(id)
+        }
+        if (songIndex != null) {
+            const searchResults = (songIndex as Document).search(trimmed.toLowerCase(), { limit: songMap.size || 100000 })
+            searchResults.forEach((fieldResult) => {
+                fieldResult.result.forEach(id => ids.add(id as number))
+            })
+        }
+        return ids
+    }
+
+    const getSongMap = () => songMap
+
     return {
         indexSongs,
         searchSong,
+        matchSongIds,
+        getSongMap,
         MAX_SEARCH_NUMBER,
     }
+}
+
+let sharedSongSearch: ReturnType<typeof useSongSearch> | null = null
+
+/** 页面间共享同一份歌曲索引，避免重复构建 */
+export function useSharedSongSearch() {
+    if (!sharedSongSearch)
+        sharedSongSearch = useSongSearch()
+    return sharedSongSearch
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MaimaiCNScores from '~/components/function/maimai-cn/scores/index.vue'
+import MaimaiCNBests from '~/components/function/maimai-cn/bests/index.vue'
 import { ProductTypeFunction } from '~/types/api'
 
 const route = useRoute()
@@ -9,5 +9,5 @@ requireFunctionType(artifact, ProductTypeFunction.MAIMAI_CN)
 </script>
 
 <template>
-    <MaimaiCNScores :artifact-id="artifactId" />
+    <MaimaiCNBests :artifact-id="artifactId" />
 </template>
