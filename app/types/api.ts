@@ -164,6 +164,16 @@ export interface MaimaiStorage {
             }>
         }
     }
+    /** 旧卡片在下次写入存储前没有该字段 */
+    view?: MaimaiViewStorage
+}
+
+export type MaimaiViewMode = 'list' | 'tile'
+export type MaimaiTileContent = 'rating' | 'achievement' | 'fc' | 'fs' | 'dx_rating' | 'level' | 'play_count' | 'none'
+
+export interface MaimaiViewStorage {
+    mode: MaimaiViewMode
+    tile_content: MaimaiTileContent
 }
 
 export interface MaimaiAquaStorage {

@@ -1,17 +1,23 @@
 import type { ArtifactStorage, ArtifactUserResponse } from '~/types/api'
+import { PIN_LOCKED } from './useArtifactPin'
 
 type StorageNamespace = keyof ArtifactStorage
 
 interface StorageSaveOptions {
     successMessage?: string
     showSuccessToast?: boolean
+    /** silent：遇到二级密码保护时不弹窗，返回 'locked'，同时不显示错误提示 */
+    pinMode?: 'prompt' | 'silent'
 }
+
+/** saved：已写入；locked：静默模式下被二级密码拦截；cancelled：用户取消 PIN 输入 */
+export type StorageSaveResult = 'saved' | 'locked' | 'cancelled'
 
 export type StorageSaveFn = <K extends StorageNamespace>(
     namespace: K,
     newData: NonNullable<ArtifactStorage[K]>,
     options?: StorageSaveOptions,
-) => Promise<void>
+) => Promise<StorageSaveResult>
 
 export async function useArtifact(artifactId: string) {
     const nuxtApp = useNuxtApp()
@@ -58,19 +64,30 @@ export async function useArtifact(artifactId: string) {
         const fullStorage = cloneStorageData({ ...artifact.value.storage, [namespace]: newData })
         let saved = false
 
+        const silent = options?.pinMode === 'silent'
         storageSaving.value = true
         try {
-            const feedback = { showSuccessToast: options?.showSuccessToast ?? true, successMessage: options?.successMessage ?? '保存成功' }
-            const result = await withSecondaryPin(headers => nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
+            const feedback = {
+                showSuccessToast: options?.showSuccessToast ?? true,
+                successMessage: options?.successMessage ?? '保存成功',
+                ...(silent ? { showErrorToast: false } : {}),
+            }
+            const request = (headers: Record<string, string>) => nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
                 method: 'PATCH',
                 body: { storage: fullStorage },
                 headers,
                 ...feedback,
-            }))
+            })
+            const result = silent
+                ? await withSecondaryPin(request, { prompt: false })
+                : await withSecondaryPin(request)
+            if (result === PIN_LOCKED)
+                return 'locked'
             if (!result)
-                return
+                return 'cancelled'
             data.value = result
             saved = true
+            return 'saved'
         }
         finally {
             if (!saved) {

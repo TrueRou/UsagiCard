@@ -1,10 +1,11 @@
 import type { ChartEntry, ScoreExtend } from './useMaimaiTypes'
 import { buildChartEntries } from './useScoreView'
 import { useSharedSongSearch } from './useSongSearch.client'
+import { fetchScoresVersion, readMaimaiCache, writeMaimaiCache } from './useMaimaiCache.client'
 
 /**
  * 加载歌曲库与卡片全部成绩，合并为谱面列表。
- * 每次调用 refresh 都会重新拉取成绩，保证快速更新后的数据是最新的。
+ * 按卡片 UUID 缓存成绩；通过后端版本接口判断缓存是否需要刷新。
  */
 export function useScoreLibrary(artifactId: string) {
     const songSearch = useSharedSongSearch()
@@ -12,16 +13,26 @@ export function useScoreLibrary(artifactId: string) {
     const loading = ref(false)
     const error = ref<string | null>(null)
     let requestId = 0
+    const cacheKey = `maicn:score-library:${artifactId}`
+
 
     async function refresh() {
         const currentId = ++requestId
         loading.value = true
         error.value = null
         try {
-            const [, scores] = await Promise.all([
-                songSearch.indexSongs(),
-                useNuxtApp().$leporidae<ScoreExtend[]>('/api/maimai/usagicard/scores', { query: { uuid: artifactId } }),
-            ])
+            const api = useNuxtApp().$leporidae
+            const cached = readMaimaiCache<ScoreExtend[]>('scores', artifactId)
+            const version = await fetchScoresVersion(artifactId)
+            let scores: ScoreExtend[]
+            if (cached && cached.version === version) {
+                scores = cached.data
+            }
+            else {
+                scores = await api<ScoreExtend[]>('/api/maimai/usagicard/scores', { query: { uuid: artifactId } })
+                writeMaimaiCache('scores', version, scores ?? [], artifactId)
+            }
+            await songSearch.indexSongs()
             if (currentId !== requestId)
                 return
             entries.value = buildChartEntries(songSearch.getSongMap().values(), scores ?? [])

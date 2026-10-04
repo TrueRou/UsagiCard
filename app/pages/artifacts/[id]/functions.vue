@@ -100,21 +100,14 @@ function goBack() {
 }
 
 const activePageLabel = computed(() => visibleNavItems.value.find(item => item.key === activePageKey.value)?.label ?? '')
+
+// 子页面通过 definePageMeta({ functionsWide: true }) 声明铺满宽度（vue-router 会合并父子路由的 meta）
+const contentWide = computed(() => route.meta.functionsWide === true)
 </script>
 
 <template>
     <div class="h-full w-full flex flex-col">
         <aside class="hidden lg:flex flex-col items-center w-16 h-full bg-base-200/50 border-r border-base-300/50 py-4 gap-1 fixed left-0 top-0 z-40">
-            <button
-                class="btn btn-ghost btn-sm btn-square mb-3 tooltip tooltip-right"
-                data-tip="返回卡面"
-                @click="goBack"
-            >
-                <Icon name="mdi:arrow-left" class="w-5 h-5" />
-            </button>
-
-            <div class="divider my-0 mx-2" />
-
             <button
                 v-for="item in visibleNavItems"
                 :key="item.key"
@@ -150,13 +143,16 @@ const activePageLabel = computed(() => visibleNavItems.value.find(item => item.k
         </header>
 
         <main
-            class="flex-1 min-h-0 overflow-y-auto pb-18 lg:pb-0 lg:ml-16 touch-pan-y"
+            class="flex-1 min-h-0 overflow-y-auto pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0 lg:ml-16 touch-pan-y"
             @pointerdown="onSwipePointerDown"
             @pointermove="onSwipePointerMove"
             @pointerup="onSwipePointerEnd"
             @pointercancel="onSwipePointerCancel"
         >
-            <div class="min-h-full w-full lg:mx-auto lg:w-[min(100%,56rem)] xl:w-[min(100%,64rem)]">
+            <div
+                class="min-h-full w-full"
+                :class="contentWide ? 'lg:px-2 xl:px-4' : 'lg:mx-auto lg:w-[min(100%,56rem)] xl:w-[min(100%,64rem)]'"
+            >
                 <NuxtPage v-slot="{ Component, route: pageRoute }">
                     <Transition name="content-fade" mode="out-in">
                         <div :key="pageRoute.fullPath" class="min-h-full">

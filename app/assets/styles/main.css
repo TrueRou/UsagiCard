@@ -17,7 +17,47 @@ body,
     height: 100%;
 }
 
+/* 触屏设备上输入框不小于 16px，避免 iOS 聚焦时自动放大页面 */
+@media (pointer: coarse) {
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+}
+
 @utility scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
+}
+
+@utility scrollbar-none {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* 面板：页面内的主要内容容器 */
+@utility panel {
+    @apply rounded-xl border border-base-300 bg-base-100;
+}
+
+/* 弹窗或面板内的分组底色 */
+@utility panel-muted {
+    @apply rounded-xl border border-base-200 bg-base-200/40;
+}
+
+/* 筛选芯片：只定义尺寸与形状，颜色由 chip-idle / chip-on 或内联难度色决定 */
+@utility chip {
+    @apply inline-flex h-8 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-lg border px-2.5 text-xs font-semibold whitespace-nowrap transition-colors select-none active:scale-95;
+}
+
+@utility chip-idle {
+    @apply border-base-300 bg-base-100 text-base-content/70 hover:bg-base-200;
+}
+
+@utility chip-on {
+    @apply border-primary bg-primary text-primary-content;
 }

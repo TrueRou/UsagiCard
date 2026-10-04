@@ -3,6 +3,7 @@ import type { Song } from './useMaimaiTypes'
 import FlexSearch from 'flexsearch'
 import { pinyin } from 'pinyin-pro'
 import { toHiragana } from 'wanakana'
+import { readMaimaiCache, removeLegacyMaimaiCaches, writeMaimaiCache } from './useMaimaiCache.client'
 
 function getNoteDesigners(song: Song) {
     const diffs = [...song.difficulties.dx, ...song.difficulties.standard]
@@ -64,18 +65,15 @@ export function useSongSearch() {
     }
 
     const indexSongs = async () => {
-        // clean up old cache
-        localStorage.removeItem('lastIndexingTime')
-
-        let songData = cache.load<Song[]>(CACHE_KEYS.MAIMAI_SONGS)
-        const lastRefresh = cache.load<number>(CACHE_KEYS.MAIMAI_INDEXING_TIME) || 0
-        const version = cache.load<number>(CACHE_KEYS.MAIMAI_INDEXING_VERSION) || 0
-        if (!songData || version < CURRENT_VERSION || Date.now() - lastRefresh > 24 * 60 * 60 * 1000) {
+        removeLegacyMaimaiCaches()
+        const api = useNuxtApp().$leporidae
+        const cached = readMaimaiCache<Song[]>('songs')
+        let songData = cached?.data
+        const remoteVersion = await api<{ version: number }>('/api/maimai/usagicard/songs/version')
+        if (!songData || !remoteVersion.version || cached?.version !== remoteVersion.version) {
             const songsUrl: string = '/api/maimai/songs'
-            songData = await useNuxtApp().$leporidae(songsUrl as never, { query: { page_size: 1000000 } })
-            cache.save(CACHE_KEYS.MAIMAI_SONGS, songData)
-            cache.save(CACHE_KEYS.MAIMAI_INDEXING_TIME, Date.now())
-            cache.save(CACHE_KEYS.MAIMAI_INDEXING_VERSION, CURRENT_VERSION)
+            songData = await api(songsUrl as never, { query: { page_size: 1000000 } })
+            writeMaimaiCache('songs', remoteVersion.version, songData ?? [])
         }
         if ((!songIndex || !songMap) && songData) {
             songMap.clear()

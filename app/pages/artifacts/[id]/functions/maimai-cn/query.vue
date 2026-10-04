@@ -2,6 +2,8 @@
 import MaimaiCNScores from '~/components/function/maimai-cn/scores/index.vue'
 import { ProductTypeFunction } from '~/types/api'
 
+definePageMeta({ functionsWide: true })
+
 const route = useRoute()
 const artifactId = route.params.id as string
 const { artifact } = await useArtifact(artifactId)

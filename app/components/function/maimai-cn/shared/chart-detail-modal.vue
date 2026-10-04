@@ -137,7 +137,7 @@ const calculatorOpen = ref(false)
 
         <div v-if="current" class="space-y-4">
             <!-- 头部 -->
-            <section class="rounded-lg border border-base-300 bg-base-100 p-3 sm:p-4" :style="{ borderLeft: `4px solid ${accentColor}` }">
+            <section class="panel p-3 sm:p-4" :style="{ borderLeft: `4px solid ${accentColor}` }">
                 <div class="flex gap-3 sm:gap-4">
                     <div class="shrink-0 text-center">
                         <img
@@ -158,7 +158,7 @@ const calculatorOpen = ref(false)
                             <button
                                 v-for="type in availableTypes"
                                 :key="type"
-                                class="btn join-item btn-xs"
+                                class="btn join-item btn-sm lg:btn-xs"
                                 :class="current.type === type ? 'btn-primary' : 'btn-ghost bg-base-200'"
                                 type="button"
                                 @click="switchType(type)"
@@ -191,11 +191,11 @@ const calculatorOpen = ref(false)
             </section>
 
             <!-- 难度 Tab -->
-            <nav class="grid grid-cols-3 gap-1.5 sm:grid-cols-5" aria-label="难度">
+            <nav class="scrollbar-none -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 pt-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0" aria-label="难度">
                 <button
                     v-for="tab in tabs"
                     :key="tab.key"
-                    class="rounded-lg border px-1.5 py-1.5 text-center transition-all"
+                    class="min-w-16 flex-1 shrink-0 rounded-xl border px-1.5 py-1.5 text-center transition-all active:scale-95 sm:min-w-0"
                     :class="tab.key === current.key ? ['ring-2 ring-offset-1 ring-offset-base-100', getDifficultyTextClass(tab.levelIndex, tab.type)] : 'border-base-300 bg-base-100 hover:bg-base-200'"
                     :style="tab.key === current.key ? activeTabStyle(tab) : undefined"
                     type="button"
@@ -215,7 +215,7 @@ const calculatorOpen = ref(false)
 
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <!-- 成绩详情 -->
-                <section class="rounded-lg border border-base-300 bg-base-100 p-3 sm:p-4">
+                <section class="panel p-3 sm:p-4">
                     <h4 class="mb-3 text-sm font-bold" :style="{ color: accentColor }">
                         成绩详情（{{ tabLabel(current) }} {{ levelText }}）
                     </h4>
@@ -290,7 +290,7 @@ const calculatorOpen = ref(false)
                 </section>
 
                 <!-- 物量分布 -->
-                <section class="rounded-lg border border-base-300 bg-base-100 p-3 sm:p-4">
+                <section class="panel p-3 sm:p-4">
                     <h4 class="mb-3 text-sm font-bold">
                         物量分布与权重（总物量 {{ noteTotal }}）
                     </h4>
@@ -352,6 +352,7 @@ const calculatorOpen = ref(false)
             :title="current.song.title"
             :difficulty-label="`${tabLabel(current)} ${levelText}`"
             :accent-color="accentColor"
+            :accent-text-class="current ? getDifficultyTextClass(current.levelIndex, current.type) : undefined"
         />
     </BaseModal>
 </template>

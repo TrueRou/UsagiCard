@@ -19,6 +19,8 @@ const props = defineProps<{
     title: string
     difficultyLabel: string
     accentColor?: string
+    /** 难度色底上的文字颜色（Re:MASTER 需要深色字） */
+    accentTextClass?: string
 }>()
 
 const open = defineModel<boolean>('open', { default: false })
@@ -112,7 +114,7 @@ const pagedResults = computed(() => (splitResults.value ?? []).slice(page.value 
                 </h3>
                 <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-base-content/60">
                     <span class="truncate font-medium text-base-content">{{ title }}</span>
-                    <span class="badge badge-sm border-0 text-white" :style="{ backgroundColor: accentColor }">{{ difficultyLabel }}</span>
+                    <span class="badge badge-sm border-0" :class="accentTextClass ?? 'text-white'" :style="{ backgroundColor: accentColor }">{{ difficultyLabel }}</span>
                     <span class="badge badge-ghost badge-sm">物量 {{ noteTotal }}</span>
                 </div>
             </div>

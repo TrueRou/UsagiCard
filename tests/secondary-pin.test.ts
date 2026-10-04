@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 // eslint-disable-next-line test/no-import-node-test -- Run with Bun without adding a test framework.
 import { beforeEach, describe, it } from 'node:test'
 import { ref } from 'vue'
-import { useArtifactPin } from '../app/composables/useArtifactPin'
+import { PIN_LOCKED, useArtifactPin } from '../app/composables/useArtifactPin'
 import { useSecondaryPinDialog } from '../app/composables/useSecondaryPinDialog'
 
 const states = new Map<string, ReturnType<typeof ref>>()
@@ -91,6 +91,35 @@ describe('artifact storage PIN requests', () => {
         assert.equal(result, undefined)
         assert.equal(attempts, 1)
         assert.equal(states.get('artifact:card:secondary-pin')?.value, null)
+    })
+
+    it('returns PIN_LOCKED without prompting in silent mode', async () => {
+        let prompted = false
+        globals.useSecondaryPinDialog = () => ({
+            request: async () => {
+                prompted = true
+                return '001234'
+            },
+        })
+        const { withSecondaryPin } = useArtifactPin('card')
+        let attempts = 0
+        const result = await withSecondaryPin(async () => {
+            attempts += 1
+            throw Object.assign(new Error('locked'), { statusCode: 423 })
+        }, { prompt: false })
+        assert.equal(result, PIN_LOCKED)
+        assert.equal(prompted, false)
+        assert.equal(attempts, 1)
+    })
+
+    it('reuses a cached PIN in silent mode', async () => {
+        const { withSecondaryPin } = useArtifactPin('card')
+        states.get('artifact:card:secondary-pin')!.value = '001234'
+        const result = await withSecondaryPin(async (headers) => {
+            assert.deepEqual(headers, { 'X-Pin': '001234' })
+            return 'saved'
+        }, { prompt: false })
+        assert.equal(result, 'saved')
     })
 
     it('does not intercept other errors', async () => {

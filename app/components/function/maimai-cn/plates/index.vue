@@ -3,16 +3,20 @@ import type { ChartEntry, PlateAttr, PlateObject } from '~/composables/function/
 import { DifficultyNames, DifficultyShortNames, SongType, useMaimaiUtils } from '~/composables/function/MaimaiCN/useMaimaiUtils'
 import { useScoreLibrary } from '~/composables/function/MaimaiCN/useScoreLibrary.client'
 import ChartDetailModal from '../shared/chart-detail-modal.vue'
+import PageHeaderActions from '../shared/page-header-actions.vue'
 
 const props = defineProps<{
     artifactId: string
 }>()
 
+const { artifact } = await useArtifact(props.artifactId)
 const { entries, refresh: refreshLibrary } = useScoreLibrary(props.artifactId)
 const { formatAchievement, getDifficultyColor, getDifficultyTextClass, getSongJacketUrl, handleImageError } = useMaimaiUtils()
 
-const CLASSIC_PLATES = ['真', '超', '檄', '橙', '晓', '桃', '樱', '紫', '堇', '白', '雪', '辉']
-const DX_PLATES = ['熊', '华', '爽', '煌', '星', '宙', '祭', '祝', '双', '宴', '镜', '彩']
+const VERSION_GROUPS = [
+    { label: '旧框', versions: ['真', '超', '檄', '橙', '晓', '桃', '樱', '紫', '堇', '白', '雪', '辉'] },
+    { label: 'DX', versions: ['熊', '华', '爽', '煌', '星', '宙', '祭', '祝', '双', '宴', '镜', '彩'] },
+]
 const PLATE_TYPES = [
     { value: '极', description: 'FC' },
     { value: '将', description: 'SSS' },
@@ -32,6 +36,7 @@ const selection = useLocalStorage('maicn:plates', { version: '桃', plan: '将',
 })
 
 const plateName = computed(() => `${selection.value.version}${selection.value.plan}`)
+const attrLabel = computed(() => ATTR_OPTIONS.find(option => option.value === selection.value.attr)?.label ?? '')
 const plates = ref<PlateObject[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -60,12 +65,13 @@ async function fetchPlates() {
     }
 }
 
-watch(() => [selection.value.version, selection.value.plan, selection.value.attr], fetchPlates)
-
-onMounted(() => {
+function refresh() {
     void fetchPlates()
     void refreshLibrary()
-})
+}
+
+watch(() => [selection.value.version, selection.value.plan, selection.value.attr], fetchPlates)
+onMounted(refresh)
 
 const summary = computed(() => {
     const counts = new Map<number, number>()
@@ -100,43 +106,53 @@ function openDetail(plate: PlateObject, level: number) {
 </script>
 
 <template>
-    <div class="space-y-3 p-2 sm:p-3">
-        <section class="space-y-3 rounded-lg border border-base-300 bg-base-100 p-3 shadow-xs">
-            <div class="space-y-1.5">
-                <div v-for="(group, index) in [CLASSIC_PLATES, DX_PLATES]" :key="index" class="flex flex-wrap gap-1">
-                    <button
-                        v-for="version in group"
-                        :key="version"
-                        class="btn btn-xs btn-square border"
-                        :class="selection.version === version ? 'btn-primary' : 'border-base-300 bg-base-100 hover:bg-base-200'"
-                        :aria-pressed="selection.version === version"
-                        type="button"
-                        @click="selection.version = version"
-                    >
-                        {{ version }}
-                    </button>
+    <div class="space-y-3 p-2 sm:p-3 lg:p-4">
+        <PageHeaderActions :artifact="artifact" :loading="loading" @refresh="refresh" @updated="refresh" />
+
+        <!-- 牌子选择 -->
+        <section class="panel space-y-3 p-3">
+            <div class="space-y-2">
+                <div v-for="group in VERSION_GROUPS" :key="group.label" class="grid grid-cols-[2.25rem_1fr] items-start gap-2">
+                    <span class="pt-2 text-[11px] font-semibold text-base-content/50">{{ group.label }}</span>
+                    <div class="flex flex-wrap gap-1">
+                        <button
+                            v-for="version in group.versions"
+                            :key="version"
+                            class="chip w-8 px-0 text-sm"
+                            :class="selection.version === version ? 'chip-on' : 'chip-idle'"
+                            :aria-pressed="selection.version === version"
+                            type="button"
+                            @click="selection.version = version"
+                        >
+                            {{ version }}
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="join">
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div class="grid grid-cols-4 gap-1" role="radiogroup" aria-label="牌子种类">
                     <button
                         v-for="plan in PLATE_TYPES"
                         :key="plan.value"
-                        class="btn join-item btn-sm"
-                        :class="selection.plan === plan.value ? 'btn-primary' : 'btn-ghost bg-base-200'"
+                        class="chip h-10 w-full flex-col gap-0 leading-tight"
+                        :class="selection.plan === plan.value ? 'chip-on' : 'chip-idle'"
+                        role="radio"
+                        :aria-checked="selection.plan === plan.value"
                         type="button"
                         @click="selection.plan = plan.value"
                     >
-                        {{ plan.value }}
-                        <span class="text-[10px] opacity-60">{{ plan.description }}</span>
+                        <span class="text-sm">{{ plan.value }}</span>
+                        <span class="text-[10px] font-medium opacity-70">{{ plan.description }}</span>
                     </button>
                 </div>
-                <div class="join">
+                <div class="grid grid-cols-4 gap-1 self-end" role="radiogroup" aria-label="曲目状态">
                     <button
                         v-for="option in ATTR_OPTIONS"
                         :key="option.value"
-                        class="btn join-item btn-xs"
-                        :class="selection.attr === option.value ? 'btn-primary btn-soft' : 'btn-ghost'"
+                        class="chip w-full"
+                        :class="selection.attr === option.value ? 'border-primary/50 bg-primary/10 text-primary' : 'chip-idle'"
+                        role="radio"
+                        :aria-checked="selection.attr === option.value"
                         type="button"
                         @click="selection.attr = option.value"
                     >
@@ -146,20 +162,21 @@ function openDetail(plate: PlateObject, level: number) {
             </div>
         </section>
 
-        <section class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 shadow-xs">
+        <!-- 进度摘要 -->
+        <section class="panel flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
             <div>
                 <div class="text-[11px] text-base-content/55">
-                    {{ ATTR_OPTIONS.find(option => option.value === selection.attr)?.label }}曲目
+                    {{ attrLabel }}曲目
                 </div>
                 <div class="text-lg font-bold">
-                    {{ plateName }} · <span class="font-mono">{{ plates.length }}</span> 首
+                    {{ plateName }} · <span class="font-mono tabular-nums">{{ loading ? '…' : plates.length }}</span> 首
                 </div>
             </div>
             <div class="flex flex-wrap gap-1.5">
                 <span
                     v-for="item in summary"
                     :key="item.level"
-                    class="rounded px-2 py-1 text-xs font-bold"
+                    class="rounded-lg px-2 py-1 text-xs font-bold"
                     :class="getDifficultyTextClass(item.level)"
                     :style="{ backgroundColor: getDifficultyColor(item.level) }"
                 >
@@ -169,28 +186,36 @@ function openDetail(plate: PlateObject, level: number) {
         </section>
 
         <div v-if="error" class="alert alert-error alert-soft text-sm" role="alert">
-            {{ error }}
+            <Icon name="mdi:alert-circle-outline" class="h-5 w-5" />
+            <span>{{ error }}</span>
+            <button class="btn btn-sm" type="button" @click="fetchPlates">
+                重试
+            </button>
         </div>
 
-        <div v-if="loading" class="flex items-center justify-center gap-2 py-14 text-sm text-base-content/60">
-            <span class="loading loading-spinner loading-md text-primary" />
-            查询中...
+        <div v-if="loading" class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" aria-busy="true">
+            <div v-for="index in 6" :key="index" class="skeleton h-[88px] rounded-xl" />
         </div>
 
-        <div v-else-if="!plates.length && !error" class="rounded-lg border border-base-300 bg-base-100 px-4 py-12 text-center text-sm text-base-content/60">
-            {{ selection.attr === 'remained' ? '已全部完成，恭喜！' : '没有符合条件的曲目' }}
+        <div v-else-if="!plates.length && !error" class="panel px-4 py-12 text-center">
+            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-base-200 text-base-content/40">
+                <Icon :name="selection.attr === 'remained' ? 'mdi:party-popper' : 'mdi:music-note-off-outline'" class="h-6 w-6" />
+            </div>
+            <p class="text-sm text-base-content/70">
+                {{ selection.attr === 'remained' ? '已全部完成，恭喜！' : '没有符合条件的曲目' }}
+            </p>
         </div>
 
-        <div v-else class="grid grid-cols-1 gap-2 lg:grid-cols-2">
+        <div v-else-if="plates.length" class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             <article
                 v-for="plate in plates"
                 :key="plate.song.id"
-                class="flex gap-3 rounded-lg border border-base-300 bg-base-100 p-2.5 shadow-xs"
+                class="panel flex gap-3 p-2.5"
             >
                 <img
                     :src="getSongJacketUrl(plate.song.id)"
-                    :alt="plate.song.title"
-                    class="h-14 w-14 shrink-0 rounded-md object-cover"
+                    alt=""
+                    class="h-14 w-14 shrink-0 rounded-lg object-cover"
                     loading="lazy"
                     @error="handleImageError"
                 >
@@ -205,7 +230,7 @@ function openDetail(plate: PlateObject, level: number) {
                         <button
                             v-for="level in plate.levels"
                             :key="level"
-                            class="flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-bold transition-opacity hover:opacity-85"
+                            class="flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs font-bold transition-[opacity,transform] hover:opacity-85 active:scale-95"
                             :class="getDifficultyTextClass(level)"
                             :style="{ backgroundColor: getDifficultyColor(level) }"
                             type="button"
@@ -213,7 +238,7 @@ function openDetail(plate: PlateObject, level: number) {
                             @click="openDetail(plate, level)"
                         >
                             {{ DifficultyShortNames[level] }}
-                            <span class="font-mono font-medium opacity-90">
+                            <span class="font-mono font-medium opacity-90 tabular-nums">
                                 {{ bestScore(plate, level) ? formatAchievement(bestScore(plate, level)!.achievements) : '未游玩' }}
                             </span>
                         </button>

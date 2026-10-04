@@ -35,7 +35,7 @@ const columns = computed<{ title: string, icon: string, buckets: DistributionBuc
 
         <div v-if="analytics" class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
-                <div class="rounded-lg border border-info/30 bg-info/10 p-3">
+                <div class="rounded-xl border border-info/30 bg-info/10 p-3">
                     <div class="text-xs text-base-content/60">
                         平均达成率
                     </div>
@@ -43,7 +43,7 @@ const columns = computed<{ title: string, icon: string, buckets: DistributionBuc
                         {{ analytics.metrics.played ? `${analytics.metrics.avgAchievement.toFixed(4)}%` : '--' }}
                     </div>
                 </div>
-                <div class="rounded-lg border border-success/30 bg-success/10 p-3">
+                <div class="rounded-xl border border-success/30 bg-success/10 p-3">
                     <div class="text-xs text-base-content/60">
                         总累计游玩次数
                     </div>
@@ -55,11 +55,11 @@ const columns = computed<{ title: string, icon: string, buckets: DistributionBuc
 
             <section>
                 <h4 class="mb-2 flex items-center gap-1.5 text-sm font-bold">
-                    <Icon name="mdi:trophy-outline" class="h-4 w-4 text-amber-500" />
+                    <Icon name="mdi:trophy-outline" class="h-4 w-4 text-warning" />
                     达成率评级阶梯分布
                 </h4>
                 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <div v-for="bucket in analytics.ranks" :key="bucket.key" class="rounded-lg border border-base-200 bg-base-100 p-2.5">
+                    <div v-for="bucket in analytics.ranks" :key="bucket.key" class="rounded-xl border border-base-200 bg-base-100 p-2.5">
                         <div class="mb-1.5 flex items-center justify-between gap-2 text-xs">
                             <span class="font-medium">{{ bucket.label }}</span>
                             <span class="font-mono text-base-content/60">{{ bucket.count }} 张（{{ bucket.pct }}%）</span>
@@ -72,7 +72,7 @@ const columns = computed<{ title: string, icon: string, buckets: DistributionBuc
             </section>
 
             <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <section v-for="column in columns" :key="column.title" class="rounded-lg border border-base-200 bg-base-100 p-3">
+                <section v-for="column in columns" :key="column.title" class="rounded-xl border border-base-200 bg-base-100 p-3">
                     <h4 class="mb-2 flex items-center gap-1.5 text-xs font-bold">
                         <Icon :name="column.icon" class="h-4 w-4 text-base-content/60" />
                         {{ column.title }}

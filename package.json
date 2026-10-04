@@ -37,9 +37,11 @@
     },
     "devDependencies": {
         "@antfu/eslint-config": "^9.5.1",
+        "@iconify-json/mdi": "^1.2.3",
         "@nuxt/eslint": "1.17.0",
         "eslint": "^10.10.0",
         "typescript": "^5.9.3",
         "vue-tsc": "^3.3.11"
-    }
+    },
+    "allowScripts": {}
 }

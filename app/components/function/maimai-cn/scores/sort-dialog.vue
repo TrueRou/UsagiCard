@@ -60,7 +60,7 @@ function apply() {
                     <button
                         v-for="preset in SORT_PRESETS"
                         :key="preset.key"
-                        class="rounded-lg border border-base-300 bg-base-100 px-3 py-2 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+                        class="rounded-xl border border-base-300 bg-base-100 px-3 py-2.5 text-left transition-colors hover:border-primary/40 hover:bg-primary/5 active:scale-[0.99]"
                         type="button"
                         @click="applyPreset(preset)"
                     >
@@ -84,7 +84,7 @@ function apply() {
                             <button
                                 v-for="option in directionOptions"
                                 :key="option.value"
-                                class="btn join-item btn-xs"
+                                class="btn join-item btn-sm lg:btn-xs"
                                 :class="draft.primaryDir === option.value ? 'btn-primary' : 'btn-ghost bg-base-200'"
                                 type="button"
                                 @click="draft.primaryDir = option.value"
@@ -98,7 +98,7 @@ function apply() {
                         <button
                             v-for="option in SORT_FIELD_OPTIONS"
                             :key="option.value"
-                            class="flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left transition-colors"
+                            class="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-colors active:scale-[0.99]"
                             :class="draft.primary === option.value ? 'border-primary bg-primary/10' : 'border-base-300 bg-base-100 hover:bg-base-200'"
                             role="radio"
                             :aria-checked="draft.primary === option.value"
@@ -122,7 +122,7 @@ function apply() {
                     <h4 class="text-xs font-bold">
                         2. 次级并列排序规则
                     </h4>
-                    <select v-model="draft.secondary" class="select select-sm w-full" aria-label="次排序字段">
+                    <select v-model="draft.secondary" class="select w-full lg:select-sm" aria-label="次排序字段">
                         <option v-for="option in SORT_FIELD_OPTIONS" :key="option.value" :value="option.value">
                             {{ option.label }}
                         </option>
@@ -148,37 +148,39 @@ function apply() {
                         <input v-model="draft.unplayedToBottom" type="checkbox" class="checkbox checkbox-sm checkbox-primary">
                         未游玩谱面强制置底
                     </label>
-                    <label class="flex cursor-pointer items-center gap-2 text-xs">
+                    <div class="flex flex-wrap items-center gap-2 text-xs">
+                        <label class="flex cursor-pointer items-center gap-2">
+                            <input
+                                type="checkbox"
+                                class="checkbox checkbox-sm checkbox-primary"
+                                :checked="draft.limit !== null"
+                                @change="draft.limit = ($event.target as HTMLInputElement).checked ? 50 : null"
+                            >
+                            仅显示前 N 条
+                        </label>
                         <input
-                            type="checkbox"
-                            class="checkbox checkbox-sm checkbox-primary"
-                            :checked="draft.limit !== null"
-                            @change="draft.limit = ($event.target as HTMLInputElement).checked ? 50 : null"
-                        >
-                        仅显示前
-                        <input
+                            v-if="draft.limit !== null"
                             v-model.number="draft.limit"
                             type="number"
                             min="1"
-                            class="input input-xs w-16 font-mono"
-                            :disabled="draft.limit === null"
+                            inputmode="numeric"
+                            class="input input-sm w-20 font-mono"
                             aria-label="显示条数"
                         >
-                        条
-                    </label>
+                    </div>
                 </section>
             </div>
         </div>
 
         <template #footer>
+            <button class="btn btn-primary order-first w-full sm:order-last sm:w-auto sm:btn-sm" type="button" @click="apply">
+                应用排序设置
+            </button>
             <button class="btn btn-ghost btn-sm mr-auto" type="button" @click="draft = { ...DEFAULT_SORT }">
                 恢复默认排序
             </button>
             <button class="btn btn-ghost btn-sm" type="button" @click="open = false">
                 取消
-            </button>
-            <button class="btn btn-primary btn-sm" type="button" @click="apply">
-                应用排序设置
             </button>
         </template>
     </BaseModal>

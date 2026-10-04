@@ -343,35 +343,36 @@ export function computeAnalytics(entries: ChartEntry[]): ScoreAnalytics {
     const countBy = (predicate: (item: { entry: ChartEntry, score: ScoreExtend }) => boolean) => scores.filter(predicate).length
     const achievementBetween = (min: number, max = Infinity) => countBy(({ score }) => score.achievements >= min && score.achievements < max)
 
+    // 只使用 daisyUI 语义色与难度色，自定义主题与暗色模式下保持可读
     const ranks = toBuckets(total, [
-        { key: 'sssp', label: 'SSS+（100.5%+）', color: 'bg-amber-500', count: achievementBetween(100.5) },
-        { key: 'sss', label: 'SSS（100% ~ 100.4999%）', color: 'bg-yellow-500', count: achievementBetween(100, 100.5) },
-        { key: 'ssp', label: 'SS+（99.5% ~ 99.9999%）', color: 'bg-purple-500', count: achievementBetween(99.5, 100) },
-        { key: 'ss', label: 'SS（99% ~ 99.4999%）', color: 'bg-blue-500', count: achievementBetween(99, 99.5) },
-        { key: 's', label: 'S / S+（97% ~ 98.9999%）', color: 'bg-emerald-500', count: achievementBetween(97, 99) },
-        { key: 'low', label: 'AAA 及以下（< 97%）', color: 'bg-slate-400', count: achievementBetween(-Infinity, 97) },
+        { key: 'sssp', label: 'SSS+（100.5%+）', color: 'bg-warning', count: achievementBetween(100.5) },
+        { key: 'sss', label: 'SSS（100% ~ 100.4999%）', color: 'bg-warning/60', count: achievementBetween(100, 100.5) },
+        { key: 'ssp', label: 'SS+（99.5% ~ 99.9999%）', color: 'bg-diff-master', count: achievementBetween(99.5, 100) },
+        { key: 'ss', label: 'SS（99% ~ 99.4999%）', color: 'bg-info', count: achievementBetween(99, 99.5) },
+        { key: 's', label: 'S / S+（97% ~ 98.9999%）', color: 'bg-success', count: achievementBetween(97, 99) },
+        { key: 'low', label: 'AAA 及以下（< 97%）', color: 'bg-neutral/40', count: achievementBetween(-Infinity, 97) },
         ...(unplayed > 0 ? [{ key: 'unplayed', label: '未游玩', color: 'bg-base-300', count: unplayed }] : []),
     ])
 
     const fc = toBuckets(total, [
-        { key: 'app', label: 'AP+', color: 'bg-amber-500', count: countBy(({ score }) => score.fc === FCType.APP) },
-        { key: 'ap', label: 'AP', color: 'bg-yellow-500', count: countBy(({ score }) => score.fc === FCType.AP) },
-        { key: 'fcp', label: 'FC+', color: 'bg-emerald-500', count: countBy(({ score }) => score.fc === FCType.FCP) },
-        { key: 'fc', label: 'FC', color: 'bg-teal-500', count: countBy(({ score }) => score.fc === FCType.FC) },
-        { key: 'none', label: '未达成', color: 'bg-slate-400', count: countBy(({ score }) => score.fc === null || score.fc === undefined) },
+        { key: 'app', label: 'AP+', color: 'bg-warning', count: countBy(({ score }) => score.fc === FCType.APP) },
+        { key: 'ap', label: 'AP', color: 'bg-warning/60', count: countBy(({ score }) => score.fc === FCType.AP) },
+        { key: 'fcp', label: 'FC+', color: 'bg-success', count: countBy(({ score }) => score.fc === FCType.FCP) },
+        { key: 'fc', label: 'FC', color: 'bg-success/60', count: countBy(({ score }) => score.fc === FCType.FC) },
+        { key: 'none', label: '未达成', color: 'bg-neutral/30', count: countBy(({ score }) => score.fc === null || score.fc === undefined) },
     ])
 
     const fs = toBuckets(total, [
-        { key: 'fsdp', label: 'FDX+', color: 'bg-amber-500', count: countBy(({ score }) => score.fs === FSType.FSDP) },
-        { key: 'fsd', label: 'FDX', color: 'bg-purple-500', count: countBy(({ score }) => score.fs === FSType.FSD) },
-        { key: 'fsp', label: 'FS+', color: 'bg-blue-500', count: countBy(({ score }) => score.fs === FSType.FSP) },
-        { key: 'fs', label: 'FS', color: 'bg-cyan-500', count: countBy(({ score }) => score.fs === FSType.FS) },
-        { key: 'sync', label: 'SYNC', color: 'bg-slate-500', count: countBy(({ score }) => score.fs === FSType.SYNC) },
-        { key: 'none', label: '未达成', color: 'bg-slate-400', count: countBy(({ score }) => score.fs === null || score.fs === undefined) },
+        { key: 'fsdp', label: 'FDX+', color: 'bg-warning', count: countBy(({ score }) => score.fs === FSType.FSDP) },
+        { key: 'fsd', label: 'FDX', color: 'bg-diff-master', count: countBy(({ score }) => score.fs === FSType.FSD) },
+        { key: 'fsp', label: 'FS+', color: 'bg-info', count: countBy(({ score }) => score.fs === FSType.FSP) },
+        { key: 'fs', label: 'FS', color: 'bg-info/60', count: countBy(({ score }) => score.fs === FSType.FS) },
+        { key: 'sync', label: 'SYNC', color: 'bg-neutral/50', count: countBy(({ score }) => score.fs === FSType.SYNC) },
+        { key: 'none', label: '未达成', color: 'bg-neutral/30', count: countBy(({ score }) => score.fs === null || score.fs === undefined) },
     ])
 
     const starLabels = ['0 星（< 85%）', '1 星（85%+）', '2 星（90%+）', '3 星（93%+）', '4 星（95%+）', '5 星（97%+）']
-    const starColors = ['bg-slate-400', 'bg-emerald-400', 'bg-emerald-500', 'bg-amber-400', 'bg-amber-500', 'bg-yellow-500']
+    const starColors = ['bg-neutral/30', 'bg-success/40', 'bg-success/70', 'bg-success', 'bg-warning/60', 'bg-warning']
     const dxStars = toBuckets(total, [5, 4, 3, 2, 1, 0].map(star => ({
         key: `star${star}`,
         label: starLabels[star]!,

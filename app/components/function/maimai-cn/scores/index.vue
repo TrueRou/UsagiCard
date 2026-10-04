@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { ChartEntry, ScoreFilterState, ScoreSortState } from '~/composables/function/MaimaiCN/useMaimaiTypes'
+import { useScoreDisplayPref } from '~/composables/function/MaimaiCN/useScoreDisplayPref'
 import { useScoreLibrary } from '~/composables/function/MaimaiCN/useScoreLibrary.client'
 import { computeMetrics, filterEntries, sortEntries } from '~/composables/function/MaimaiCN/useScoreView'
 import { useScoreViewState } from '~/composables/function/MaimaiCN/useScoreViewState'
 import ChartDetailModal from '../shared/chart-detail-modal.vue'
+import PageHeaderActions from '../shared/page-header-actions.vue'
 import ScoreGrid from '../shared/score-grid.vue'
 import AdvancedFilterDialog from './advanced-filter-dialog.vue'
 import AnalyticsDialog from './analytics-dialog.vue'
@@ -15,8 +17,10 @@ const props = defineProps<{
     artifactId: string
 }>()
 
+const { artifact, storageSave } = await useArtifact(props.artifactId)
 const { entries, loading, error, refresh, matchSongIds } = useScoreLibrary(props.artifactId)
 const { filter, sort } = useScoreViewState()
+const { mode: viewMode, tileContent, syncState, saveToCard } = useScoreDisplayPref(props.artifactId, artifact, storageSave)
 
 const keyword = ref('')
 const debouncedKeyword = refDebounced(keyword, 200)
@@ -50,35 +54,21 @@ function applyPreset(value: { filter: ScoreFilterState, sort: ScoreSortState }) 
     sort.value = value.sort
 }
 
+function clearLimit() {
+    sort.value = { ...sort.value, limit: null }
+}
+
 onMounted(refresh)
 </script>
 
 <template>
-    <div class="space-y-3 p-2 sm:p-3">
-        <header class="flex flex-wrap items-end justify-between gap-2">
-            <div>
-                <h2 class="text-lg font-bold tracking-tight sm:text-xl">
-                    全部成绩
-                </h2>
-                <span class="badge badge-soft badge-primary badge-sm mt-1">
-                    <Icon name="mdi:music-note" class="h-3.5 w-3.5" />
-                    已游玩 {{ playedTotal }} 张 · 当前显示 {{ displayed.length }} 张
-                </span>
-            </div>
-            <div class="flex gap-1.5">
-                <button class="btn btn-sm btn-ghost border border-base-300" type="button" :disabled="loading" aria-label="刷新成绩" @click="refresh">
-                    <Icon name="mdi:refresh" class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
-                </button>
-                <button class="btn btn-sm btn-ghost border border-base-300" type="button" :disabled="!displayed.length" @click="analyticsOpen = true">
-                    <Icon name="mdi:chart-bar" class="h-4 w-4 text-primary" />
-                    统计看板
-                </button>
-            </div>
-        </header>
+    <div class="space-y-3 p-2 sm:p-3 lg:p-4">
+        <PageHeaderActions :artifact="artifact" :loading="loading" @refresh="refresh" @updated="refresh" />
 
         <div v-if="error" class="alert alert-error alert-soft text-sm" role="alert">
-            {{ error }}
-            <button class="btn btn-xs" type="button" @click="refresh">
+            <Icon name="mdi:alert-circle-outline" class="h-5 w-5" />
+            <span>{{ error }}</span>
+            <button class="btn btn-sm" type="button" @click="refresh">
                 重试
             </button>
         </div>
@@ -87,15 +77,35 @@ onMounted(refresh)
 
         <FilterBar
             v-model:keyword="keyword"
+            v-model:mode="viewMode"
+            v-model:tile-content="tileContent"
             :filter="filter"
             :sort="sort"
+            :sync-state="syncState"
             @update:filter="filter = $event"
             @update:sort="sort = $event"
             @open-advanced="advancedOpen = true"
             @open-sort="sortOpen = true"
+            @open-analytics="analyticsOpen = true"
+            @save-to-card="saveToCard"
         />
 
-        <ScoreGrid :entries="displayed" :loading="loading && !entries.length" @select="openDetail">
+        <div class="-mt-1 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1 px-0.5 text-xs text-base-content/55">
+            <span>已游玩 <b class="font-mono font-semibold text-base-content/80">{{ playedTotal }}</b> 张</span>
+            <span>当前显示 <b class="font-mono font-semibold text-base-content/80">{{ displayed.length }}</b> 张</span>
+            <button v-if="sort.limit" class="badge badge-soft badge-primary gap-1" type="button" @click="clearLimit">
+                仅前 {{ sort.limit }} 条
+                <Icon name="mdi:close" class="h-3 w-3" />
+            </button>
+        </div>
+
+        <ScoreGrid
+            :entries="displayed"
+            :loading="loading && !entries.length"
+            :mode="viewMode"
+            :tile-content="tileContent"
+            @select="openDetail"
+        >
             <template #empty>
                 <p class="text-sm font-medium text-base-content/75">
                     暂未检索到符合条件的谱面成绩
