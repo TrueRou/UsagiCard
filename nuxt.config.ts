@@ -41,7 +41,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         leporidae: {
             baseURL: 'https://api.turou.fun/leporidae',
-            developerToken: '',
+            developerToken: '4616dd015b6139704d259ea9c1a0e29d',
         },
         public: {
             URL: 'https://uc.turou.fun',
