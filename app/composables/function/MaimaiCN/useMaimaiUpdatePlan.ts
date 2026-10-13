@@ -2,10 +2,16 @@ import type { UpdatesChainResult } from './useMaimaiTypes'
 
 export type MaimaiUpdateServer = 'diving_fish' | 'lxns' | 'arcade_legacy' | 'arcade' | 'usagi_card'
 
+export type MaimaiUpdateAuthType = 'TOKEN' | 'OAUTH'
+
 export interface MaimaiUpdateNode {
     server: MaimaiUpdateServer
     credential?: string | null
     transient?: boolean
+    /** 旧节点没有该字段，视为 TOKEN */
+    auth_type?: MaimaiUpdateAuthType
+    /** OAuth 授权账号的展示名称 */
+    display_name?: string | null
 }
 
 export interface MaimaiUpdateStrategy {
@@ -23,6 +29,8 @@ export interface MaimaiUpdateDataSourceDef {
     visibleInPicker: boolean
     canBindAsSource: boolean
     canBindAsTarget: boolean
+    /** 支持跳转查分器 OAuth 授权绑定 */
+    oauthCapable: boolean
 }
 
 export const MAIMAI_UPDATE_SOURCE_COLORS: Record<MaimaiUpdateServer, string> = {
@@ -44,6 +52,7 @@ export const MAIMAI_UPDATE_DATA_SOURCES: MaimaiUpdateDataSourceDef[] = [
         visibleInPicker: false,
         canBindAsSource: false,
         canBindAsTarget: false,
+        oauthCapable: false,
     },
     {
         id: 'arcade_legacy',
@@ -55,6 +64,7 @@ export const MAIMAI_UPDATE_DATA_SOURCES: MaimaiUpdateDataSourceDef[] = [
         visibleInPicker: false,
         canBindAsSource: false,
         canBindAsTarget: false,
+        oauthCapable: false,
     },
     {
         id: 'usagi_card',
@@ -66,6 +76,7 @@ export const MAIMAI_UPDATE_DATA_SOURCES: MaimaiUpdateDataSourceDef[] = [
         visibleInPicker: false,
         canBindAsSource: false,
         canBindAsTarget: false,
+        oauthCapable: false,
     },
     {
         id: 'diving_fish',
@@ -77,6 +88,7 @@ export const MAIMAI_UPDATE_DATA_SOURCES: MaimaiUpdateDataSourceDef[] = [
         visibleInPicker: true,
         canBindAsSource: false,
         canBindAsTarget: true,
+        oauthCapable: true,
     },
     {
         id: 'lxns',
@@ -88,6 +100,7 @@ export const MAIMAI_UPDATE_DATA_SOURCES: MaimaiUpdateDataSourceDef[] = [
         visibleInPicker: true,
         canBindAsSource: false,
         canBindAsTarget: true,
+        oauthCapable: true,
     },
 ]
 
@@ -99,6 +112,10 @@ export const MAIMAI_UPDATE_SERVER_TO_CHAIN_LABEL: Record<MaimaiUpdateServer, str
     arcade_legacy: 'arcade_legacy',
     arcade: 'arcade',
     usagi_card: 'usagicard',
+}
+
+export function isMaimaiOAuthNode(node?: Pick<MaimaiUpdateNode, 'auth_type'> | null) {
+    return node?.auth_type === 'OAUTH'
 }
 
 export function getMaimaiUpdateSourceDef(id: string) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MaimaiUpdateNode, MaimaiUpdateServer } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
+import type { MaimaiUpdateAuthType, MaimaiUpdateNode, MaimaiUpdateServer } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
 import type { MaimaiStorage } from '~/types/api'
 import {
     getMaimaiUpdateSourceColor,
@@ -7,12 +7,15 @@ import {
     MAIMAI_UPDATE_DATA_SOURCES,
     sanitizeMaimaiUpdateStrategy,
 } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
+import { startProberOAuth } from '~/composables/function/MaimaiCN/useProberOAuth'
 
 interface PlacedItem {
     id: MaimaiUpdateServer
     chainLabel: string
     credential: string
     transient: boolean
+    authType: MaimaiUpdateAuthType
+    displayName: string | null
     isNew: boolean
 }
 
@@ -22,11 +25,13 @@ const props = defineProps<{
 
 const { storageOf, storageSave } = await useArtifact(props.artifactId)
 
+const route = useRoute()
 const storage = storageOf('MaimaiCN')
 const sourceSources = ref<PlacedItem[]>([])
 const targetSources = ref<PlacedItem[]>([])
 const planDirty = ref(false)
 const planSaving = ref(false)
+const authorizingId = ref<MaimaiUpdateServer | null>(null)
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 
 function toPlacedItem(node: MaimaiUpdateNode): PlacedItem | null {
@@ -38,7 +43,19 @@ function toPlacedItem(node: MaimaiUpdateNode): PlacedItem | null {
         chainLabel: def?.chainLabel ?? node.server,
         credential: node.credential ?? '',
         transient: node.transient ?? false,
+        authType: node.auth_type ?? 'TOKEN',
+        displayName: node.display_name ?? null,
         isNew: false,
+    }
+}
+
+function toNode(item: PlacedItem): MaimaiUpdateNode {
+    return {
+        server: item.id,
+        credential: item.transient ? null : item.credential,
+        transient: item.transient,
+        auth_type: item.authType,
+        display_name: item.displayName,
     }
 }
 
@@ -53,20 +70,13 @@ onMounted(loadPlan)
 async function savePlan() {
     planSaving.value = true
     const strategy = sanitizeMaimaiUpdateStrategy({
-        sources: sourceSources.value.map(item => ({
-            server: item.id,
-            credential: item.transient ? null : item.credential,
-            transient: item.transient,
-        })),
-        targets: targetSources.value.map(item => ({
-            server: item.id,
-            credential: item.transient ? null : item.credential,
-            transient: item.transient,
-        })),
+        sources: sourceSources.value.map(toNode),
+        targets: targetSources.value.map(toNode),
     })
     try {
-        await storageSave('MaimaiCN', { ...storage.value, update: { ...storage.value.update, strategy: strategy as NonNullable<MaimaiStorage['update']>['strategy'] } }, { showSuccessToast: false })
+        const result = await storageSave('MaimaiCN', { ...storage.value, update: { ...storage.value.update, strategy: strategy as NonNullable<MaimaiStorage['update']>['strategy'] } }, { showSuccessToast: false })
         planDirty.value = false
+        return result
     }
     finally {
         planSaving.value = false
@@ -181,6 +191,8 @@ function onPointerUp(e: PointerEvent) {
         chainLabel: def.chainLabel,
         credential: '',
         transient: def.isTransient,
+        authType: 'TOKEN',
+        displayName: null,
         isNew: !def.isTransient,
     }
 
@@ -193,6 +205,29 @@ function onPointerUp(e: PointerEvent) {
 
 function isEncryptedCredential(item: PlacedItem) {
     return item.credential.startsWith('enc$')
+}
+
+function isOAuthItem(item: PlacedItem) {
+    return item.authType === 'OAUTH' && !!item.credential
+}
+
+function canAuthorize(item: PlacedItem) {
+    return !item.transient && !item.credential && !!getSourceDef(item.id).oauthCapable
+}
+
+async function authorizeItem(zone: 'source' | 'target', item: PlacedItem) {
+    if (saveTimer)
+        clearTimeout(saveTimer)
+    authorizingId.value = item.id
+    try {
+        // 先保存当前计划（同时完成二级密码校验），授权回调后再写入凭据
+        if (await savePlan() !== 'saved')
+            return
+        await startProberOAuth(item.id, { artifactId: props.artifactId, zone: zone === 'source' ? 'sources' : 'targets', returnTo: route.fullPath })
+    }
+    finally {
+        authorizingId.value = null
+    }
 }
 </script>
 
@@ -245,19 +280,34 @@ function isEncryptedCredential(item: PlacedItem) {
                                 </button>
                             </div>
                         </div>
-                        <input
-                            v-if="!item.transient"
-                            v-model="item.credential"
-                            type="text"
-                            class="input input-bordered w-full"
-                            :class="isEncryptedCredential(item) ? 'bg-base-200 text-base-content/60' : ''"
-                            :placeholder="getSourceDef(item.id).credentialLabel"
-                            :readonly="isEncryptedCredential(item)"
-                            @input="scheduleSavePlan"
-                        >
-                        <p v-if="isEncryptedCredential(item)" class="text-xs text-base-content/50">
-                            凭据已加密保存，需要修改时请先移除后重新添加。
+                        <p v-if="isOAuthItem(item)" class="text-xs text-success">
+                            <Icon name="mdi:shield-check-outline" class="w-4 h-4 align-text-bottom" />
+                            {{ item.displayName ? `已授权 · ${item.displayName}` : '已授权' }}
                         </p>
+                        <template v-else-if="!item.transient">
+                            <button
+                                v-if="canAuthorize(item)"
+                                type="button"
+                                class="btn btn-primary btn-sm w-full"
+                                :disabled="authorizingId !== null"
+                                @click="authorizeItem('source', item)"
+                            >
+                                <span v-if="authorizingId === item.id" class="loading loading-spinner loading-xs" />
+                                使用{{ getSourceDef(item.id).name }}账号授权
+                            </button>
+                            <input
+                                v-model="item.credential"
+                                type="text"
+                                class="input input-bordered w-full"
+                                :class="isEncryptedCredential(item) ? 'bg-base-200 text-base-content/60' : ''"
+                                :placeholder="canAuthorize(item) ? `或填写${getSourceDef(item.id).credentialLabel}` : getSourceDef(item.id).credentialLabel"
+                                :readonly="isEncryptedCredential(item)"
+                                @input="scheduleSavePlan"
+                            >
+                            <p v-if="isEncryptedCredential(item)" class="text-xs text-base-content/50">
+                                凭据已加密保存，需要修改时请先移除后重新添加。
+                            </p>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -302,19 +352,34 @@ function isEncryptedCredential(item: PlacedItem) {
                                 </button>
                             </div>
                         </div>
-                        <input
-                            v-if="!item.transient"
-                            v-model="item.credential"
-                            type="text"
-                            class="input input-bordered w-full"
-                            :class="isEncryptedCredential(item) ? 'bg-base-200 text-base-content/60' : ''"
-                            :placeholder="getSourceDef(item.id).credentialLabel"
-                            :readonly="isEncryptedCredential(item)"
-                            @input="scheduleSavePlan"
-                        >
-                        <p v-if="isEncryptedCredential(item)" class="text-xs text-base-content/50">
-                            凭据已加密保存，需要修改时请先移除后重新添加。
+                        <p v-if="isOAuthItem(item)" class="text-xs text-success">
+                            <Icon name="mdi:shield-check-outline" class="w-4 h-4 align-text-bottom" />
+                            {{ item.displayName ? `已授权 · ${item.displayName}` : '已授权' }}
                         </p>
+                        <template v-else-if="!item.transient">
+                            <button
+                                v-if="canAuthorize(item)"
+                                type="button"
+                                class="btn btn-primary btn-sm w-full"
+                                :disabled="authorizingId !== null"
+                                @click="authorizeItem('target', item)"
+                            >
+                                <span v-if="authorizingId === item.id" class="loading loading-spinner loading-xs" />
+                                使用{{ getSourceDef(item.id).name }}账号授权
+                            </button>
+                            <input
+                                v-model="item.credential"
+                                type="text"
+                                class="input input-bordered w-full"
+                                :class="isEncryptedCredential(item) ? 'bg-base-200 text-base-content/60' : ''"
+                                :placeholder="canAuthorize(item) ? `或填写${getSourceDef(item.id).credentialLabel}` : getSourceDef(item.id).credentialLabel"
+                                :readonly="isEncryptedCredential(item)"
+                                @input="scheduleSavePlan"
+                            >
+                            <p v-if="isEncryptedCredential(item)" class="text-xs text-base-content/50">
+                                凭据已加密保存，需要修改时请先移除后重新添加。
+                            </p>
+                        </template>
                     </div>
                 </div>
             </div>

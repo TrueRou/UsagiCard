@@ -7,6 +7,7 @@ import {
     getMaimaiUpdateNode,
     getMaimaiUpdateSourceDef,
     getMaimaiUpdateTargetNames,
+    isMaimaiOAuthNode,
     MAIMAI_UPDATE_BINDABLE_TARGETS,
     maimaiUpdateChainLabelToColor,
     maimaiUpdateChainLabelToName,
@@ -14,6 +15,7 @@ import {
     sanitizeMaimaiUpdateStrategy,
     upsertMaimaiUpdateNode,
 } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
+import { startProberOAuth } from '~/composables/function/MaimaiCN/useProberOAuth'
 import { applyMaimaiUpdateResult } from '~/composables/function/MaimaiCN/useQuickUpdate'
 import ErrorMessage from './error-message.vue'
 
@@ -56,18 +58,29 @@ const latestQrCredential = ref('')
 const rememberUid = ref(false)
 const bindDialogOpen = ref(false)
 const bindCredential = ref('')
+const bindAuthorizing = ref(false)
 const activeBindOption = ref<BindTargetOption | null>(null)
+const route = useRoute()
 
 const sanitizedStrategy = computed(() => sanitizeMaimaiUpdateStrategy(storage.value.update?.strategy))
 const rememberedUidNode = computed(() => getMaimaiUpdateNode(storage.value.update?.strategy, 'sources', 'arcade_legacy'))
 const hasRememberedUid = computed(() => !!rememberedUidNode.value?.credential)
 
-function getStoredTargetCredential(server: MaimaiUpdateServer) {
-    return sanitizedStrategy.value.targets.find(node => node.server === server)?.credential ?? ''
+function getStoredTargetNode(server: MaimaiUpdateServer) {
+    return sanitizedStrategy.value.targets.find(node => node.server === server) ?? null
 }
 
 function isTargetBound(server: MaimaiUpdateServer) {
-    return !!getStoredTargetCredential(server)
+    return !!getStoredTargetNode(server)?.credential
+}
+
+function getTargetStatus(server: MaimaiUpdateServer) {
+    const node = getStoredTargetNode(server)
+    if (!node?.credential)
+        return '尚未绑定'
+    if (isMaimaiOAuthNode(node))
+        return node.display_name ? `已授权 · ${node.display_name}` : '已授权'
+    return `已绑定 ${getMaimaiUpdateSourceDef(server)?.credentialLabel ?? '凭据'}`
 }
 
 function openBindDialog(option: BindTargetOption) {
@@ -76,13 +89,25 @@ function openBindDialog(option: BindTargetOption) {
     bindDialogOpen.value = true
 }
 
-async function handleTargetAction(option: BindTargetOption) {
-    if (isTargetBound(option.id)) {
-        await saveStrategy(removeMaimaiUpdateNode(storage.value.update?.strategy, 'targets', option.id))
-        return
-    }
+async function unbindTarget(option: BindTargetOption) {
+    // 移除节点后，后端会同步作废对应的 OAuth 授权
+    await saveStrategy(removeMaimaiUpdateNode(storage.value.update?.strategy, 'targets', option.id))
+}
 
-    openBindDialog(option)
+async function authorizeBindTarget() {
+    if (!activeBindOption.value)
+        return
+    bindAuthorizing.value = true
+    try {
+        // 跳转前先通过二级密码校验：授权码有效期很短，不宜在回调时才弹出密码输入
+        const verified = await storageSave('MaimaiCN', storage.value, { showSuccessToast: false })
+        if (verified !== 'saved')
+            return
+        await startProberOAuth(activeBindOption.value.id, { artifactId: props.artifactId, zone: 'targets', returnTo: route.fullPath })
+    }
+    finally {
+        bindAuthorizing.value = false
+    }
 }
 
 async function saveStrategy(strategy: ReturnType<typeof sanitizeMaimaiUpdateStrategy>, showSuccessToast = true) {
@@ -103,6 +128,7 @@ async function saveBindCredential() {
         server: option.id,
         credential: bindCredential.value.trim(),
         transient: false,
+        auth_type: 'TOKEN',
     })
     await saveStrategy(strategy)
     bindDialogOpen.value = false
@@ -266,18 +292,26 @@ function resetResult() {
                                 <p class="text-sm font-medium">
                                     {{ getMaimaiUpdateSourceDef(option.id)?.name }}
                                 </p>
-                                <p class="mt-1 text-xs text-base-content/60">
-                                    {{ isTargetBound(option.id) ? '已绑定' : '尚未绑定' }}
+                                <p class="mt-1 text-xs break-all" :class="isTargetBound(option.id) ? 'text-success' : 'text-base-content/60'">
+                                    {{ getTargetStatus(option.id) }}
                                 </p>
                             </div>
                         </div>
+                        <div v-if="isTargetBound(option.id)" class="grid grid-cols-2 gap-2 mt-3">
+                            <button type="button" class="btn btn-sm btn-outline" @click="openBindDialog(option)">
+                                重新绑定
+                            </button>
+                            <button type="button" class="btn btn-sm btn-ghost text-error" @click="unbindTarget(option)">
+                                解除绑定
+                            </button>
+                        </div>
                         <button
+                            v-else
                             type="button"
-                            class="btn btn-sm w-full mt-3"
-                            :class="isTargetBound(option.id) ? 'btn-outline' : 'border-success/50 bg-success/10 text-base-content hover:border-success hover:bg-success/15'"
-                            @click="handleTargetAction(option)"
+                            class="btn btn-sm w-full mt-3 border-success/50 bg-success/10 text-base-content hover:border-success hover:bg-success/15"
+                            @click="openBindDialog(option)"
                         >
-                            {{ isTargetBound(option.id) ? '重新绑定' : option.label }}
+                            {{ option.label }}
                         </button>
                     </div>
                 </div>
@@ -364,16 +398,39 @@ function resetResult() {
         <Teleport to="body">
             <div v-if="bindDialogOpen && activeBindOption" class="fixed inset-0 z-80 bg-black/50 flex items-end sm:items-center justify-center">
                 <div class="bg-base-100 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm p-5 space-y-4">
-                    <h3 class="text-base font-semibold">
-                        {{ activeBindOption.label }}
-                    </h3>
-                    <input v-model="bindCredential" type="text" class="input input-bordered w-full" :placeholder="getMaimaiUpdateSourceDef(activeBindOption.id)?.credentialLabel">
+                    <div>
+                        <h3 class="text-base font-semibold">
+                            {{ activeBindOption.label }}
+                        </h3>
+                        <p class="mt-1 text-xs text-base-content/60">
+                            推荐使用账号授权：无需复制密钥，可随时在{{ getMaimaiUpdateSourceDef(activeBindOption.id)?.name }}账号设置中撤销。
+                        </p>
+                    </div>
+                    <button
+                        v-if="getMaimaiUpdateSourceDef(activeBindOption.id)?.oauthCapable"
+                        type="button"
+                        class="btn btn-primary w-full"
+                        :disabled="bindAuthorizing"
+                        @click="authorizeBindTarget"
+                    >
+                        <span v-if="bindAuthorizing" class="loading loading-spinner loading-sm" />
+                        <Icon v-else name="mdi:open-in-new" class="w-4 h-4" />
+                        使用{{ getMaimaiUpdateSourceDef(activeBindOption.id)?.name }}账号授权
+                    </button>
+                    <details class="collapse collapse-arrow rounded-lg border border-base-300">
+                        <summary class="collapse-title min-h-0 py-3 text-sm">
+                            使用 {{ getMaimaiUpdateSourceDef(activeBindOption.id)?.credentialLabel }}
+                        </summary>
+                        <div class="collapse-content space-y-2">
+                            <input v-model="bindCredential" type="text" class="input input-bordered w-full" :placeholder="getMaimaiUpdateSourceDef(activeBindOption.id)?.credentialLabel">
+                            <button class="btn btn-outline btn-sm w-full" :disabled="!bindCredential.trim()" @click="saveBindCredential">
+                                保存{{ getMaimaiUpdateSourceDef(activeBindOption.id)?.credentialLabel }}
+                            </button>
+                        </div>
+                    </details>
                     <div class="flex gap-2 justify-end">
                         <button class="btn btn-ghost" @click="bindDialogOpen = false">
                             取消
-                        </button>
-                        <button class="btn btn-primary" :disabled="!bindCredential.trim()" @click="saveBindCredential">
-                            保存
                         </button>
                     </div>
                 </div>

@@ -156,11 +156,15 @@ export interface MaimaiStorage {
                 server: 'diving_fish' | 'lxns' | 'arcade_legacy' | 'arcade' | 'usagi_card'
                 credential: string | null
                 transient: boolean
+                auth_type?: 'TOKEN' | 'OAUTH'
+                display_name?: string | null
             }>
             targets: Array<{
                 server: 'diving_fish' | 'lxns' | 'arcade_legacy' | 'arcade' | 'usagi_card'
                 credential: string | null
                 transient: boolean
+                auth_type?: 'TOKEN' | 'OAUTH'
+                display_name?: string | null
             }>
         }
     }
