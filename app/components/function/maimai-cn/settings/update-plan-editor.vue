@@ -8,6 +8,7 @@ import {
     sanitizeMaimaiUpdateStrategy,
 } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
 import { startProberOAuth } from '~/composables/function/MaimaiCN/useProberOAuth'
+import OAuthAccountBadge from '../shared/oauth-account-badge.vue'
 
 interface PlacedItem {
     id: MaimaiUpdateServer
@@ -280,10 +281,7 @@ async function authorizeItem(zone: 'source' | 'target', item: PlacedItem) {
                                 </button>
                             </div>
                         </div>
-                        <p v-if="isOAuthItem(item)" class="text-xs text-success">
-                            <Icon name="mdi:shield-check-outline" class="w-4 h-4 align-text-bottom" />
-                            {{ item.displayName ? `已授权 · ${item.displayName}` : '已授权' }}
-                        </p>
+                        <OAuthAccountBadge v-if="isOAuthItem(item)" :display-name="item.displayName" />
                         <template v-else-if="!item.transient">
                             <button
                                 v-if="canAuthorize(item)"
@@ -296,11 +294,12 @@ async function authorizeItem(zone: 'source' | 'target', item: PlacedItem) {
                                 使用{{ getSourceDef(item.id).name }}账号授权
                             </button>
                             <input
+                                v-else
                                 v-model="item.credential"
                                 type="text"
                                 class="input input-bordered w-full"
                                 :class="isEncryptedCredential(item) ? 'bg-base-200 text-base-content/60' : ''"
-                                :placeholder="canAuthorize(item) ? `或填写${getSourceDef(item.id).credentialLabel}` : getSourceDef(item.id).credentialLabel"
+                                :placeholder="getSourceDef(item.id).credentialLabel"
                                 :readonly="isEncryptedCredential(item)"
                                 @input="scheduleSavePlan"
                             >
@@ -352,10 +351,7 @@ async function authorizeItem(zone: 'source' | 'target', item: PlacedItem) {
                                 </button>
                             </div>
                         </div>
-                        <p v-if="isOAuthItem(item)" class="text-xs text-success">
-                            <Icon name="mdi:shield-check-outline" class="w-4 h-4 align-text-bottom" />
-                            {{ item.displayName ? `已授权 · ${item.displayName}` : '已授权' }}
-                        </p>
+                        <OAuthAccountBadge v-if="isOAuthItem(item)" :display-name="item.displayName" />
                         <template v-else-if="!item.transient">
                             <button
                                 v-if="canAuthorize(item)"
@@ -368,11 +364,12 @@ async function authorizeItem(zone: 'source' | 'target', item: PlacedItem) {
                                 使用{{ getSourceDef(item.id).name }}账号授权
                             </button>
                             <input
+                                v-else
                                 v-model="item.credential"
                                 type="text"
                                 class="input input-bordered w-full"
                                 :class="isEncryptedCredential(item) ? 'bg-base-200 text-base-content/60' : ''"
-                                :placeholder="canAuthorize(item) ? `或填写${getSourceDef(item.id).credentialLabel}` : getSourceDef(item.id).credentialLabel"
+                                :placeholder="getSourceDef(item.id).credentialLabel"
                                 :readonly="isEncryptedCredential(item)"
                                 @input="scheduleSavePlan"
                             >

@@ -17,6 +17,7 @@ import {
 } from '~/composables/function/MaimaiCN/useMaimaiUpdatePlan'
 import { startProberOAuth } from '~/composables/function/MaimaiCN/useProberOAuth'
 import { applyMaimaiUpdateResult } from '~/composables/function/MaimaiCN/useQuickUpdate'
+import OAuthAccountBadge from '../shared/oauth-account-badge.vue'
 import ErrorMessage from './error-message.vue'
 
 const props = defineProps<{
@@ -74,12 +75,15 @@ function isTargetBound(server: MaimaiUpdateServer) {
     return !!getStoredTargetNode(server)?.credential
 }
 
+function isTargetOAuth(server: MaimaiUpdateServer) {
+    const node = getStoredTargetNode(server)
+    return !!node?.credential && isMaimaiOAuthNode(node)
+}
+
 function getTargetStatus(server: MaimaiUpdateServer) {
     const node = getStoredTargetNode(server)
     if (!node?.credential)
         return '尚未绑定'
-    if (isMaimaiOAuthNode(node))
-        return node.display_name ? `已授权 · ${node.display_name}` : '已授权'
     return `已绑定 ${getMaimaiUpdateSourceDef(server)?.credentialLabel ?? '凭据'}`
 }
 
@@ -288,11 +292,16 @@ function resetResult() {
                     >
                         <div class="flex items-start gap-3">
                             <Icon :name="option.icon" class="w-6 h-6 text-primary" />
-                            <div>
+                            <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium">
                                     {{ getMaimaiUpdateSourceDef(option.id)?.name }}
                                 </p>
-                                <p class="mt-1 text-xs break-all" :class="isTargetBound(option.id) ? 'text-success' : 'text-base-content/60'">
+                                <OAuthAccountBadge
+                                    v-if="isTargetOAuth(option.id)"
+                                    class="mt-2 bg-base-200/60"
+                                    :display-name="getStoredTargetNode(option.id)?.display_name"
+                                />
+                                <p v-else class="mt-1 text-xs break-all" :class="isTargetBound(option.id) ? 'text-success' : 'text-base-content/60'">
                                     {{ getTargetStatus(option.id) }}
                                 </p>
                             </div>
@@ -402,8 +411,8 @@ function resetResult() {
                         <h3 class="text-base font-semibold">
                             {{ activeBindOption.label }}
                         </h3>
-                        <p class="mt-1 text-xs text-base-content/60">
-                            推荐使用账号授权：无需复制密钥，可随时在{{ getMaimaiUpdateSourceDef(activeBindOption.id)?.name }}账号设置中撤销。
+                        <p v-if="getMaimaiUpdateSourceDef(activeBindOption.id)?.oauthCapable" class="mt-1 text-xs text-base-content/60">
+                            将跳转至{{ getMaimaiUpdateSourceDef(activeBindOption.id)?.name }}完成账号授权，无需复制密钥，可随时在{{ getMaimaiUpdateSourceDef(activeBindOption.id)?.name }}账号设置中撤销。
                         </p>
                     </div>
                     <button
@@ -417,7 +426,7 @@ function resetResult() {
                         <Icon v-else name="mdi:open-in-new" class="w-4 h-4" />
                         使用{{ getMaimaiUpdateSourceDef(activeBindOption.id)?.name }}账号授权
                     </button>
-                    <details class="collapse collapse-arrow rounded-lg border border-base-300">
+                    <details v-else class="collapse collapse-arrow rounded-lg border border-base-300">
                         <summary class="collapse-title min-h-0 py-3 text-sm">
                             使用 {{ getMaimaiUpdateSourceDef(activeBindOption.id)?.credentialLabel }}
                         </summary>
