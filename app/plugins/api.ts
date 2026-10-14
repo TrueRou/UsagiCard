@@ -12,9 +12,10 @@ interface ApiResponse<T = unknown> {
     detail?: string
 }
 
+const UNAUTHORIZED = 401
 const LOCKED = 423
 
-export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>(() => {
+export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>((nuxtApp) => {
     let pendingRequestCount = 0
 
     const startGlobalLoading = () => {
@@ -56,6 +57,22 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
         return rawData?.message || rawData?.detail || fallback
     }
 
+    // 登录态失效（或未登录调用需要登录的接口）：清除会话并跳转登录页，登录后回到当前页面
+    const handleUnauthorized = async (message?: string) => {
+        if (!import.meta.client)
+            return
+
+        await useUserSession().clear()
+
+        const route = useRoute()
+        if (route.path === '/auth/login')
+            return
+
+        addToast('warning', message || '请先登录。')
+        const redirect = encodeURIComponent(route.fullPath || '/')
+        await nuxtApp.runWithContext(() => navigateTo(`/auth/login?redirect=${redirect}`))
+    }
+
     const leporidae = $fetch.create({
         onRequest(context) {
             if (import.meta.server) {
@@ -75,7 +92,7 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
             if (shouldShowErrorToast(options, method, 0))
                 addToast('error', '网络连接失败，请检查网络后重试。')
         },
-        onResponse(context) {
+        async onResponse(context) {
             stopGlobalLoading()
 
             const options = context.options as ApiFetchOptions
@@ -87,7 +104,9 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
             if (rawData.code !== 200) {
                 const message = resolveMessage(rawData, context.response.statusText || '请求失败')
 
-                if (rawData.code !== LOCKED && shouldShowErrorToast(options, context.options.method?.toString() || 'GET', rawData.code))
+                if (rawData.code === UNAUTHORIZED)
+                    await handleUnauthorized(message)
+                else if (rawData.code !== LOCKED && shouldShowErrorToast(options, context.options.method?.toString() || 'GET', rawData.code))
                     addToast('error', message)
 
                 throw createError({
@@ -113,7 +132,8 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
             const isAppResponse = typeof rawData?.code === 'number'
             const message = resolveMessage(rawData, context.response.statusText || '请求失败')
 
-            if (status === LOCKED)
+            // LOCKED 由调用方处理；带统一响应包装的 401 已在 onResponse 中处理
+            if (status === LOCKED || (status === UNAUTHORIZED && isAppResponse))
                 return
 
             if (shouldShowErrorToast(options, context.options.method?.toString() || 'GET', status))

@@ -1,27 +1,23 @@
 import type { ArtifactStorage, ArtifactUserResponse } from '~/types/api'
-import { PIN_LOCKED } from './useArtifactPin'
 
 type StorageNamespace = keyof ArtifactStorage
 
 interface StorageSaveOptions {
     successMessage?: string
     showSuccessToast?: boolean
-    /** silent：遇到二级密码保护时不弹窗，返回 'locked'，同时不显示错误提示 */
-    pinMode?: 'prompt' | 'silent'
+    /** false 时失败不弹出错误提示（调用方自行处理抛出的错误） */
+    showErrorToast?: boolean
 }
 
-/** saved：已写入；locked：静默模式下被二级密码拦截；cancelled：用户取消 PIN 输入 */
-export type StorageSaveResult = 'saved' | 'locked' | 'cancelled'
-
+/** 写入成功时 resolve；失败时抛出请求错误，并回滚传入的 newData */
 export type StorageSaveFn = <K extends StorageNamespace>(
     namespace: K,
     newData: NonNullable<ArtifactStorage[K]>,
     options?: StorageSaveOptions,
-) => Promise<StorageSaveResult>
+) => Promise<void>
 
 export async function useArtifact(artifactId: string) {
     const nuxtApp = useNuxtApp()
-    const { withSecondaryPin } = useArtifactPin(artifactId)
 
     /*
     / 工件元数据相关
@@ -64,30 +60,16 @@ export async function useArtifact(artifactId: string) {
         const fullStorage = cloneStorageData({ ...artifact.value.storage, [namespace]: newData })
         let saved = false
 
-        const silent = options?.pinMode === 'silent'
         storageSaving.value = true
         try {
-            const feedback = {
-                showSuccessToast: options?.showSuccessToast ?? true,
-                successMessage: options?.successMessage ?? '保存成功',
-                ...(silent ? { showErrorToast: false } : {}),
-            }
-            const request = (headers: Record<string, string>) => nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
+            data.value = await nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
                 method: 'PATCH',
                 body: { storage: fullStorage },
-                headers,
-                ...feedback,
+                showSuccessToast: options?.showSuccessToast ?? true,
+                successMessage: options?.successMessage ?? '保存成功',
+                ...(options?.showErrorToast === false ? { showErrorToast: false } : {}),
             })
-            const result = silent
-                ? await withSecondaryPin(request, { prompt: false })
-                : await withSecondaryPin(request)
-            if (result === PIN_LOCKED)
-                return 'locked'
-            if (!result)
-                return 'cancelled'
-            data.value = result
             saved = true
-            return 'saved'
         }
         finally {
             if (!saved) {
@@ -99,9 +81,35 @@ export async function useArtifact(artifactId: string) {
         }
     }
 
+    /*
+    / 工件激活相关（SHIPPED -> ACTIVATED）
+    */
+
+    /** 已发货但尚未激活：需先申领或跳过申领 */
+    const needsActivation = computed(() => artifact.value.status === 'SHIPPED')
+    const activating = ref(false)
+
+    /** claim：以当前登录用户申领（需登录）；skip：跳过申领直接激活，此后不可再申领 */
+    async function activate(mode: 'claim' | 'skip') {
+        activating.value = true
+        try {
+            data.value = await nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/${mode === 'claim' ? 'claim' : 'skip-claim'}`, {
+                method: 'POST',
+                showSuccessToast: true,
+                successMessage: mode === 'claim' ? '申领成功' : '卡片已激活',
+            })
+        }
+        finally {
+            activating.value = false
+        }
+    }
+
     return {
         artifact,
         artifactAsyncData,
+        needsActivation,
+        activating,
+        activate,
         storageOf,
         storageSave,
         storageSaving,

@@ -75,9 +75,8 @@ async function savePlan() {
         targets: targetSources.value.map(toNode),
     })
     try {
-        const result = await storageSave('MaimaiCN', { ...storage.value, update: { ...storage.value.update, strategy: strategy as NonNullable<MaimaiStorage['update']>['strategy'] } }, { showSuccessToast: false })
+        await storageSave('MaimaiCN', { ...storage.value, update: { ...storage.value.update, strategy: strategy as NonNullable<MaimaiStorage['update']>['strategy'] } }, { showSuccessToast: false })
         planDirty.value = false
-        return result
     }
     finally {
         planSaving.value = false
@@ -221,9 +220,8 @@ async function authorizeItem(zone: 'source' | 'target', item: PlacedItem) {
         clearTimeout(saveTimer)
     authorizingId.value = item.id
     try {
-        // 先保存当前计划（同时完成二级密码校验），授权回调后再写入凭据
-        if (await savePlan() !== 'saved')
-            return
+        // 先保存当前计划，授权回调后再写入凭据
+        await savePlan()
         await startProberOAuth(item.id, { artifactId: props.artifactId, zone: zone === 'source' ? 'sources' : 'targets', returnTo: route.fullPath })
     }
     finally {

@@ -10,7 +10,11 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const artifactId = route.params.id as string
-const { artifact, storageOf } = await useArtifact(artifactId)
+const { artifact, needsActivation, storageOf } = await useArtifact(artifactId)
+
+// 尚未激活的卡片需先在主页申领或跳过申领
+if (needsActivation.value)
+    await navigateTo(`/artifacts/${artifactId}`, { replace: true })
 
 useHead({
     title: `${artifact.value.type.name} - 兔兔实验室`,

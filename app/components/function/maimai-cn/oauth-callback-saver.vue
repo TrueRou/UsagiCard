@@ -15,7 +15,7 @@ const props = defineProps<{
 const { storageOf, storageSave } = await useArtifact(props.pending.artifactId)
 const storage = storageOf('MaimaiCN')
 
-const phase = ref<'exchanging' | 'saving' | 'cancelled' | 'error'>('exchanging')
+const phase = ref<'exchanging' | 'saving' | 'error'>('exchanging')
 const errorMessage = ref('')
 const binding = ref<ProberOAuthCallbackResponse | null>(null)
 const sourceName = computed(() => getMaimaiUpdateSourceDef(props.pending.server)?.name ?? '查分器')
@@ -63,17 +63,13 @@ async function saveBinding(granted: ProberOAuthCallbackResponse) {
         auth_type: 'OAUTH',
         display_name: granted.display_name || granted.username || null,
     })
-    const result = await storageSave('MaimaiCN', {
+    await storageSave('MaimaiCN', {
         ...storage.value,
         update: {
             ...storage.value.update,
             strategy: strategy as NonNullable<MaimaiStorage['update']>['strategy'],
         },
     }, { successMessage: `已绑定${sourceName.value}账号` })
-    if (result !== 'saved') {
-        phase.value = 'cancelled'
-        return
-    }
     await navigateTo(props.returnTo, { replace: true })
 }
 
@@ -86,21 +82,6 @@ onMounted(exchange)
             <span class="loading loading-spinner loading-sm" />
             <span>{{ phase === 'exchanging' ? `正在完成${sourceName}授权…` : '正在保存到卡片…' }}</span>
         </div>
-
-        <template v-else-if="phase === 'cancelled'">
-            <div class="alert alert-warning text-sm">
-                <Icon name="mdi:lock-outline" class="w-5 h-5" />
-                <span>授权已完成，但尚未保存到卡片（需要输入二级密码）。</span>
-            </div>
-            <div class="flex gap-2">
-                <button type="button" class="btn btn-primary" @click="save">
-                    重试保存
-                </button>
-                <NuxtLink :to="returnTo" class="btn btn-ghost">
-                    放弃
-                </NuxtLink>
-            </div>
-        </template>
 
         <template v-else>
             <div class="alert alert-error text-sm">

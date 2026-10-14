@@ -103,10 +103,6 @@ async function authorizeBindTarget() {
         return
     bindAuthorizing.value = true
     try {
-        // 跳转前先通过二级密码校验：授权码有效期很短，不宜在回调时才弹出密码输入
-        const verified = await storageSave('MaimaiCN', storage.value, { showSuccessToast: false })
-        if (verified !== 'saved')
-            return
         await startProberOAuth(activeBindOption.value.id, { artifactId: props.artifactId, zone: 'targets', returnTo: route.fullPath })
     }
     finally {

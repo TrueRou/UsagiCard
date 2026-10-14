@@ -24,45 +24,10 @@ function toLXNSStyleId(id: number) {
     return id
 }
 
-const CACHE_KEYS = {
-    MAIMAI_SONGS: 'maimaiSongs',
-    MAIMAI_INDEXING_TIME: 'maimaiIndexingTime',
-    MAIMAI_INDEXING_VERSION: 'maimaiIndexingVersion',
-}
-
 export function useSongSearch() {
     const MAX_SEARCH_NUMBER = 100
-    const CURRENT_VERSION = 1
     let songIndex: Document<DocumentData, boolean, boolean> | null = null
     const songMap: Map<number, Song> = new Map()
-
-    const cache = {
-        save(key: string, value: any) {
-            if (value === null || value === undefined) {
-                localStorage.removeItem(key)
-                return
-            }
-            localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value))
-        },
-        load<T>(key: string): T | null {
-            const value = localStorage.getItem(key)
-            if (!value)
-                return null
-            try {
-                return JSON.parse(value) as T
-            }
-            catch {
-                localStorage.removeItem(key)
-                return null
-            }
-        },
-        has(key: string): boolean {
-            return localStorage.getItem(key) !== null
-        },
-        clear() {
-            Object.values(CACHE_KEYS).forEach(key => localStorage.removeItem(key))
-        },
-    }
 
     const indexSongs = async () => {
         removeLegacyMaimaiCaches()

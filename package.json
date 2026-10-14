@@ -26,6 +26,7 @@
         "flexsearch": "^0.8.212",
         "marked": "^17.0.6",
         "nuxt": "^4.5.2",
+        "nuxt-auth-utils": "0.5.31",
         "pinia": "^3.0.4",
         "pinyin-pro": "^3.29.4",
         "qrcode": "^1.5.4",

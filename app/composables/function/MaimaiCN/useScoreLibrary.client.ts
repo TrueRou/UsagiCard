@@ -1,7 +1,7 @@
 import type { ChartEntry, ScoreExtend } from './useMaimaiTypes'
+import { fetchScoresVersion, readMaimaiCache, writeMaimaiCache } from './useMaimaiCache.client'
 import { buildChartEntries } from './useScoreView'
 import { useSharedSongSearch } from './useSongSearch.client'
-import { fetchScoresVersion, readMaimaiCache, writeMaimaiCache } from './useMaimaiCache.client'
 
 /**
  * 加载歌曲库与卡片全部成绩，合并为谱面列表。
@@ -13,8 +13,6 @@ export function useScoreLibrary(artifactId: string) {
     const loading = ref(false)
     const error = ref<string | null>(null)
     let requestId = 0
-    const cacheKey = `maicn:score-library:${artifactId}`
-
 
     async function refresh() {
         const currentId = ++requestId

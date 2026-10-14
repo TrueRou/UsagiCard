@@ -6,7 +6,7 @@
 
 // ===== 枚举（IntEnum → StrEnum，值为大写字符串）=====
 
-export type ArtifactStatus = 'FAILED' | 'PENDING' | 'IN_PRODUCTION' | 'COMPLETED'
+export type ArtifactStatus = 'FAILED' | 'PENDING' | 'PRODUCING' | 'PRODUCED' | 'SHIPPED' | 'ACTIVATED'
 export type ImageVisibility = 'DELETED' | 'PRIVATE' | 'PUBLIC'
 export enum ProductTypeFunction {
     USAGI_CARD = 'USAGI_CARD',
@@ -55,6 +55,8 @@ export interface ArtifactUserResponse {
     status: ArtifactStatus
     storage: ArtifactStorage
     order_id: string | null
+    /** 申领用户ID，未激活或跳过申领时为空 */
+    user_id: string | null
     design_vid: string
     design: Record<string, unknown>
     type: ProductTypeResponse

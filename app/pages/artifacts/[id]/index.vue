@@ -9,7 +9,7 @@ definePageMeta({
 
 const route = useRoute()
 const artifactId = route.params.id as string // UUID string
-const { artifact, storageSave, useDesignCtx } = await useArtifact(artifactId)
+const { artifact, needsActivation, storageSave, useDesignCtx } = await useArtifact(artifactId)
 const adaptiveComponent = computed(() => useDesignCtx.adaptiveViewComponent.value)
 
 useHead({
@@ -19,8 +19,10 @@ useHead({
 
 <template>
     <div class="w-full h-full overflow-hidden relative">
+        <ArtifactActivation v-if="needsActivation" :artifact-id="artifactId" />
         <component
             :is="adaptiveComponent"
+            v-else
             :use-design-ctx="useDesignCtx"
             :storage-save="storageSave"
         />

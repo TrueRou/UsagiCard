@@ -16,10 +16,12 @@ function key(kind: MaimaiCacheKind, artifactId?: string) {
 export function readMaimaiCache<T>(kind: MaimaiCacheKind, artifactId?: string): CacheEntry<T> | null {
     try {
         const raw = localStorage.getItem(key(kind, artifactId))
-        if (!raw) return null
+        if (!raw)
+            return null
         const value = JSON.parse(raw) as CacheEntry<T>
         return typeof value.version === 'number' && value.data !== undefined ? value : null
-    } catch {
+    }
+    catch {
         localStorage.removeItem(key(kind, artifactId))
         return null
     }
@@ -28,7 +30,8 @@ export function readMaimaiCache<T>(kind: MaimaiCacheKind, artifactId?: string): 
 export function writeMaimaiCache<T>(kind: MaimaiCacheKind, version: number, data: T, artifactId?: string) {
     try {
         localStorage.setItem(key(kind, artifactId), JSON.stringify({ version, data }))
-    } catch {
+    }
+    catch {
         // 缓存失败不影响正常请求。
     }
 }

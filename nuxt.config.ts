@@ -29,6 +29,7 @@ export default defineNuxtConfig({
         '@nuxt/icon',
         '@nuxt/eslint',
         '@vueuse/nuxt',
+        'nuxt-auth-utils',
     ],
     icon: {
         localApiEndpoint: '/_nuxt_icon',
@@ -39,8 +40,24 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
+        session: {
+            name: 'nuxt-session',
+            password: process.env.NUXT_SESSION_PASSWORD || '',
+            maxAge: 31536000,
+            cookie: {
+                sameSite: 'lax',
+            },
+        },
+        // UsagiLab 账号登录（OAuth 授权码 + PKCE），凭据通过 NUXT_OAUTH_OIDC_* 注入
+        oauth: {
+            oidc: {
+                clientId: '',
+                clientSecret: '',
+            },
+        },
         leporidae: {
             baseURL: 'https://api.turou.fun/leporidae',
+            fePublicURL: 'https://hoshirabi.com',
             developerToken: '4616dd015b6139704d259ea9c1a0e29d',
         },
         public: {

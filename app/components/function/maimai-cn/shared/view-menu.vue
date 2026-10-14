@@ -28,7 +28,7 @@ const tileContent = defineModel<MaimaiTileContent>('tileContent', { required: tr
 
 const sheetOpen = ref(false)
 const icon = computed(() => props.triggerIcon ?? VIEW_MODE_OPTIONS.find(option => option.value === mode.value)?.icon ?? 'mdi:view-grid-outline')
-const needsAttention = computed(() => props.syncState === 'locked' || props.syncState === 'error')
+const needsAttention = computed(() => props.syncState === 'error')
 </script>
 
 <template>

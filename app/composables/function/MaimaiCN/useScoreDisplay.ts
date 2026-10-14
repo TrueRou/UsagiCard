@@ -25,7 +25,7 @@ export interface LocalViewPref extends MaimaiViewStorage {
     dirty: boolean
 }
 
-export type ViewSyncState = 'synced' | 'syncing' | 'locked' | 'error'
+export type ViewSyncState = 'synced' | 'syncing' | 'error'
 
 const MODES = new Set<string>(VIEW_MODE_OPTIONS.map(option => option.value))
 const CONTENTS = new Set<string>(TILE_CONTENT_OPTIONS.map(option => option.value))

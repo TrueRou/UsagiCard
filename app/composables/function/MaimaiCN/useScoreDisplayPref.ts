@@ -11,8 +11,8 @@ const SYNC_DEBOUNCE_MS = 800
  * 成绩页视图偏好（列表 / 平铺、平铺显示内容）。
  *
  * - 修改立即在本地生效，并写入 localStorage（标记为未同步）。
- * - 防抖后静默写入卡片存储；卡片设置了二级密码时不弹窗，状态变为 locked。
- * - locked 时由用户在视图菜单中点击「保存到卡片」，这时才弹出 PIN 验证。
+ * - 防抖后静默写入卡片存储（不弹出提示）；写入失败时状态变为 error。
+ * - error 时由用户在视图菜单中点击「保存到卡片」手动重试。
  *
  * artifact 与 storageSave 由调用方在 script setup 顶层通过 `await useArtifact()` 取得后传入，
  * 这样本函数保持同步，生命周期钩子能正确绑定到组件实例。
@@ -41,10 +41,10 @@ export function useScoreDisplayPref(
 
     function schedule() {
         clearTimer()
-        timer = setTimeout(() => void sync('silent'), SYNC_DEBOUNCE_MS)
+        timer = setTimeout(() => void sync(true), SYNC_DEBOUNCE_MS)
     }
 
-    async function sync(pinMode: 'silent' | 'prompt') {
+    async function sync(silent: boolean) {
         clearTimer()
         const storage = artifact.value.storage.MaimaiCN
         if (!storage)
@@ -52,15 +52,11 @@ export function useScoreDisplayPref(
         const target = normalizeView(current.value)
         syncState.value = 'syncing'
         try {
-            const result = await storageSave('MaimaiCN', { ...storage, view: target }, {
-                pinMode,
-                showSuccessToast: pinMode === 'prompt',
+            await storageSave('MaimaiCN', { ...storage, view: target }, {
+                showSuccessToast: !silent,
+                showErrorToast: !silent,
                 successMessage: '视图已保存到卡片',
             })
-            if (result !== 'saved') {
-                syncState.value = 'locked'
-                return
-            }
             // 同步期间用户可能又改了视图：一致时清除未同步标记，否则继续排队同步
             if (local.value && isSameView(local.value, target))
                 local.value = { ...target, dirty: false }
@@ -109,13 +105,13 @@ export function useScoreDisplayPref(
     // 离开页面时立刻提交还在防抖中的同步；失败会保留本地标记，下次进入时重试
     onScopeDispose(() => {
         if (timer !== undefined)
-            void sync('silent')
+            void sync(true)
     })
 
     return {
         mode,
         tileContent,
         syncState: readonly(syncState),
-        saveToCard: () => sync('prompt'),
+        saveToCard: () => sync(false),
     }
 }

@@ -24,8 +24,6 @@ const syncInfo = computed(() => {
     switch (props.syncState) {
         case 'syncing':
             return { icon: '', text: '正在同步到卡片…', class: 'text-base-content/60' }
-        case 'locked':
-            return { icon: 'mdi:lock-outline', text: '卡片已加密，目前只保存在本机', class: 'text-warning' }
         case 'error':
             return { icon: 'mdi:cloud-alert-outline', text: '同步失败，目前只保存在本机', class: 'text-error' }
         default:
@@ -84,7 +82,7 @@ const syncInfo = computed(() => {
                 <span class="truncate">{{ syncInfo.text }}</span>
             </span>
             <button
-                v-if="syncState === 'locked' || syncState === 'error'"
+                v-if="syncState === 'error'"
                 class="btn btn-primary btn-sm shrink-0"
                 type="button"
                 @click="emit('saveToCard')"
