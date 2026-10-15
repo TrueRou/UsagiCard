@@ -48,7 +48,7 @@ function closeDetail() {
 
 <template>
     <div class="flex items-start gap-1.5 text-xs text-error">
-        <p class="flex-1 break-words leading-snug">
+        <p class="flex-1 wrap-break-word leading-snug">
             {{ preview }}
         </p>
         <button
@@ -82,7 +82,7 @@ function closeDetail() {
                         </button>
                     </div>
                     <div class="overflow-auto p-4">
-                        <pre class="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-error">{{ normalized }}</pre>
+                        <pre class="whitespace-pre-wrap wrap-break-word font-mono text-xs leading-relaxed text-error">{{ normalized }}</pre>
                     </div>
                 </div>
             </div>

@@ -97,7 +97,7 @@ function select() {
     >
         <!-- 成绩区：难度色底 -->
         <div class="flex gap-2 rounded-t-xl px-1.5 pb-2 pt-1.5" :class="accentTextClass" :style="{ backgroundColor: accentColor }">
-            <div class="relative h-10 w-10 shrink-0 sm:h-[52px] sm:w-[52px]">
+            <div class="relative h-10 w-10 shrink-0 sm:h-13 sm:w-13">
                 <div class="h-full w-full overflow-hidden rounded-lg border border-white/40 bg-black/25">
                     <img
                         :src="getSongJacketUrl(entry.song.id)"

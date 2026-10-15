@@ -194,7 +194,7 @@ function openDetail(plate: PlateObject, level: number) {
         </div>
 
         <div v-if="loading" class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" aria-busy="true">
-            <div v-for="index in 6" :key="index" class="skeleton h-[88px] rounded-xl" />
+            <div v-for="index in 6" :key="index" class="skeleton h-22 rounded-xl" />
         </div>
 
         <div v-else-if="!plates.length && !error" class="panel px-4 py-12 text-center">

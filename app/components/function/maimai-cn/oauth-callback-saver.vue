@@ -26,7 +26,7 @@ async function exchange() {
             method: 'POST',
             body: { code: props.code, state: props.state },
             showErrorToast: false,
-        } as any)
+        })
         if (result.context.artifact_id !== props.pending.artifactId)
             throw new Error('授权回调与当前卡片不一致，请重新授权。')
         binding.value = result

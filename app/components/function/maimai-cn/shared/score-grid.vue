@@ -57,7 +57,7 @@ const gridClass = computed(() => props.mode === 'tile' ? TILE_GRID : LIST_GRID)
                 v-for="index in (mode === 'tile' ? 16 : 8)"
                 :key="index"
                 class="skeleton"
-                :class="mode === 'tile' ? 'aspect-square rounded-lg' : 'h-[88px] rounded-xl sm:h-[100px]'"
+                :class="mode === 'tile' ? 'aspect-square rounded-lg' : 'h-22 rounded-xl sm:h-25'"
             />
         </div>
 

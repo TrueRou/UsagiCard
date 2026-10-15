@@ -1,8 +1,4 @@
-interface ApiFetchOptions {
-    showErrorToast?: boolean
-    showSuccessToast?: boolean
-    successMessage?: string
-}
+import type { FetchOptions } from 'ofetch'
 
 interface ApiResponse<T = unknown> {
     code?: number
@@ -43,7 +39,7 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
         useNotificationsStore().addNotification({ type, message })
     }
 
-    const shouldShowErrorToast = (options: ApiFetchOptions | undefined, method: string, status: number) => {
+    const shouldShowErrorToast = (options: FetchOptions | undefined, method: string, status: number) => {
         if (options?.showErrorToast !== undefined)
             return options.showErrorToast
 
@@ -87,7 +83,7 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
         onRequestError(context) {
             stopGlobalLoading()
 
-            const options = context.options as ApiFetchOptions
+            const options = context.options
             const method = context.options.method?.toString() || 'GET'
             if (shouldShowErrorToast(options, method, 0))
                 addToast('error', '网络连接失败，请检查网络后重试。')
@@ -95,7 +91,7 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
         async onResponse(context) {
             stopGlobalLoading()
 
-            const options = context.options as ApiFetchOptions
+            const options = context.options
             const rawData = context.response._data as ApiResponse | undefined
 
             if (!rawData || typeof rawData.code !== 'number')
@@ -126,7 +122,7 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
         async onResponseError(context) {
             stopGlobalLoading()
 
-            const options = context.options as ApiFetchOptions
+            const options = context.options
             const status = context.response.status
             const rawData = context.response._data as ApiResponse | undefined
             const isAppResponse = typeof rawData?.code === 'number'

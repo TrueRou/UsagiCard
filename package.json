@@ -11,6 +11,7 @@
         "postinstall": "nuxt prepare",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
+        "test": "bun test tests/",
         "typecheck": "nuxi typecheck"
     },
     "dependencies": {
@@ -25,14 +26,14 @@
         "echarts": "^6.1.0",
         "flexsearch": "^0.8.212",
         "marked": "^17.0.6",
-        "nuxt": "^4.5.2",
+        "nuxt": "^4.6.1",
         "nuxt-auth-utils": "0.5.31",
         "pinia": "^3.0.4",
         "pinyin-pro": "^3.29.4",
         "qrcode": "^1.5.4",
         "tailwindcss": "^4.3.3",
         "ufo": "^1.6.4",
-        "vue": "^3.5.43",
+        "vue": "^3.5.44",
         "vue-echarts": "^8.3.0",
         "wanakana": "^5.3.1",
         "zod": "^4.6.5"
@@ -42,7 +43,7 @@
         "@nuxt/eslint": "1.17.0",
         "eslint": "^10.10.0",
         "typescript": "^5.9.3",
-        "vue-tsc": "^3.3.11"
+        "vue-tsc": "^3.3.13"
     },
     "allowScripts": {}
 }

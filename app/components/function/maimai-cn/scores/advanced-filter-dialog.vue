@@ -306,7 +306,7 @@ const rowLabelClass = 'pt-2 text-xs text-base-content/55'
             <button class="btn btn-primary order-first w-full sm:order-last sm:w-auto sm:btn-sm" type="button" @click="apply">
                 应用筛选（{{ previewCount }} 条结果）
             </button>
-            <label class="order-2 flex w-full cursor-pointer items-center justify-end gap-2 text-xs sm:order-none sm:w-auto sm:mr-auto">
+            <label class="order-2 flex w-full cursor-pointer items-center justify-end gap-2 text-xs sm:order-0 sm:w-auto sm:mr-auto">
                 <input v-model="draft.showUnplayed" type="checkbox" class="checkbox checkbox-sm checkbox-primary">
                 包含未游玩谱面
             </label>

@@ -34,6 +34,12 @@ export default defineNuxtConfig({
     icon: {
         localApiEndpoint: '/_nuxt_icon',
     },
+    typescript: {
+        // tests/ 下的纯函数单测（bun test）不在 Nuxt 默认的 tests/nuxt/** 范围内，显式纳入 app 上下文做类型检查
+        tsConfig: {
+            include: ['../tests/**/*'],
+        },
+    },
     eslint: {
         config: {
             standalone: false, // <---

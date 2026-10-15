@@ -153,7 +153,7 @@ async function fetchArcadeLegacyCredential(sgwcmaid: string) {
     const identifier = await useNuxtApp().$leporidae<MaimaiArcadeLegacyIdentifier>('/api/maimai/arcade_legacy/identifiers', {
         query: { code: sgwcmaid },
         showErrorToast: false,
-    } as any)
+    })
     return typeof identifier.credentials === 'string' && identifier.credentials.trim()
         ? identifier.credentials.trim()
         : null
@@ -195,7 +195,7 @@ async function doSubmit(latestQr: string | null, skippedQr: boolean) {
         updateTargetNames.value = getMaimaiUpdateTargetNames(payload.target)
         const result = await useNuxtApp().$leporidae<UpdatesChainResult>(
             `/api/maimai/updates_chain`,
-            { method: 'POST', body: payload, showSuccessToast: false } as any,
+            { method: 'POST', body: payload, showSuccessToast: false },
         )
         const updatedStorage = applyMaimaiUpdateResult(storage.value, result)
         const targetRating = Object.values(result.target).find(entry => entry.scores_rating)?.scores_rating
