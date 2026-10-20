@@ -37,7 +37,7 @@ async function handleLogin(prompt?: 'create') {
         <section class="mx-auto max-w-md space-y-6 pt-8">
             <header class="space-y-2 text-center">
                 <p class="text-sm uppercase tracking-widest text-base-content/60">
-                    Leporidae Lab
+                    UsagiLab 兔兔实验室
                 </p>
                 <h1 class="text-3xl font-bold text-base-content">
                     登录

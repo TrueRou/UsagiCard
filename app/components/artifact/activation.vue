@@ -41,7 +41,7 @@ async function handleSwitchAccount() {
                     激活你的{{ artifact.type.name }}
                 </h1>
                 <p class="text-sm text-base-content/70 leading-relaxed">
-                    这张卡片已经寄出，首次使用前需要激活。申领后卡片将绑定到你的 UsagiLab 账号。
+                    首次使用前需要激活喵。申领后卡片将绑定到你的 UsagiLab 账号。
                 </p>
             </header>
 
