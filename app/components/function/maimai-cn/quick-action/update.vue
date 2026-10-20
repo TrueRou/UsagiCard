@@ -280,7 +280,7 @@ function resetResult() {
                         更新到兔卡和其他查分器
                     </p>
                 </div>
-                <div class="grid gap-3 md:grid-cols-2">
+                <div class="grid grid-cols-1 gap-3">
                     <div
                         v-for="option in bindTargetOptions"
                         :key="option.id"

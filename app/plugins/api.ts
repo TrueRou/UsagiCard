@@ -12,6 +12,8 @@ const UNAUTHORIZED = 401
 const LOCKED = 423
 
 export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>((nuxtApp) => {
+    const event = import.meta.server ? useRequestEvent() : undefined
+    const ssrCookies = event ? createSsrCookieForwarder(event) : undefined
     let pendingRequestCount = 0
 
     const startGlobalLoading = () => {
@@ -72,9 +74,8 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
     const leporidae = $fetch.create({
         onRequest(context) {
             if (import.meta.server) {
-                const reqHeaders = useRequestHeaders(['cookie'])
                 const headers = new Headers(context.options.headers as HeadersInit | undefined)
-                headers.set('cookie', reqHeaders.cookie || '')
+                headers.set('cookie', ssrCookies?.requestCookie() || '')
                 context.options.headers = headers
             }
 
@@ -90,6 +91,8 @@ export default defineNuxtPlugin<{ leporidae: ReturnType<typeof $fetch.create> }>
         },
         async onResponse(context) {
             stopGlobalLoading()
+            if (typeof context.request === 'string' && context.request.startsWith('/api/'))
+                ssrCookies?.onResponse(context.response.headers)
 
             const options = context.options
             const rawData = context.response._data as ApiResponse | undefined
