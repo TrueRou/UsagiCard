@@ -73,12 +73,6 @@ export interface ScoreExtend extends MaimaiScore {
     play_time: string | null
 }
 
-export interface PlateObject {
-    song: Song
-    levels: LevelIndex[]
-    scores: ScoreExtend[]
-}
-
 export interface StoreLatestResponse {
     uuid: string
     version: number | null
@@ -148,8 +142,6 @@ export interface UpdatesChainResult {
     target: Record<string, UpdatesChainEntryResult>
     stores: Record<string, { message: string, data: any | null }>
 }
-
-export type PlateAttr = 'remained' | 'cleared' | 'played' | 'all'
 
 /** 单张谱面：歌曲 + 难度 + 可能存在的成绩 */
 export interface ChartEntry {

@@ -160,7 +160,7 @@ const contentWide = computed(() => route.meta.functionsWide === true)
             >
                 <NuxtPage v-slot="{ Component, route: pageRoute }">
                     <Transition name="content-fade" mode="out-in">
-                        <div :key="pageRoute.fullPath" class="min-h-full">
+                        <div :key="pageRoute.path" class="min-h-full">
                             <component :is="Component" />
                         </div>
                     </Transition>

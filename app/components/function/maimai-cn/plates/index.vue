@@ -1,251 +1,222 @@
 <script setup lang="ts">
-import type { ChartEntry, PlateAttr, PlateObject } from '~/composables/function/MaimaiCN/useMaimaiTypes'
-import { DifficultyNames, DifficultyShortNames, SongType, useMaimaiUtils } from '~/composables/function/MaimaiCN/useMaimaiUtils'
+import type { ChartEntry } from '~/composables/function/MaimaiCN/useMaimaiTypes'
+import type { PlateCompletionMode, PlateRouteState } from '~/composables/function/MaimaiCN/usePlateProgress'
+import {
+    buildPlateQuery,
+    computeOverview,
+    computePlate,
+    groupTableRows,
+    normalizeCompletionMode,
+    parsePlateId,
+    parsePlateQuery,
+} from '~/composables/function/MaimaiCN/usePlateProgress'
 import { useScoreLibrary } from '~/composables/function/MaimaiCN/useScoreLibrary.client'
 import ChartDetailModal from '../shared/chart-detail-modal.vue'
 import PageHeaderActions from '../shared/page-header-actions.vue'
+import PlateOverview from './plate-overview.vue'
+import PlatePicker from './plate-picker.vue'
+import PlateSummary from './plate-summary.vue'
+import PlateTable from './plate-table.vue'
+import PlateToolbar from './plate-toolbar.vue'
 
+/**
+ * 牌子进度：基于全量成绩在前端实时计算。
+ * 状态放在 URL（?plate=桃将&diff=3），支持前进后退与收藏。
+ * 默认展示最高要求难度（MASTER，舞/霸有 Re:MASTER 时为 Re:MASTER），点击难度卡片切换。
+ */
 const props = defineProps<{
     artifactId: string
 }>()
 
 const { artifact } = await useArtifact(props.artifactId)
-const { entries, refresh: refreshLibrary } = useScoreLibrary(props.artifactId)
-const { formatAchievement, getDifficultyColor, getDifficultyTextClass, getSongJacketUrl, handleImageError } = useMaimaiUtils()
+const { entries, loading, error, refresh } = useScoreLibrary(props.artifactId)
 
-const VERSION_GROUPS = [
-    { label: '旧框', versions: ['真', '超', '檄', '橙', '晓', '桃', '樱', '紫', '堇', '白', '雪', '辉'] },
-    { label: 'DX', versions: ['熊', '华', '爽', '煌', '星', '宙', '祭', '祝', '双', '宴', '镜', '彩'] },
-]
-const PLATE_TYPES = [
-    { value: '极', description: 'FC' },
-    { value: '将', description: 'SSS' },
-    { value: '神', description: 'AP' },
-    { value: '舞舞', description: 'FDX' },
-]
-const ATTR_OPTIONS: { value: PlateAttr, label: string }[] = [
-    { value: 'remained', label: '未完成' },
-    { value: 'cleared', label: '已完成' },
-    { value: 'played', label: '已游玩' },
-    { value: 'all', label: '全部' },
-]
+const route = useRoute()
+const router = useRouter()
 
-const selection = useLocalStorage('maicn:plates', { version: '桃', plan: '将', attr: 'remained' as PlateAttr }, {
+const prefs = useLocalStorage('maicn:plates:prefs', { hideCompleted: false, mode: 'all' as PlateCompletionMode }, {
     mergeDefaults: true,
     initOnMounted: true,
 })
-
-const plateName = computed(() => `${selection.value.version}${selection.value.plan}`)
-const attrLabel = computed(() => ATTR_OPTIONS.find(option => option.value === selection.value.attr)?.label ?? '')
-const plates = ref<PlateObject[]>([])
-const loading = ref(false)
-const error = ref<string | null>(null)
-let requestId = 0
-
-async function fetchPlates() {
-    const currentId = ++requestId
-    loading.value = true
-    error.value = null
-    try {
-        const data = await useNuxtApp().$leporidae<PlateObject[]>('/api/maimai/usagicard/plates', {
-            query: { uuid: props.artifactId, plate: plateName.value, attr: selection.value.attr },
-        })
-        if (currentId === requestId)
-            plates.value = data ?? []
-    }
-    catch (e: any) {
-        if (currentId === requestId) {
-            plates.value = []
-            error.value = e?.message || `「${plateName.value}」查询失败`
-        }
-    }
-    finally {
-        if (currentId === requestId)
-            loading.value = false
-    }
-}
-
-function refresh() {
-    void fetchPlates()
-    void refreshLibrary()
-}
-
-watch(() => [selection.value.version, selection.value.plan, selection.value.attr], fetchPlates)
-onMounted(refresh)
-
-const summary = computed(() => {
-    const counts = new Map<number, number>()
-    for (const plate of plates.value) {
-        for (const level of plate.levels)
-            counts.set(level, (counts.get(level) ?? 0) + 1)
-    }
-    return [...counts.entries()].sort((a, b) => a[0] - b[0]).map(([level, count]) => ({ level, count }))
+const hideCompleted = computed({
+    get: () => prefs.value.hideCompleted,
+    set: value => prefs.value = { ...prefs.value, hideCompleted: value },
+})
+/** 仅总览使用的完成度口径，详情固定要求所有难度达成 */
+const mode = computed<PlateCompletionMode>({
+    get: () => normalizeCompletionMode(prefs.value.mode),
+    set: value => prefs.value = { ...prefs.value, mode: value },
 })
 
-function bestScore(plate: PlateObject, level: number) {
-    return plate.scores.find(score => score.level_index === level)
+const state = computed(() => parsePlateQuery(route.query))
+const plate = computed(() => state.value.plate)
+
+// ===== 计算 =====
+
+const ready = computed(() => entries.value.length > 0)
+const overview = computed(() => computeOverview(entries.value))
+const progress = computed(() => plate.value ? computePlate(entries.value, plate.value) : null)
+const tableGroups = computed(() => progress.value
+    ? groupTableRows(progress.value, { diff: state.value.diff, hideCompleted: hideCompleted.value })
+    : [])
+
+// ===== 导航 =====
+
+const recent = ref<string | null>(null)
+const invalidName = ref<string | null>(null)
+
+function scrollTop() {
+    document.querySelector('main')?.scrollTo({ top: 0 })
 }
 
-function chartType(plate: PlateObject, level: number): SongType {
-    return bestScore(plate, level)?.type
-        ?? (plate.song.difficulties.standard.some(diff => diff.level_index === level) ? SongType.STANDARD : SongType.DX)
+function navigate(next: Pick<PlateRouteState, 'plate' | 'diff'>, mode: 'push' | 'replace') {
+    const location = { path: route.path, query: buildPlateQuery(next) }
+    return mode === 'push' ? router.push(location) : router.replace(location)
 }
 
+function openPlate(id: string) {
+    const next = parsePlateId(id)
+    if (!next || next.id === plate.value?.id)
+        return
+    recent.value = next.id
+    // 切换种类时保留当前难度（目标牌子没有该难度时会被丢弃）
+    void navigate({ plate: next, diff: plate.value ? state.value.diff : null }, 'push').then(scrollTop)
+}
+
+function backToOverview() {
+    if (plate.value)
+        recent.value = plate.value.id
+    if (import.meta.client && window.history.state?.back === route.path)
+        router.back()
+    else
+        void router.replace({ path: route.path, query: {} })
+}
+
+function toggleDiff(levelIndex: number) {
+    const diff = state.value.diff === levelIndex ? null : levelIndex
+    void navigate({ plate: plate.value, diff }, 'replace')
+}
+
+function clearDiff() {
+    void navigate({ plate: plate.value, diff: null }, 'replace')
+}
+
+// 别名（华将 → 熊将）规范化；无法识别的牌子回到总览并提示
+watch(() => route.query, (query) => {
+    const current = parsePlateQuery(query)
+    if (current.invalid) {
+        invalidName.value = current.invalid
+        void router.replace({ path: route.path, query: {} })
+        return
+    }
+    const canonical = buildPlateQuery(current)
+    const keys = Object.keys(query)
+    const same = keys.length === Object.keys(canonical).length && keys.every(key => query[key] === canonical[key])
+    if (current.plate && !same)
+        void router.replace({ path: route.path, query: canonical })
+}, { immediate: true })
+
+// ===== 详情 =====
+
+const pickerOpen = ref(false)
 const detailOpen = ref(false)
 const selected = ref<ChartEntry | null>(null)
 
-function openDetail(plate: PlateObject, level: number) {
-    const type = chartType(plate, level)
-    const entry = entries.value.find(item => item.song.id === plate.song.id && item.type === type && item.levelIndex === level)
-        ?? entries.value.find(item => item.song.id === plate.song.id && item.levelIndex === level)
-    if (!entry)
-        return
+function openDetail(entry: ChartEntry) {
     selected.value = entry
     detailOpen.value = true
 }
+
+onMounted(refresh)
 </script>
 
 <template>
     <div class="space-y-3 p-2 sm:p-3 lg:p-4">
         <PageHeaderActions :artifact="artifact" :loading="loading" @refresh="refresh" @updated="refresh" />
 
-        <!-- 牌子选择 -->
-        <section class="panel space-y-3 p-3">
-            <div class="space-y-2">
-                <div v-for="group in VERSION_GROUPS" :key="group.label" class="grid grid-cols-[2.25rem_1fr] items-start gap-2">
-                    <span class="pt-2 text-[11px] font-semibold text-base-content/50">{{ group.label }}</span>
-                    <div class="flex flex-wrap gap-1">
-                        <button
-                            v-for="version in group.versions"
-                            :key="version"
-                            class="chip w-8 px-0 text-sm"
-                            :class="selection.version === version ? 'chip-on' : 'chip-idle'"
-                            :aria-pressed="selection.version === version"
-                            type="button"
-                            @click="selection.version = version"
-                        >
-                            {{ version }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <div class="grid grid-cols-4 gap-1" role="radiogroup" aria-label="牌子种类">
-                    <button
-                        v-for="plan in PLATE_TYPES"
-                        :key="plan.value"
-                        class="chip h-10 w-full flex-col gap-0 leading-tight"
-                        :class="selection.plan === plan.value ? 'chip-on' : 'chip-idle'"
-                        role="radio"
-                        :aria-checked="selection.plan === plan.value"
-                        type="button"
-                        @click="selection.plan = plan.value"
-                    >
-                        <span class="text-sm">{{ plan.value }}</span>
-                        <span class="text-[10px] font-medium opacity-70">{{ plan.description }}</span>
-                    </button>
-                </div>
-                <div class="grid grid-cols-4 gap-1 self-end" role="radiogroup" aria-label="曲目状态">
-                    <button
-                        v-for="option in ATTR_OPTIONS"
-                        :key="option.value"
-                        class="chip w-full"
-                        :class="selection.attr === option.value ? 'border-primary/50 bg-primary/10 text-primary' : 'chip-idle'"
-                        role="radio"
-                        :aria-checked="selection.attr === option.value"
-                        type="button"
-                        @click="selection.attr = option.value"
-                    >
-                        {{ option.label }}
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- 进度摘要 -->
-        <section class="panel flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
-            <div>
-                <div class="text-[11px] text-base-content/55">
-                    {{ attrLabel }}曲目
-                </div>
-                <div class="text-lg font-bold">
-                    {{ plateName }} · <span class="font-mono tabular-nums">{{ loading ? '…' : plates.length }}</span> 首
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-1.5">
-                <span
-                    v-for="item in summary"
-                    :key="item.level"
-                    class="rounded-lg px-2 py-1 text-xs font-bold"
-                    :class="getDifficultyTextClass(item.level)"
-                    :style="{ backgroundColor: getDifficultyColor(item.level) }"
-                >
-                    {{ DifficultyNames[item.level] }} · {{ item.count }}
-                </span>
-            </div>
-        </section>
+        <div v-if="invalidName" class="alert alert-warning alert-soft text-sm" role="alert">
+            <Icon name="mdi:help-circle-outline" class="h-5 w-5" />
+            <span>未知牌子「{{ invalidName }}」，已返回总览。</span>
+            <button class="btn btn-ghost btn-sm" type="button" aria-label="关闭提示" @click="invalidName = null">
+                <Icon name="mdi:close" class="h-4 w-4" />
+            </button>
+        </div>
 
         <div v-if="error" class="alert alert-error alert-soft text-sm" role="alert">
             <Icon name="mdi:alert-circle-outline" class="h-5 w-5" />
             <span>{{ error }}</span>
-            <button class="btn btn-sm" type="button" @click="fetchPlates">
+            <button class="btn btn-sm" type="button" @click="refresh">
                 重试
             </button>
         </div>
 
-        <div v-if="loading" class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" aria-busy="true">
-            <div v-for="index in 6" :key="index" class="skeleton h-22 rounded-xl" />
-        </div>
+        <PlateOverview
+            v-if="!plate"
+            v-model:mode="mode"
+            :overview="overview"
+            :loading="!ready && loading"
+            :recent="recent"
+            @select="openPlate"
+        />
 
-        <div v-else-if="!plates.length && !error" class="panel px-4 py-12 text-center">
-            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-base-200 text-base-content/40">
-                <Icon :name="selection.attr === 'remained' ? 'mdi:party-popper' : 'mdi:music-note-off-outline'" class="h-6 w-6" />
+        <template v-else>
+            <PlateToolbar
+                v-model:hide-completed="hideCompleted"
+                :plate="plate"
+                :diff="state.diff"
+                @back="backToOverview"
+                @open-picker="pickerOpen = true"
+                @select-plate="openPlate"
+                @clear-diff="clearDiff"
+            />
+
+            <div v-if="!ready" class="space-y-3" aria-busy="true" aria-label="正在加载成绩">
+                <div class="skeleton h-40 rounded-xl" />
+                <div class="grid grid-cols-5 gap-1 sm:grid-cols-9">
+                    <div v-for="index in 18" :key="index" class="skeleton aspect-square rounded-md" />
+                </div>
             </div>
-            <p class="text-sm text-base-content/70">
-                {{ selection.attr === 'remained' ? '已全部完成，恭喜！' : '没有符合条件的曲目' }}
-            </p>
-        </div>
 
-        <div v-else-if="plates.length" class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-            <article
-                v-for="plate in plates"
-                :key="plate.song.id"
-                class="panel flex gap-3 p-2.5"
-            >
-                <img
-                    :src="getSongJacketUrl(plate.song.id)"
-                    alt=""
-                    class="h-14 w-14 shrink-0 rounded-lg object-cover"
-                    loading="lazy"
-                    @error="handleImageError"
-                >
-                <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-bold">
-                        {{ plate.song.title }}
-                    </div>
-                    <div class="truncate text-[11px] text-base-content/55">
-                        #{{ plate.song.id }} · {{ plate.song.artist }}
-                    </div>
-                    <div class="mt-1.5 flex flex-wrap gap-1">
-                        <button
-                            v-for="level in plate.levels"
-                            :key="level"
-                            class="flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs font-bold transition-[opacity,transform] hover:opacity-85 active:scale-95"
-                            :class="getDifficultyTextClass(level)"
-                            :style="{ backgroundColor: getDifficultyColor(level) }"
-                            type="button"
-                            :aria-label="`${DifficultyNames[level]} 详情`"
-                            @click="openDetail(plate, level)"
-                        >
-                            {{ DifficultyShortNames[level] }}
-                            <span class="font-mono font-medium opacity-90 tabular-nums">
-                                {{ bestScore(plate, level) ? formatAchievement(bestScore(plate, level)!.achievements) : '未游玩' }}
-                            </span>
+            <template v-else-if="progress">
+                <PlateSummary :progress="progress" :active-diff="state.diff" @select-diff="toggleDiff" />
+
+                <div v-if="progress.songCount.total === 0" class="panel px-4 py-12 text-center text-sm text-base-content/60">
+                    该版本暂无谱面数据
+                </div>
+
+                <template v-else>
+                    <PlateTable
+                        v-if="tableGroups.length"
+                        :groups="tableGroups"
+                        :kind="plate.kind"
+                        :filtered="state.diff !== null"
+                        @select="openDetail"
+                    />
+                    <div v-else class="panel px-4 py-12 text-center">
+                        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success/15 text-success">
+                            <Icon name="mdi:party-popper" class="h-6 w-6" />
+                        </div>
+                        <p class="text-sm font-medium">
+                            {{ state.diff === null ? '已全部完成' : '该难度已全部达成' }}，恭喜！
+                        </p>
+                        <button class="btn btn-ghost btn-sm mt-2" type="button" @click="hideCompleted = false">
+                            显示已完成
                         </button>
                     </div>
-                </div>
-            </article>
-        </div>
+                    <p class="px-1 text-[11px] leading-relaxed text-base-content/45">
+                        <template v-if="state.diff === null">
+                            底部色块依次为各难度，实心为已达成，描边为未达成。
+                        </template>
+                        <template v-else>
+                            图标显示该难度的当前成绩，右上角对勾表示当前难度已达成。
+                        </template>
+                        点击封面查看谱面详情。
+                    </p>
+                </template>
+            </template>
+
+            <PlatePicker v-model:open="pickerOpen" :current="plate.id" :overview="overview" mode="all" @select="openPlate" />
+        </template>
 
         <ChartDetailModal v-model:open="detailOpen" :entry="selected" :library="entries" />
     </div>
