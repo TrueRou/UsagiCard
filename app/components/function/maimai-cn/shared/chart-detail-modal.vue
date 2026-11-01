@@ -141,7 +141,7 @@ const calculatorOpen = ref(false)
                 <div class="flex gap-3 sm:gap-4">
                     <div class="shrink-0 text-center">
                         <img
-                            :src="getSongJacketUrl(current.song.id, 'images')"
+                            :src="getSongJacketUrl(current.song.id)"
                             :alt="current.song.title"
                             class="h-16 w-16 rounded-xl object-cover shadow-md sm:h-28 sm:w-28"
                             @error="handleImageError"
