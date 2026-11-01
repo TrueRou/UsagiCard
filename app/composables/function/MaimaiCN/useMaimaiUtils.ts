@@ -348,9 +348,9 @@ export function useMaimaiUtils() {
         target.src = 'https://assets2.lxns.net/maimai/icon/11.png'
     }
 
-    // 获取歌曲封面URL
-    const getSongJacketUrl = (songId: number) => {
-        return `https://assets2.lxns.net/maimai/jacket/${songId}.png`
+    // 列表默认使用缩略图，详情显式选择 images 大图。
+    const getSongJacketUrl = (songId: number, variant: 'thumbnails' | 'images' = 'thumbnails') => {
+        return `https://eo.assets.turou.fun/mai-jacket/${variant}/${songId}.webp`
     }
 
     // 格式化成绩达成率显示
