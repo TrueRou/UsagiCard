@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ChartEntry, ScoreFilterState, ScoreSortState } from '~/composables/function/MaimaiCN/useMaimaiTypes'
-import { useScoreDisplayPref } from '~/composables/function/MaimaiCN/useScoreDisplayPref'
 import { useScoreLibrary } from '~/composables/function/MaimaiCN/useScoreLibrary.client'
 import { computeMetrics, filterEntries, sortEntries } from '~/composables/function/MaimaiCN/useScoreView'
 import { useScoreViewState } from '~/composables/function/MaimaiCN/useScoreViewState'
@@ -19,8 +18,7 @@ const props = defineProps<{
 
 const { artifact, storageSave } = await useArtifact(props.artifactId)
 const { entries, loading, error, refresh, matchSongIds } = useScoreLibrary(props.artifactId)
-const { filter, sort } = useScoreViewState()
-const { mode: viewMode, tileContent, syncState, saveToCard } = useScoreDisplayPref(props.artifactId, artifact, storageSave)
+const { filter, sort, mode: viewMode, tileContent, syncState, saveToCard } = useScoreViewState(props.artifactId, artifact, storageSave)
 
 const keyword = ref('')
 const debouncedKeyword = refDebounced(keyword, 200)

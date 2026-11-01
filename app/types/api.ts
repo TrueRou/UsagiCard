@@ -172,6 +172,7 @@ export interface MaimaiStorage {
     }
     /** 旧卡片在下次写入存储前没有该字段 */
     view?: MaimaiViewStorage
+    scores?: MaimaiScoresStorage | null
 }
 
 export type MaimaiViewMode = 'list' | 'tile'
@@ -180,6 +181,29 @@ export type MaimaiTileContent = 'rating' | 'achievement' | 'fc' | 'fs' | 'dx_rat
 export interface MaimaiViewStorage {
     mode: MaimaiViewMode
     tile_content: MaimaiTileContent
+}
+
+export interface MaimaiScoresStorage {
+    filter: {
+        difficulties: number[]
+        level_range: [number, number]
+        versions: number[]
+        genres: string[]
+        types: ('standard' | 'dx' | 'utage')[]
+        rates: number[]
+        fc: (number | 'none')[]
+        fs: (number | 'none')[]
+        dx_stars: number[]
+        show_unplayed: boolean
+    }
+    sort: {
+        primary: 'level' | 'achievement' | 'rating' | 'dxScore' | 'playCount' | 'title'
+        primary_dir: 'asc' | 'desc'
+        secondary: 'level' | 'achievement' | 'rating' | 'dxScore' | 'playCount' | 'title'
+        secondary_dir: 'asc' | 'desc'
+        unplayed_to_bottom: boolean
+        limit: number | null
+    }
 }
 
 export interface MaimaiAquaStorage {

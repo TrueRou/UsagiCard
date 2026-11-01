@@ -1,4 +1,6 @@
 import type { ArtifactStorage, ArtifactUserResponse } from '~/types/api'
+import type { StoragePatch } from '~/utils/storagePatch'
+import { diffStorage, rollbackStoragePatch } from '../utils/storagePatch'
 
 type StorageNamespace = keyof ArtifactStorage
 
@@ -9,10 +11,10 @@ interface StorageSaveOptions {
     showErrorToast?: boolean
 }
 
-/** 写入成功时 resolve；失败时抛出请求错误，并回滚传入的 newData */
+/** 只发送变化字段；支持部分对象，省略字段不删除，数组整体替换。失败回滚此次提交的字段。 */
 export type StorageSaveFn = <K extends StorageNamespace>(
     namespace: K,
-    newData: NonNullable<ArtifactStorage[K]>,
+    newData: StoragePatch<NonNullable<ArtifactStorage[K]>>,
     options?: StorageSaveOptions,
 ) => Promise<void>
 
@@ -57,14 +59,16 @@ export async function useArtifact(artifactId: string) {
 
     const storageSave: StorageSaveFn = async (namespace, newData, options) => {
         const currentStorage = cloneStorageData(artifact.value.storage[namespace])
-        const fullStorage = cloneStorageData({ ...artifact.value.storage, [namespace]: newData })
+        const patch = diffStorage(currentStorage, cloneStorageData(newData))
+        if (!patch || !Object.keys(patch).length)
+            return
         let saved = false
 
         storageSaving.value = true
         try {
             data.value = await nuxtApp.$leporidae<ArtifactUserResponse>(`/api/artifacts/${artifactId}/storage`, {
                 method: 'PATCH',
-                body: { storage: fullStorage },
+                body: { storage: { [namespace]: patch } },
                 showSuccessToast: options?.showSuccessToast ?? true,
                 successMessage: options?.successMessage ?? '保存成功',
                 ...(options?.showErrorToast === false ? { showErrorToast: false } : {}),
@@ -72,11 +76,8 @@ export async function useArtifact(artifactId: string) {
             saved = true
         }
         finally {
-            if (!saved) {
-                for (const key of Object.keys(newData))
-                    Reflect.deleteProperty(newData, key)
-                Object.assign(newData, currentStorage)
-            }
+            if (!saved)
+                rollbackStoragePatch(newData, currentStorage, patch)
             setTimeout(() => storageSaving.value = false, 500)
         }
     }

@@ -25,9 +25,9 @@ const syncInfo = computed(() => {
         case 'syncing':
             return { icon: '', text: '正在同步到卡片…', class: 'text-base-content/60' }
         case 'error':
-            return { icon: 'mdi:cloud-alert-outline', text: '同步失败，目前只保存在本机', class: 'text-error' }
+            return { icon: 'mdi:cloud-alert-outline', text: '设置同步失败，目前只保存在本机', class: 'text-error' }
         default:
-            return { icon: 'mdi:cloud-check-outline', text: '已同步到卡片', class: 'text-success' }
+            return { icon: 'mdi:cloud-check-outline', text: '设置已同步到卡片', class: 'text-success' }
     }
 })
 </script>

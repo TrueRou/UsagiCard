@@ -1,36 +1,58 @@
 import type { ComputedRef } from 'vue'
 import type { LocalViewPref, ViewSyncState } from './useScoreDisplay'
+import type { LocalScoresPref } from './useScorePreferences'
 import type { StorageSaveFn } from '~/composables/useArtifact'
 import type { ArtifactStorage, ArtifactUserResponse, MaimaiTileContent, MaimaiViewMode, MaimaiViewStorage } from '~/types/api'
 import { StorageSerializers } from '@vueuse/core'
 import { isSameView, normalizeView, resolveDisplayPref } from './useScoreDisplay'
+import { createPreferenceQueue, isSameScores, normalizeScores, resolveScoresPref, scoresFromStorage, scoresToStorage } from './useScorePreferences'
+import { cloneFilter, DEFAULT_FILTER, DEFAULT_SORT } from './useScoreView'
 
 const SYNC_DEBOUNCE_MS = 800
+// 以 Nuxt app 隔离 SSR 请求；离开页面后的提交也与下一页的写入共用队列。
+const queues = new WeakMap<object, Map<string, ReturnType<typeof createPreferenceQueue>>>()
 
 /**
- * 成绩页视图偏好（列表 / 平铺、平铺显示内容）。
- *
- * - 修改立即在本地生效，并写入 localStorage（标记为未同步）。
- * - 防抖后静默写入卡片存储（不弹出提示）；写入失败时状态变为 error。
- * - error 时由用户在视图菜单中点击「保存到卡片」手动重试。
- *
- * artifact 与 storageSave 由调用方在 script setup 顶层通过 `await useArtifact()` 取得后传入，
- * 这样本函数保持同步，生命周期钩子能正确绑定到组件实例。
+ * 视图及可选的「全部成绩」偏好：立即本地生效，防抖保存到卡片。
+ * 本地缓存按卡片隔离，失败保留 dirty，支持手动及下次进入重试。
+ * bests 只更新 view；全部成绩通过同一个请求提交 view/filter/sort，避免相互覆盖。
  */
 export function useScoreDisplayPref(
     artifactId: string,
     artifact: ComputedRef<ArtifactUserResponse & { storage: ArtifactStorage }>,
     storageSave: StorageSaveFn,
+    includeScores = false,
 ) {
+    const app = useNuxtApp()
+    let appQueues = queues.get(app)
+    if (!appQueues) {
+        appQueues = new Map()
+        queues.set(app, appQueues)
+    }
+    if (!appQueues.has(artifactId))
+        appQueues.set(artifactId, createPreferenceQueue())
+    const enqueue = appQueues.get(artifactId)!
+
     const local = useLocalStorage<LocalViewPref | null>(`maicn:${artifactId}:view`, null, {
         serializer: StorageSerializers.object,
         initOnMounted: true,
     })
+    const localScores = useLocalStorage<LocalScoresPref | null>(`maicn:${artifactId}:scores`, null, {
+        serializer: StorageSerializers.object,
+        initOnMounted: true,
+    })
     const cardView = computed(() => artifact.value.storage.MaimaiCN?.view)
+    const cardScores = computed(() => artifact.value.storage.MaimaiCN?.scores)
     const current = computed(() => resolveDisplayPref(cardView.value, local.value))
+    const currentScores = computed(() => resolveScoresPref(cardScores.value, localScores.value))
+    const scoreState = computed(() => scoresFromStorage(currentScores.value))
     const syncState = ref<ViewSyncState>('synced')
+    const dirty = () => Boolean(local.value?.dirty || (includeScores && localScores.value?.dirty))
 
     let timer: ReturnType<typeof setTimeout> | undefined
+    let running: Promise<void> | undefined
+    let mounted = false
+    let disposed = false
 
     function clearTimer() {
         if (timer !== undefined) {
@@ -41,32 +63,60 @@ export function useScoreDisplayPref(
 
     function schedule() {
         clearTimer()
-        timer = setTimeout(() => void sync(true), SYNC_DEBOUNCE_MS)
+        syncState.value = 'syncing'
+        if (disposed)
+            void sync(true)
+        else
+            timer = setTimeout(() => void sync(true), SYNC_DEBOUNCE_MS)
     }
 
-    async function sync(silent: boolean) {
+    async function sync(silent: boolean): Promise<void> {
         clearTimer()
-        const storage = artifact.value.storage.MaimaiCN
-        if (!storage)
+        if (running) {
+            await running
+            if (!silent && dirty())
+                return sync(false)
             return
-        const target = normalizeView(current.value)
+        }
+        if (!dirty()) {
+            syncState.value = 'synced'
+            return
+        }
         syncState.value = 'syncing'
-        try {
-            await storageSave('MaimaiCN', { ...storage, view: target }, {
+        let failed = false
+        running = enqueue(async () => {
+            // 只提交本次修改的设置，不再拼接 bio/update 或其他无关内容。
+            const storage = artifact.value.storage.MaimaiCN
+            if (!storage)
+                throw new Error('卡片未启用 MaimaiCN')
+            const view = local.value?.dirty ? normalizeView(current.value) : undefined
+            const scores = includeScores && localScores.value?.dirty ? normalizeScores(currentScores.value) : undefined
+            if (!view && !scores)
+                return
+            await storageSave('MaimaiCN', {
+                ...(view ? { view } : {}),
+                ...(scores ? { scores } : {}),
+            }, {
                 showSuccessToast: !silent,
                 showErrorToast: !silent,
-                successMessage: '视图已保存到卡片',
+                successMessage: includeScores ? '成绩页设置已保存到卡片' : '视图已保存到卡片',
             })
-            // 同步期间用户可能又改了视图：一致时清除未同步标记，否则继续排队同步
-            if (local.value && isSameView(local.value, target))
-                local.value = { ...target, dirty: false }
-            if (local.value?.dirty)
+            // 请求期间的新修改不能被旧响应清除，完成后继续提交最新值。
+            if (view && local.value && isSameView(local.value, view))
+                local.value = { ...view, dirty: false }
+            if (scores && localScores.value && isSameScores(localScores.value, scores))
+                localScores.value = { ...scores, dirty: false }
+        }).catch(() => {
+            failed = true
+            syncState.value = 'error'
+        })
+        await running
+        running = undefined
+        if (!failed) {
+            if (dirty())
                 schedule()
             else
                 syncState.value = 'synced'
-        }
-        catch {
-            syncState.value = 'error'
         }
     }
 
@@ -74,15 +124,16 @@ export function useScoreDisplayPref(
         const next = normalizeView({ ...current.value, ...patch })
         if (isSameView(next, current.value))
             return
-        const matchesCard = Boolean(cardView.value) && isSameView(next, normalizeView(cardView.value))
+        const matchesCard = !enqueue.isPending() && Boolean(cardView.value) && isSameView(next, normalizeView(cardView.value))
         local.value = { ...next, dirty: !matchesCard }
-        if (matchesCard) {
-            clearTimer()
-            syncState.value = 'synced'
+    }
+
+    function updateScores(patch: Partial<typeof scoreState.value>) {
+        const next = scoresToStorage(patch.filter ?? scoreState.value.filter, patch.sort ?? scoreState.value.sort)
+        if (isSameScores(next, currentScores.value))
             return
-        }
-        syncState.value = 'syncing'
-        schedule()
+        const matchesCard = !enqueue.isPending() && Boolean(cardScores.value) && isSameScores(next, normalizeScores(cardScores.value))
+        localScores.value = { ...next, dirty: !matchesCard }
     }
 
     const mode = computed<MaimaiViewMode>({
@@ -93,24 +144,67 @@ export function useScoreDisplayPref(
         get: () => current.value.tile_content,
         set: value => update({ tile_content: value }),
     })
-
-    // useLocalStorage 的 initOnMounted 先注册，这里执行时本地值已读出；上次未同步成功的修改在此重试
-    onMounted(() => {
-        if (local.value?.dirty) {
-            syncState.value = 'syncing'
-            schedule()
-        }
+    const filter = computed({
+        get: () => scoreState.value.filter,
+        set: value => updateScores({ filter: value }),
+    })
+    const sort = computed({
+        get: () => scoreState.value.sort,
+        set: value => updateScores({ sort: value }),
     })
 
-    // 离开页面时立刻提交还在防抖中的同步；失败会保留本地标记，下次进入时重试
+    watch([local, localScores], () => {
+        if (!mounted || disposed)
+            return
+        if (dirty()) {
+            schedule()
+        }
+        else if (!running) {
+            clearTimer()
+            syncState.value = 'synced'
+        }
+    }, { deep: true, flush: 'sync' })
+
+    onMounted(() => {
+        // 旧全局筛选/排序仅迁入第一张没有卡片配置的卡片；不覆盖卡片或按卡片缓存。
+        if (includeScores && !cardScores.value && !localScores.value) {
+            try {
+                const storage = window.localStorage
+                if (!storage.getItem('maicn:score-view:migrated-to')) {
+                    const filter = storage.getItem('maicn:score-view:filter')
+                    const sort = storage.getItem('maicn:score-view:sort')
+                    if (filter || sort) {
+                        // 通过同一规范化入口校验旧 camelCase 数据。
+                        const oldFilter = filter ? JSON.parse(filter) : DEFAULT_FILTER
+                        const oldSort = sort ? JSON.parse(sort) : DEFAULT_SORT
+                        localScores.value = { ...scoresToStorage(oldFilter, oldSort), dirty: true }
+                        storage.setItem('maicn:score-view:migrated-to', artifactId)
+                    }
+                }
+            }
+            catch {
+                // 损坏或不可访问的旧缓存不影响页面使用。
+            }
+        }
+        mounted = true
+        if (dirty())
+            schedule()
+    })
+
     onScopeDispose(() => {
-        if (timer !== undefined)
+        disposed = true
+        clearTimer()
+        if (dirty())
             void sync(true)
     })
 
     return {
         mode,
         tileContent,
+        filter,
+        sort,
+        resetFilter: () => updateScores({ filter: cloneFilter(DEFAULT_FILTER) }),
+        resetSort: () => updateScores({ sort: { ...DEFAULT_SORT } }),
         syncState: readonly(syncState),
         saveToCard: () => sync(false),
     }
