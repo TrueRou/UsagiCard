@@ -65,7 +65,7 @@ function goBack() {
                                 未登录
                             </p>
                             <p class="text-xs text-base-content/50 truncate">
-                                登录 UsagiLab 账号
+                                登录 HoshiRabi 账号
                             </p>
                         </template>
                     </div>

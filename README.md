@@ -1,6 +1,6 @@
 # UsagiCard
 
-UsagiCard是「兔兔实验室」（UsagiLab）的用户前端：创建和管理可定制 NFC 卡片，并可绑定多款游戏功能。功能包含卡片设计器、用户账户与订单系统，以及舞萌 DX（国服 / Aqua）、UsagiCard DX / WARS 等多款游戏的数据展示与交互组件。
+为 HoshiRabi 创建的可定制 NFC 卡片提供功能支持。功能包含卡片设计器，以及 舞萌DX 游戏的数据展示与交互组件。
 
 ## 技术栈
 

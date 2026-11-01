@@ -17,6 +17,7 @@ const { visibleNavItems } = useFunctionMenu(pageItems, computed(() => usagiCardS
 const functionPageItems = computed(() => visibleNavItems.value.filter(item => item.key !== 'uc-me'))
 
 const router = useRouter()
+const headerTarget = useFunctionsHeader()
 function navigateToPage(path: string) {
     router.push(path)
 }
@@ -54,7 +55,7 @@ function formatDate(dateStr: string | null | undefined) {
     <div class="p-4 space-y-5">
         <!-- 设置按钮注入到页面头部 -->
         <ClientOnly>
-            <Teleport to="#functions-header-slot">
+            <Teleport v-if="headerTarget" :to="headerTarget">
                 <button
                     class="btn btn-ghost btn-sm btn-square"
                     title="设置"

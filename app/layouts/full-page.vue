@@ -1,6 +1,6 @@
 <template>
     <div class="h-full flex">
-        <NuxtPage />
+        <slot />
         <ClientOnly>
             <NuxtLoadingIndicator />
             <BannerNotification />

@@ -13,12 +13,13 @@ const emit = defineEmits<{
 }>()
 
 const qButton = useQButton(toRef(props, 'artifact'))
+const headerTarget = useFunctionsHeader()
 const hasQuickActions = computed(() => Object.keys(qButton.quickActions.value ?? {}).length > 0)
 </script>
 
 <template>
     <ClientOnly>
-        <Teleport to="#functions-header-slot">
+        <Teleport v-if="headerTarget" :to="headerTarget">
             <button
                 class="btn btn-ghost btn-square lg:btn-sm"
                 type="button"

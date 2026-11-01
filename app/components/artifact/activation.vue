@@ -38,10 +38,10 @@ async function handleSwitchAccount() {
                     <Icon name="mdi:card-account-details-star-outline" class="w-9 h-9" />
                 </div>
                 <h1 class="text-2xl font-bold text-base-content">
-                    激活你的{{ artifact.type.name }}
+                    激活你的 "{{ artifact.type.name }}" 卡片
                 </h1>
                 <p class="text-sm text-base-content/70 leading-relaxed">
-                    首次使用前需要激活喵。申领后卡片将绑定到你的 UsagiLab 账号。
+                    激活后卡片将绑定到你的 HoshiRabi 账号。
                 </p>
             </header>
 
@@ -65,14 +65,14 @@ async function handleSwitchAccount() {
                     </div>
                     <button type="button" class="btn btn-primary w-full" :disabled="activating" @click="handleClaim">
                         <span v-if="activating" class="loading loading-spinner loading-sm" />
-                        申领到当前账号
+                        激活到当前账号
                     </button>
                 </template>
 
                 <template v-else>
                     <button type="button" class="btn btn-primary w-full" :disabled="loggingIn" @click="handleLogin()">
                         <span v-if="loggingIn" class="loading loading-spinner loading-sm" />
-                        登录并申领
+                        登录并激活
                     </button>
                     <p class="text-center text-xs text-base-content/60">
                         没有账户？
@@ -85,7 +85,7 @@ async function handleSwitchAccount() {
 
             <div class="text-center">
                 <button type="button" class="btn btn-ghost btn-sm text-base-content/60" :disabled="activating" @click="skipDialogOpen = true">
-                    跳过申领，直接使用
+                    跳过激活，直接使用
                 </button>
             </div>
         </section>
@@ -93,10 +93,10 @@ async function handleSwitchAccount() {
         <dialog class="modal" :class="{ 'modal-open': skipDialogOpen }">
             <div class="modal-box max-w-sm space-y-2">
                 <h3 class="text-base font-semibold">
-                    确认跳过申领？
+                    确认跳过激活？
                 </h3>
                 <p class="text-sm leading-relaxed text-base-content/70">
-                    跳过后卡片会直接激活，但不会绑定任何账号，并且<strong class="text-base-content">之后无法再申领</strong>。如需重新申领，请联系客服重置卡片。
+                    跳过后卡片会直接激活，但不会绑定任何账号，并且<strong class="text-base-content">之后无法再申领</strong>。如需重新申领，请在订单页面重置卡片。
                 </p>
                 <div class="modal-action mt-4">
                     <button type="button" class="btn btn-ghost btn-sm" @click="skipDialogOpen = false">

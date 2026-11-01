@@ -39,7 +39,7 @@ function onInput() {
                     UsagiCard 已部署
                 </h1>
                 <p class="text-base text-base-content/80 md:text-lg">
-                    输入你的卡片 UUID 即可访问对应的 UsagiCard 页面。
+                    输入你的卡片 UUID 即可前往卡片页面。
                 </p>
             </header>
 
@@ -83,7 +83,7 @@ function onInput() {
                     v-else
                     class="text-sm text-base-content/60"
                 >
-                    提示：UUID 通常可以在你的卡片分享链接或管理后台中找到。
+                    提示：重新扫描你的 UsagiCard 也可以前往卡片，如果仍有问题，请联系管理员。
                 </p>
             </form>
         </section>

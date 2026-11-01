@@ -28,8 +28,9 @@ export function useSongSearch() {
     const MAX_SEARCH_NUMBER = 100
     let songIndex: Document<DocumentData, boolean, boolean> | null = null
     const songMap: Map<number, Song> = new Map()
+    let pendingIndex: Promise<void> | null = null
 
-    const indexSongs = async () => {
+    const loadSongs = async () => {
         removeLegacyMaimaiCaches()
         const api = useNuxtApp().$leporidae
         const cached = readMaimaiCache<Song[]>('songs')
@@ -88,8 +89,20 @@ export function useSongSearch() {
                 })
                 resolve(songIndex)
             })
-            promise.then(index => songIndex = index)
+            songIndex = await promise
         }
+    }
+
+    // The shared index is valid for this application lifetime, including route changes.
+    const indexSongs = () => {
+        if (songIndex)
+            return Promise.resolve()
+        if (!pendingIndex) {
+            pendingIndex = loadSongs().finally(() => {
+                pendingIndex = null
+            })
+        }
+        return pendingIndex
     }
 
     const searchSong = (keyword: string) => {

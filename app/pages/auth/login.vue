@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-    title: '登录 - 兔兔实验室',
+    title: '登录 - UsagiCard',
 })
 
 const { loggedIn } = useUserSession()
@@ -37,13 +37,13 @@ async function handleLogin(prompt?: 'create') {
         <section class="mx-auto max-w-md space-y-6 pt-8">
             <header class="space-y-2 text-center">
                 <p class="text-sm uppercase tracking-widest text-base-content/60">
-                    UsagiLab 兔兔实验室
+                    使用 HoshiRabi 账号登录
                 </p>
                 <h1 class="text-3xl font-bold text-base-content">
                     登录
                 </h1>
                 <p class="text-sm text-base-content/70">
-                    使用 UsagiLab 账号登录后即可申领你的卡片。
+                    使用 HoshiRabi 账号登录后即可申领你的卡片。
                 </p>
             </header>
 
@@ -53,7 +53,7 @@ async function handleLogin(prompt?: 'create') {
             </div>
 
             <button type="button" class="btn btn-primary w-full" @click="handleLogin()">
-                使用 UsagiLab 账号登录
+                使用 HoshiRabi 账号登录
             </button>
 
             <p class="text-center text-sm">

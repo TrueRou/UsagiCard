@@ -1,6 +1,6 @@
 import { withQuery } from 'ufo'
 
-/** UsagiLab 账号登录入口（服务端 OAuth 授权码 + PKCE），登录完成后回到 redirect */
+/** HoshiRabi 账号登录入口（服务端 OAuth 授权码 + PKCE），登录完成后回到 redirect */
 export function loginURL(redirect: string, prompt?: 'create') {
     return withQuery('/api/nuxt/auth/leporidae', { redirect, prompt })
 }

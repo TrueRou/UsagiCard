@@ -33,6 +33,12 @@ export default defineNuxtConfig({
     ],
     icon: {
         localApiEndpoint: '/_nuxt_icon',
+        clientBundle: {
+            scan: {
+                // Navigation manifests also contain icon names outside Vue templates.
+                globInclude: ['app/**/*.{vue,ts}'],
+            },
+        },
     },
     typescript: {
         // tests/ 下的纯函数单测（bun test）不在 Nuxt 默认的 tests/nuxt/** 范围内，显式纳入 app 上下文做类型检查
@@ -54,7 +60,7 @@ export default defineNuxtConfig({
                 sameSite: 'lax',
             },
         },
-        // UsagiLab 账号登录（OAuth 授权码 + PKCE），凭据通过 NUXT_OAUTH_OIDC_* 注入
+        // HoshiRabi 账号登录（OAuth 授权码 + PKCE），凭据通过 NUXT_OAUTH_OIDC_* 注入
         oauth: {
             oidc: {
                 clientId: '',

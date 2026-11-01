@@ -9,6 +9,7 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
+const headerTarget = useProvideFunctionsHeader()
 const artifactId = route.params.id as string
 const { artifact, needsActivation, storageOf } = await useArtifact(artifactId)
 
@@ -143,7 +144,7 @@ const contentWide = computed(() => route.meta.functionsWide === true)
             >
                 {{ activePageLabel }}
             </span>
-            <div id="functions-header-slot" class="functions-header-slot ml-auto flex items-center gap-1" />
+            <div id="functions-header-slot" ref="headerTarget" class="functions-header-slot ml-auto flex items-center gap-1" />
         </header>
 
         <main
