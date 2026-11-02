@@ -71,7 +71,7 @@ const ariaLabel = computed(() => {
             @error="handleImageError"
         >
         <!-- 所有封面统一蒙层，提高成绩与指示器的可读性。 -->
-        <span class="absolute inset-0 bg-black/60" />
+        <span class="absolute inset-0 bg-black/50" />
         <span
             v-if="filtered && stampLabel"
             class="absolute inset-0 flex items-center justify-center"

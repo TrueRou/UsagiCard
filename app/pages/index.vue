@@ -33,7 +33,7 @@ function onInput() {
         <section class="mx-auto max-w-2xl space-y-8">
             <header class="space-y-3">
                 <p class="text-sm uppercase tracking-widest text-base-content/60">
-                    Leporidae Lab
+                    HoshiRabi Lab
                 </p>
                 <h1 class="text-3xl font-bold text-base-content md:text-4xl">
                     UsagiCard 已部署
